@@ -5,6 +5,7 @@ import AuthStorage from "./AuthContext";
 import ProtectedRoute from "./ProtectedRoute";
 import Customers from "./components/Customers/Customers";
 import { Toaster } from "./components/ui/toaster";
+import Operations from "./components/Operations/Operations";
 
 export default function App() {
   return (
@@ -21,6 +22,14 @@ export default function App() {
               }
             />
             <Route path="/login" element={<Login />} />
+            <Route
+              path="/operacoes"
+              element={
+                <ProtectedRoute>
+                  <Operations />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/clientes"
               element={

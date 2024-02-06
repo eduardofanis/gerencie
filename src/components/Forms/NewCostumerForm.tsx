@@ -46,6 +46,7 @@ export default function NewCostumerForm() {
       estadoCivil: "",
       naturalidade: "",
       telefone: "",
+      cep: "",
       rua: "",
       numeroDaRua: "",
       complemento: "",
@@ -90,20 +91,33 @@ export default function NewCostumerForm() {
       </DialogHeader>
 
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="grid grid-cols-2 gap-8"
-        >
-          <div>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <div className="mt-4">
             <h2 className="mb-2 font-medium">Dados pessoais</h2>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="space-y-1 col-span-3">
+            <div className="grid grid-cols-4 gap-2">
+              <div className="space-y-1 col-span-2">
                 <TextInput form={form} label="Nome completo" name="nome" />
               </div>
               <div className="space-y-1">
-                <NumberInput form={form} name="cpf" label="CPF" />
+                <NumberInput
+                  form={form}
+                  name="cpf"
+                  label="CPF"
+                  placeholder="000.000.000-00"
+                />
               </div>
-              <div className="space-y-1"></div>
+              <FormField
+                control={form.control}
+                name="telefone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Telefone</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="(00) 00000-0000" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
 
               <div className="space-y-1">
                 <SelectInput
@@ -159,17 +173,10 @@ export default function NewCostumerForm() {
                 />
               </div>
               <div className="space-y-1">
-                <FormField
-                  control={form.control}
-                  name="telefone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Telefone</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
+                <NumberInput
+                  form={form}
+                  name="dataDeNascimento"
+                  label="Data de nascimento"
                 />
               </div>
             </div>
@@ -177,7 +184,13 @@ export default function NewCostumerForm() {
 
           <div>
             <h2 className="mb-2 font-medium">Endereço</h2>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-4 gap-2">
+              <NumberInput
+                form={form}
+                name="cep"
+                label="CEP"
+                placeholder="00000-000"
+              />
               <div className="space-y-1 col-span-2">
                 <FormField
                   control={form.control}
@@ -269,168 +282,46 @@ export default function NewCostumerForm() {
           <div>
             <h2 className="mb-2 font-medium">Documentos</h2>
             <div className="grid grid-cols-3 gap-2">
-              <div className="space-y-1">
-                <FormField
-                  control={form.control}
-                  name="tipoDoDocumento"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipo do documento</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="rg">RG</SelectItem>
-                          <SelectItem value="cnh">CNH</SelectItem>
-                          <SelectItem value="outro">Outro</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="space-y-1">
-                <FileInput
-                  form={form}
-                  label="Frente do documento"
-                  name="frenteDoDocumento"
-                  className="pt-28 pb-32 cursor-pointer"
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="tipoDoDocumento"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo do documento</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="rg">RG</SelectItem>
+                        <SelectItem value="cnh">CNH</SelectItem>
+                        <SelectItem value="outro">Outro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+              <FileInput
+                form={form}
+                label="Frente do documento"
+                name="frenteDoDocumento"
+                className="cursor-pointer"
+              />
+              <FileInput
+                form={form}
+                label="Verso do documento"
+                name="versoDoDocumento"
+                className="cursor-pointer"
+              />
               <div className="space-y-1"></div>
             </div>
           </div>
 
-          <div>
-            <h2 className="mb-2 font-medium">Operação</h2>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="space-y-1">
-                <FormField
-                  control={form.control}
-                  name="tipoDaOperacao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipo da operação</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="fgts">FGTS</SelectItem>
-                          <SelectItem value="gov">GOV</SelectItem>
-                          <SelectItem value="inss">INSS</SelectItem>
-                          <SelectItem value="prefeitura">Prefeitura</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="space-y-1">
-                <FormField
-                  control={form.control}
-                  name="statusDaOperacao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status da operação</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="sucesso">Sucesso</SelectItem>
-                          <SelectItem value="processando">
-                            Processando
-                          </SelectItem>
-                          <SelectItem value="pendente">Pendente</SelectItem>
-                          <SelectItem value="falha">Falha</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="space-y-1">
-                <FormField
-                  control={form.control}
-                  name="dataDaOperacao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data da operação</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full flex justify-start text-left font-normal",
-                                !field.value &&
-                                  "text-muted-foreground col-span-2"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Selecione uma data</span>
-                              )}
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="space-y-1">
-                <MoneyInput
-                  form={form}
-                  name="valorLiberado"
-                  label="Valor liberado"
-                  placeholder=""
-                />
-              </div>
-              <div className="space-y-1">
-                <FormField
-                  control={form.control}
-                  name="comissao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Comissão</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-          </div>
           <DialogFooter className="mt-8 col-span-2">
             <Button variant={"outline"} onClick={GetConsumers}>
               Cancelar

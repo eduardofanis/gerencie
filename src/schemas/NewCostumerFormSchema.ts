@@ -31,6 +31,7 @@ const NewCostumerFormSchema = z.object({
   estadoCivil: z.string().min(1),
   naturalidade: z.string().min(1),
   telefone: z.string().min(1),
+  cep: z.string().min(1),
   rua: z.string().min(1),
   numeroDaRua: z.string().min(1),
   complemento: z.string().min(1),

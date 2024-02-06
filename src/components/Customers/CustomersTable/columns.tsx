@@ -24,54 +24,6 @@ export type Customer = {
 
 export const columns: ColumnDef<Customer>[] = [
   {
-    accessorKey: "status",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => {
-      const status = row.getValue("status");
-
-      switch (status) {
-        case 1:
-          return (
-            <div className="text-green-600 font-medium ml-4 flex items-center">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-              Sucesso
-            </div>
-          );
-        case 2:
-          return (
-            <div className="text-yellow-600 font-medium ml-4 flex items-center">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
-              Processando
-            </div>
-          );
-        case 3:
-          return (
-            <div className="text-orange-600 font-medium ml-4 flex items-center">
-              <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
-              Pendente
-            </div>
-          );
-        case 4:
-          return (
-            <div className="text-red-600 font-medium ml-4 flex items-center">
-              <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
-              Falha
-            </div>
-          );
-      }
-    },
-  },
-  {
     accessorKey: "name",
     header: ({ column }) => {
       return (
@@ -89,50 +41,10 @@ export const columns: ColumnDef<Customer>[] = [
     },
   },
   {
-    accessorKey: "type",
-    header: "Tipo",
+    accessorKey: "telefone",
+    header: "Telefone",
     cell: ({ row }) => {
-      const type: string = row.getValue("type");
-      return (
-        <Badge
-          className={
-            type == "FGTS"
-              ? "bg-sky-600"
-              : type == "GOV"
-              ? "bg-green-600"
-              : type == "INSS"
-              ? "bg-yellow-600"
-              : "bg-indigo-600"
-          }
-        >
-          {type}
-        </Badge>
-      );
-    },
-  },
-  {
-    accessorKey: "amount",
-    header: ({ column }) => {
-      return (
-        <div className="text-right">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Valor liberado
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-      );
-    },
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"));
-      const formatted = new Intl.NumberFormat("pt-BR", {
-        style: "currency",
-        currency: "BRL",
-      }).format(amount);
-
-      return <div className="text-right font-medium mr-4">{formatted}</div>;
+      return <div>{row.getValue("name")}</div>;
     },
   },
   {

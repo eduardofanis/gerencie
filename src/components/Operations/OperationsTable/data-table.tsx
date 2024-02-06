@@ -41,6 +41,7 @@ import {
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import React from "react";
 import NewCostumerForm from "@/components/Forms/NewCostumerForm";
+import NewOperationForm from "@/components/Forms/NewOperationForm";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -88,11 +89,11 @@ export function DataTable<TData, TValue>({
           <DialogTrigger asChild>
             <Button>
               <PlusCircle className="w-4 h-4 mr-2" />
-              Novo cliente
+              Nova operação
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[1000px]">
-            <NewCostumerForm />
+          <DialogContent className="sm:max-w-[800px]">
+            <NewOperationForm />
           </DialogContent>
         </Dialog>
       </div>

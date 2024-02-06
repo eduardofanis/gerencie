@@ -1,4 +1,4 @@
-import { Users, MoreVertical, LogOut, BarChart4 } from "lucide-react";
+import { Users, MoreVertical, LogOut, BarChart4, Factory } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
@@ -71,6 +71,16 @@ export default function Sidebar() {
           >
             <BarChart4 className="h-5 w-5" />
             <span>Dashboard</span>
+          </Button>
+          <Button
+            className={`w-full space-x-4 justify-start ${
+              pathname == "/operacoes" && "bg-slate-50"
+            }`}
+            variant={"ghost"}
+            onClick={() => navigate("/operacoes")}
+          >
+            <Factory className="h-5 w-5 " />
+            <span>Operações</span>
           </Button>
           <Button
             className={`w-full space-x-4 justify-start ${
