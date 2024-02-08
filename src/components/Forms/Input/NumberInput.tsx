@@ -6,9 +6,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { InputProps } from "@/types/InputProps";
+import { CostumerInputProps } from "@/types/CostumerInputProps";
 
-export default function NumberInput(props: InputProps) {
+export default function NumberInput(props: CostumerInputProps) {
   return (
     <FormField
       control={props.form.control}

@@ -34,6 +34,7 @@ import SelectInput, { SelectItems } from "./Input/SelectInput";
 import TextInput from "./Input/TextInput";
 import NumberInput from "./Input/NumberInput";
 import FileInput from "./Input/FileInput";
+import { Label } from "../ui/label";
 
 export default function NewCostumerForm() {
   const form = useForm<z.infer<typeof NewCostumerFormSchema>>({
@@ -54,15 +55,10 @@ export default function NewCostumerForm() {
       cidade: "",
       bairro: "",
       tipoDoDocumento: "",
-      tipoDaOperacao: "",
-      statusDaOperacao: "",
-      valorLiberado: 0,
-      comissao: "",
     },
   });
   function onSubmit(values: z.infer<typeof NewCostumerFormSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
+    console.log("aaa");
     console.log(values);
   }
 
@@ -119,6 +115,12 @@ export default function NewCostumerForm() {
                 )}
               />
 
+              <NumberInput
+                form={form}
+                name="dataDeNascimento"
+                label="Data de nascimento"
+              />
+
               <div className="space-y-1">
                 <SelectInput
                   form={form}
@@ -170,13 +172,6 @@ export default function NewCostumerForm() {
                       </FormControl>
                     </FormItem>
                   )}
-                />
-              </div>
-              <div className="space-y-1">
-                <NumberInput
-                  form={form}
-                  name="dataDeNascimento"
-                  label="Data de nascimento"
                 />
               </div>
             </div>
@@ -306,29 +301,38 @@ export default function NewCostumerForm() {
                   </FormItem>
                 )}
               />
-              <FileInput
-                form={form}
-                label="Frente do documento"
+              <FormField
+                control={form.control}
                 name="frenteDoDocumento"
-                className="cursor-pointer"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Frente do documento</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="frenteDoDocumento"
+                        type="file"
+                        {...form.register("frenteDoDocumento")}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
               />
+
               <FileInput
                 form={form}
                 label="Verso do documento"
                 name="versoDoDocumento"
-                className="cursor-pointer"
               />
-              <div className="space-y-1"></div>
             </div>
           </div>
 
           <DialogFooter className="mt-8 col-span-2">
-            <Button variant={"outline"} onClick={GetConsumers}>
-              Cancelar
-            </Button>
-            <DialogClose asChild></DialogClose>
+            <DialogClose asChild>
+              <Button variant={"outline"} onClick={GetConsumers}>
+                Cancelar
+              </Button>
+            </DialogClose>
 
-            <DialogClose asChild></DialogClose>
             <Button type="submit">Cadastrar</Button>
           </DialogFooter>
         </form>

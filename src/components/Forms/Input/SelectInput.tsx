@@ -12,14 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { InputProps } from "@/types/InputProps";
+import { CostumerInputProps } from "@/types/CostumerInputProps";
 
 export type SelectItems = {
   value: string;
   label: string;
 };
 
-interface SelectProps extends InputProps {
+interface SelectProps extends CostumerInputProps {
   selectItems: Array<SelectItems>;
   placeholder: string;
 }

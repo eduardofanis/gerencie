@@ -7,7 +7,7 @@ import {
   FormMessage,
 } from "../../ui/form"; // Shadcn UI import
 import { Input } from "../../ui/input"; // Shandcn UI Input
-import { InputProps } from "@/types/InputProps";
+import { CostumerInputProps } from "@/types/CostumerInputProps";
 
 // Brazilian currency config
 const moneyFormatter = Intl.NumberFormat("pt-BR", {
@@ -19,7 +19,7 @@ const moneyFormatter = Intl.NumberFormat("pt-BR", {
   maximumFractionDigits: 2,
 });
 
-export default function MoneyInput(props: InputProps) {
+export default function MoneyInput(props: CostumerInputProps) {
   const initialValue = props.form.getValues()[props.name]
     ? moneyFormatter.format(Number(props.form.getValues()[props.name]))
     : "";

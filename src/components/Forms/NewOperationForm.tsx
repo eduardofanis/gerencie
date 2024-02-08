@@ -34,32 +34,20 @@ import SelectInput, { SelectItems } from "./Input/SelectInput";
 import TextInput from "./Input/TextInput";
 import NumberInput from "./Input/NumberInput";
 import FileInput from "./Input/FileInput";
+import { NewOperationFormSchema } from "@/schemas/NewOperationFormSchema";
 
 export default function NewOperationForm() {
-  const form = useForm<z.infer<typeof NewCostumerFormSchema>>({
-    resolver: zodResolver(NewCostumerFormSchema),
+  const form = useForm<z.infer<typeof NewOperationFormSchema>>({
+    resolver: zodResolver(NewOperationFormSchema),
     defaultValues: {
-      nome: "",
-      cpf: "",
-      dataDeNascimento: "",
-      sexo: "",
-      estadoCivil: "",
-      naturalidade: "",
-      telefone: "",
-      rua: "",
-      numeroDaRua: "",
-      complemento: "",
-      estado: "",
-      cidade: "",
-      bairro: "",
-      tipoDoDocumento: "",
+      cliente: "",
       tipoDaOperacao: "",
       statusDaOperacao: "",
       valorLiberado: 0,
       comissao: "",
     },
   });
-  function onSubmit(values: z.infer<typeof NewCostumerFormSchema>) {
+  function onSubmit(values: z.infer<typeof NewOperationFormSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values);
@@ -96,7 +84,7 @@ export default function NewOperationForm() {
             <div className="grid grid-cols-3 gap-2">
               <FormField
                 control={form.control}
-                name="tipoDaOperacao"
+                name="cliente"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Cliente</FormLabel>
