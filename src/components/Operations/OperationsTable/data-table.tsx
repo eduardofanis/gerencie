@@ -3,6 +3,7 @@
 import {
   ColumnDef,
   ColumnFiltersState,
+  FilterFn,
   SortingState,
   flexRender,
   getCoreRowModel,
@@ -11,6 +12,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+
+import { rankItem } from "@tanstack/match-sorter-utils";
 
 import {
   Table,
@@ -23,29 +26,48 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  CalendarIcon,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  X,
   PlusCircle,
+  X,
 } from "lucide-react";
 
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import React from "react";
-import NewCostumerForm from "@/components/Forms/NewCostumerForm";
 import NewOperationForm from "@/components/Forms/NewOperationForm";
+import { DateRange } from "react-day-picker";
+import { format } from "date-fns";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import dateBetweenFilterFn from "@/lib/date-between-filter";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+}
+
+declare module "@tanstack/table-core" {
+  interface FilterFns {
+    fuzzy: FilterFn<unknown>;
+    dateBetweenFilterFn: FilterFn<unknown>;
+  }
 }
 
 export function DataTable<TData, TValue>({
@@ -56,6 +78,20 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const [date, setDate] = React.useState<DateRange | undefined>();
+
+  const fuzzyFilter: FilterFn<unknown> = (row, columnId, value, addMeta) => {
+    // Rank the item
+    const itemRank = rankItem(row.getValue(columnId), value);
+
+    // Store the itemRank info
+    addMeta({
+      itemRank,
+    });
+
+    // Return if the item should be filtered in/out
+    return itemRank.passed;
+  };
 
   const table = useReactTable({
     data,
@@ -71,19 +107,151 @@ export function DataTable<TData, TValue>({
       columnFilters,
     },
     columnResizeMode: "onChange",
+    filterFns: {
+      fuzzy: fuzzyFilter,
+      dateBetweenFilterFn: dateBetweenFilterFn,
+    },
   });
 
   return (
     <div>
       <div className="flex items-center justify-between py-2">
-        <Input
-          placeholder="Nome do cliente"
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm w-64"
-        />
+        <div className="flex gap-2 items-center">
+          <span className="font-medium mr-1">Filtros</span>
+          <Input
+            placeholder="Nome do cliente"
+            value={
+              (table.getColumn("cliente")?.getFilterValue() as string) ?? ""
+            }
+            onChange={(event) =>
+              table.getColumn("cliente")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm w-64"
+          />
+          <Select
+            value={
+              (table
+                .getColumn("statusDaOperacao")
+                ?.getFilterValue() as string) ?? ""
+            }
+            onValueChange={(event) =>
+              table.getColumn("statusDaOperacao")?.setFilterValue(event)
+            }
+          >
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Status</SelectLabel>
+                <SelectItem value="1">Sucesso</SelectItem>
+                <SelectItem value="2">Processando</SelectItem>
+                <SelectItem value="3">Pendente</SelectItem>
+                <SelectItem value="4">Falha</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Select
+            value={
+              (table.getColumn("tipoDaOperacao")?.getFilterValue() as string) ??
+              ""
+            }
+            onValueChange={(event) =>
+              table.getColumn("tipoDaOperacao")?.setFilterValue(event)
+            }
+          >
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Tipo</SelectLabel>
+                <SelectItem value="fgts">FGTS</SelectItem>
+                <SelectItem value="gov">GOV</SelectItem>
+                <SelectItem value="prefeitura">PREFEITURA</SelectItem>
+                <SelectItem value="inss">INSS</SelectItem>
+                <SelectItem value="bolsa-familia">BOLSA FAMÍLIA</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Select
+            value={
+              (table.getColumn("promotora")?.getFilterValue() as string) ?? ""
+            }
+            onValueChange={(event) =>
+              table.getColumn("promotora")?.setFilterValue(event)
+            }
+          >
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Promotora" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Promotora</SelectLabel>
+                <SelectItem value="inove">Inove</SelectItem>
+                <SelectItem value="pineapple">Pineapple</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                id="date"
+                variant="outline"
+                className={cn(
+                  "justify-start text-left font-normal",
+                  !date && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date?.from ? (
+                  date.to ? (
+                    <>
+                      {format(date.from, "LLL dd, y")} -{" "}
+                      {format(date.to, "LLL dd, y")}
+                    </>
+                  ) : (
+                    format(date.from, "LLL dd, y")
+                  )
+                ) : (
+                  <span>Data da operação</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                initialFocus
+                mode="range"
+                selected={date}
+                defaultMonth={date?.from}
+                onSelect={(e) => {
+                  table
+                    .getColumn("dataDaOperacao")
+                    ?.setFilterValue([e?.from, e?.to]);
+                  setDate(e);
+                }}
+                numberOfMonths={2}
+              />
+            </PopoverContent>
+          </Popover>
+
+          <Button
+            variant="ghost"
+            className="px-3 text-red-600 hover:text-red-800 hover:bg-red-50"
+            onClick={() => {
+              console.log(date?.from?.getTime());
+              table.getColumn("statusDaOperacao")?.setFilterValue("");
+              table.getColumn("tipoDaOperacao")?.setFilterValue("");
+              table.getColumn("cliente")?.setFilterValue("");
+              table.getColumn("promotora")?.setFilterValue("");
+              setDate(undefined);
+            }}
+          >
+            <X className="h-4 w-4 mr-2 " />
+            Limpar filtros
+          </Button>
+        </div>
 
         <Dialog>
           <DialogTrigger asChild>
@@ -150,9 +318,22 @@ export function DataTable<TData, TValue>({
       <div>
         <div className="flex items-center justify-end space-x-2 py-2">
           <span className="text-sm  ml-2 p-0 text-slate-700">
-            Página {table.getState().pagination.pageIndex + 1} de{" "}
-            {table.getPageCount()}
+            Página{" "}
+            <span className="font-bold">
+              {table.getState().pagination.pageIndex + 1} de{" "}
+              {table.getPageCount()}
+            </span>
           </span>
+          <Input
+            type="number"
+            defaultValue={table.getState().pagination.pageIndex + 1}
+            max={2}
+            onChange={(e) => {
+              const page = e.target.value ? Number(e.target.value) - 1 : 0;
+              table.setPageIndex(page);
+            }}
+            className="border p-1 rounded w-10 h-9"
+          />
           <Button
             variant="outline"
             size="sm"

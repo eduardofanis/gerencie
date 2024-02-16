@@ -14,56 +14,48 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 
-export type Customer = {
-  id: string;
-  name: string;
-  status: 1 | 2 | 3 | 4;
-  type: "FGTS" | "GOV" | "INSS" | "PREFEITURA";
-  amount: number;
+export type Operation = {
+  statusDaOperacao: 1 | 2 | 3 | 4;
+  cliente: string;
+  tipoDaOperacao: "FGTS" | "GOV" | "INSS" | "PREFEITURA";
+  promotora: string;
+  dataDaOperacao: number;
+  valorRecebido: number;
+  valorLiberado: number;
 };
 
-export const columns: ColumnDef<Customer>[] = [
+export const columns: ColumnDef<Operation>[] = [
   {
-    accessorKey: "status",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    accessorKey: "statusDaOperacao",
+    header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status");
+      const status = row.getValue("statusDaOperacao");
 
       switch (status) {
         case 1:
           return (
-            <div className="text-green-600 font-medium ml-4 flex items-center">
+            <div className="text-green-600 font-medium flex items-center">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
               Sucesso
             </div>
           );
         case 2:
           return (
-            <div className="text-yellow-600 font-medium ml-4 flex items-center">
+            <div className="text-yellow-600 font-medium flex items-center">
               <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
               Processando
             </div>
           );
         case 3:
           return (
-            <div className="text-orange-600 font-medium ml-4 flex items-center">
+            <div className="text-orange-600 font-medium flex items-center">
               <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
               Pendente
             </div>
           );
         case 4:
           return (
-            <div className="text-red-600 font-medium ml-4 flex items-center">
+            <div className="text-red-600 font-medium flex items-center">
               <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
               Falha
             </div>
@@ -72,7 +64,7 @@ export const columns: ColumnDef<Customer>[] = [
     },
   },
   {
-    accessorKey: "name",
+    accessorKey: "cliente",
     header: ({ column }) => {
       return (
         <Button
@@ -85,14 +77,14 @@ export const columns: ColumnDef<Customer>[] = [
       );
     },
     cell: ({ row }) => {
-      return <div className="ml-4">{row.getValue("name")}</div>;
+      return <div className="ml-4">{row.getValue("cliente")}</div>;
     },
   },
   {
-    accessorKey: "type",
+    accessorKey: "tipoDaOperacao",
     header: "Tipo",
     cell: ({ row }) => {
-      const type: string = row.getValue("type");
+      const type: string = row.getValue("tipoDaOperacao");
       return (
         <Badge
           className={
@@ -111,7 +103,60 @@ export const columns: ColumnDef<Customer>[] = [
     },
   },
   {
-    accessorKey: "amount",
+    accessorKey: "promotora",
+    header: "Promotora",
+  },
+  {
+    accessorKey: "dataDaOperacao",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Data da operação
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const date = new Date(row.getValue("dataDaOperacao"));
+      const formatted = date.toLocaleDateString("pt-BR");
+
+      return <div className="ml-4">{formatted}</div>;
+    },
+  },
+  {
+    accessorKey: "valorRecebido",
+    header: ({ column }) => {
+      return (
+        <div className="text-right">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Valor recebido
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("valorRecebido"));
+      const formatted = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(amount);
+
+      return (
+        <div className="text-right font-medium mr-4 text-green-600">
+          {formatted}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "valorLiberado",
     header: ({ column }) => {
       return (
         <div className="text-right">
@@ -126,7 +171,7 @@ export const columns: ColumnDef<Customer>[] = [
       );
     },
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"));
+      const amount = parseFloat(row.getValue("valorLiberado"));
       const formatted = new Intl.NumberFormat("pt-BR", {
         style: "currency",
         currency: "BRL",
@@ -137,9 +182,7 @@ export const columns: ColumnDef<Customer>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const payment = row.original;
-
+    cell: () => {
       return (
         <div className="flex justify-end items-center">
           <DropdownMenu>
@@ -151,11 +194,7 @@ export const columns: ColumnDef<Customer>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(payment.id)}
-              >
-                Copy payment ID
-              </DropdownMenuItem>
+              <DropdownMenuItem>Copy payment ID</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>View customer</DropdownMenuItem>
               <DropdownMenuItem>View payment details</DropdownMenuItem>
