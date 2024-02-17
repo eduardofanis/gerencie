@@ -3,7 +3,6 @@
 import {
   ColumnDef,
   ColumnFiltersState,
-  FilterFn,
   SortingState,
   flexRender,
   getCoreRowModel,
@@ -12,8 +11,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-
-import { rankItem } from "@tanstack/match-sorter-utils";
 
 import {
   Table,
@@ -56,18 +53,10 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import dateBetweenFilterFn from "@/lib/date-between-filter";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-}
-
-declare module "@tanstack/table-core" {
-  interface FilterFns {
-    fuzzy: FilterFn<unknown>;
-    dateBetweenFilterFn: FilterFn<unknown>;
-  }
 }
 
 export function DataTable<TData, TValue>({
@@ -79,19 +68,6 @@ export function DataTable<TData, TValue>({
     []
   );
   const [date, setDate] = React.useState<DateRange | undefined>();
-
-  const fuzzyFilter: FilterFn<unknown> = (row, columnId, value, addMeta) => {
-    // Rank the item
-    const itemRank = rankItem(row.getValue(columnId), value);
-
-    // Store the itemRank info
-    addMeta({
-      itemRank,
-    });
-
-    // Return if the item should be filtered in/out
-    return itemRank.passed;
-  };
 
   const table = useReactTable({
     data,
@@ -107,10 +83,6 @@ export function DataTable<TData, TValue>({
       columnFilters,
     },
     columnResizeMode: "onChange",
-    filterFns: {
-      fuzzy: fuzzyFilter,
-      dateBetweenFilterFn: dateBetweenFilterFn,
-    },
   });
 
   return (

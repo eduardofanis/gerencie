@@ -12,7 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 
 export type Customer = {
   id: string;
@@ -44,7 +43,53 @@ export const columns: ColumnDef<Customer>[] = [
     accessorKey: "telefone",
     header: "Telefone",
     cell: ({ row }) => {
-      return <div>{row.getValue("name")}</div>;
+      return <div>{row.getValue("telefone")}</div>;
+    },
+  },
+  {
+    accessorKey: "dataDeNascimento",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Data de nascimento
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      return <div className="ml-4">{row.getValue("dataDeNascimento")}</div>;
+    },
+  },
+  {
+    accessorKey: "valorTotalLiberado",
+    header: ({ column }) => {
+      return (
+        <div className="text-right">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Valor total liberado
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => {
+      const amount = parseFloat(
+        row.getValue("valorTotalLiberado")
+          ? row.getValue("valorTotalLiberado")
+          : "0"
+      );
+      const formatted = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(amount);
+
+      return <div className="text-right font-medium mr-4">{formatted}</div>;
     },
   },
   {

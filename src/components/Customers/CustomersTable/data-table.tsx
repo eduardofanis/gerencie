@@ -20,13 +20,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -75,14 +68,29 @@ export function DataTable<TData, TValue>({
   return (
     <div>
       <div className="flex items-center justify-between py-2">
-        <Input
-          placeholder="Nome do cliente"
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm w-64"
-        />
+        <div className="flex gap-2 items-center">
+          <span className="font-medium mr-2">Filtros</span>
+          <Input
+            placeholder="Nome do cliente"
+            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("name")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm w-64"
+          />
+
+          <Button
+            variant="ghost"
+            className="px-3 text-red-600 hover:text-red-800 hover:bg-red-50"
+            onClick={() => {
+              table.getColumn("name")?.setFilterValue("");
+              table.getColumn("telefone")?.setFilterValue("");
+            }}
+          >
+            <X className="h-4 w-4 mr-2 " />
+            Limpar filtros
+          </Button>
+        </div>
 
         <Dialog>
           <DialogTrigger asChild>
