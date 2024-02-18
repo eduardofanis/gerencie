@@ -1,42 +1,25 @@
 import { Button } from "../ui/button";
 import {
-  DialogClose,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { Input } from "../ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { GetConsumers } from "@/api";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
+import { NewConsumer } from "@/api";
+import { Form } from "../ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import MoneyInput from "./Input/MoneyInput";
 import { NewCostumerFormSchema } from "../../schemas/NewCostumerFormSchema";
 import SelectInput, { SelectItems } from "./Input/SelectInput";
 import TextInput from "./Input/TextInput";
 import NumberInput from "./Input/NumberInput";
 import FileInput from "./Input/FileInput";
-import { Label } from "../ui/label";
+import { useSearchParams } from "react-router-dom";
 
 export default function NewCostumerForm() {
+  const [_, setSearchParams] = useSearchParams();
+
   const form = useForm<z.infer<typeof NewCostumerFormSchema>>({
     resolver: zodResolver(NewCostumerFormSchema),
     defaultValues: {
@@ -58,8 +41,10 @@ export default function NewCostumerForm() {
     },
   });
   function onSubmit(values: z.infer<typeof NewCostumerFormSchema>) {
-    console.log("aaa");
+    NewConsumer(values);
     console.log(values);
+    _;
+    setSearchParams({ modal: "false" });
   }
 
   const SexoItems: SelectItems[] = [
@@ -77,12 +62,46 @@ export default function NewCostumerForm() {
     },
   ];
 
+  const EstadoCivilItems: SelectItems[] = [
+    {
+      value: "casado",
+      label: "Casado",
+    },
+    {
+      value: "separado",
+      label: "Separado",
+    },
+    {
+      value: "divorciado",
+      label: "Divorciado",
+    },
+    {
+      value: "viuvu",
+      label: "Viúvo",
+    },
+  ];
+
+  const DocumentoItems: SelectItems[] = [
+    {
+      value: "rg",
+      label: "RG",
+    },
+    {
+      value: "cnh",
+      label: "CNH",
+    },
+    {
+      value: "outro",
+      label: "Outro",
+    },
+  ];
+
   return (
     <>
       <DialogHeader>
         <DialogTitle>Cadastrar novo cliente</DialogTitle>
         <DialogDescription>
-          Preencha todos os campos e clique em cadastrar em seguida.
+          Preencha os campos obrigatórios (*) e clique em cadastrar em seguida.
         </DialogDescription>
       </DialogHeader>
 
@@ -92,88 +111,44 @@ export default function NewCostumerForm() {
             <h2 className="mb-2 font-medium">Dados pessoais</h2>
             <div className="grid grid-cols-4 gap-2">
               <div className="space-y-1 col-span-2">
-                <TextInput form={form} label="Nome completo" name="nome" />
+                <TextInput form={form} label="Nome completo *" name="nome" />
               </div>
-              <div className="space-y-1">
-                <NumberInput
-                  form={form}
-                  name="cpf"
-                  label="CPF"
-                  placeholder="000.000.000-00"
-                />
-              </div>
-              <FormField
-                control={form.control}
+              <NumberInput
+                form={form}
+                name="cpf"
+                label="CPF"
+                placeholder="000.000.000-00"
+              />
+              <NumberInput
+                form={form}
                 name="telefone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Telefone</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="(00) 00000-0000" />
-                    </FormControl>
-                  </FormItem>
-                )}
+                label="Telefone *"
+                placeholder="(00) 00000-0000"
               />
 
               <NumberInput
                 form={form}
                 name="dataDeNascimento"
-                label="Data de nascimento"
+                label="Data de nascimento *"
               />
 
-              <div className="space-y-1">
-                <SelectInput
-                  form={form}
-                  name="sexo"
-                  label="Sexo"
-                  placeholder="Selecione"
-                  selectItems={SexoItems}
-                />
-              </div>
+              <SelectInput
+                form={form}
+                name="sexo"
+                label="Sexo"
+                placeholder="Selecione"
+                selectItems={SexoItems}
+              />
 
-              <div className="space-y-1">
-                <FormField
-                  control={form.control}
-                  name="estadoCivil"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado civil</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="solteiro">Solteiro</SelectItem>
-                          <SelectItem value="casado">Casado</SelectItem>
-                          <SelectItem value="separado">Separado</SelectItem>
-                          <SelectItem value="divorciado">Divorciado</SelectItem>
-                          <SelectItem value="viuvu">Viúvo</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <SelectInput
+                form={form}
+                name="estadoCivil"
+                label="Estado civil"
+                placeholder="Selecione"
+                selectItems={EstadoCivilItems}
+              />
 
-              <div className="space-y-1">
-                <FormField
-                  control={form.control}
-                  name="naturalidade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Naturalidade</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <TextInput form={form} label="Naturalidade" name="naturalidade" />
             </div>
           </div>
 
@@ -187,135 +162,30 @@ export default function NewCostumerForm() {
                 placeholder="00000-000"
               />
               <div className="space-y-1 col-span-2">
-                <FormField
-                  control={form.control}
-                  name="rua"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Rua</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                <TextInput form={form} label="Rua" name="rua" />
               </div>
-              <div className="space-y-1">
-                <FormField
-                  control={form.control}
-                  name="numeroDaRua"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Número</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="space-y-1">
-                <FormField
-                  control={form.control}
-                  name="complemento"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Complemento</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="space-y-1">
-                <FormField
-                  control={form.control}
-                  name="estado"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="space-y-1">
-                <FormField
-                  control={form.control}
-                  name="cidade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cidade</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="space-y-1">
-                <FormField
-                  control={form.control}
-                  name="bairro"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bairro</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <NumberInput form={form} label="Número" name="numeroDaRua" />
+              <TextInput form={form} label="Complemento" name="complemento" />
+              <TextInput form={form} label="Estado" name="estado" />
+              <TextInput form={form} label="Cidade" name="cidade" />
+              <TextInput form={form} label="Bairro" name="bairro" />
             </div>
           </div>
 
           <div>
             <h2 className="mb-2 font-medium">Documentos</h2>
             <div className="grid grid-cols-3 gap-2">
-              <FormField
-                control={form.control}
+              <SelectInput
+                form={form}
                 name="tipoDoDocumento"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo do documento</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="rg">RG</SelectItem>
-                        <SelectItem value="cnh">CNH</SelectItem>
-                        <SelectItem value="outro">Outro</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
+                label="Tipo do documento"
+                placeholder="Selecione"
+                selectItems={DocumentoItems}
               />
-              <FormField
-                control={form.control}
+              <FileInput
+                form={form}
+                label="Frente do documento"
                 name="frenteDoDocumento"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Frente do documento</FormLabel>
-                    <FormControl>
-                      <Input
-                        id="frenteDoDocumento"
-                        type="file"
-                        {...form.register("frenteDoDocumento")}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
               />
 
               <FileInput
@@ -327,11 +197,15 @@ export default function NewCostumerForm() {
           </div>
 
           <DialogFooter className="mt-8 col-span-2">
-            <DialogClose asChild>
-              <Button variant={"outline"} onClick={GetConsumers}>
-                Cancelar
-              </Button>
-            </DialogClose>
+            <Button
+              type="button"
+              variant={"outline"}
+              onClick={() => {
+                setSearchParams({ modal: "false" });
+              }}
+            >
+              Cancelar
+            </Button>
 
             <Button type="submit">Cadastrar</Button>
           </DialogFooter>

@@ -13,6 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { NewOperationFormSchema } from "@/schemas/NewOperationFormSchema";
+import { z } from "zod";
 
 export type Operation = {
   statusDaOperacao: 1 | 2 | 3 | 4;
@@ -24,7 +26,7 @@ export type Operation = {
   valorLiberado: number;
 };
 
-export const columns: ColumnDef<Operation>[] = [
+export const columns: ColumnDef<z.infer<typeof NewOperationFormSchema>>[] = [
   {
     accessorKey: "statusDaOperacao",
     header: "Status",
@@ -32,28 +34,28 @@ export const columns: ColumnDef<Operation>[] = [
       const status = row.getValue("statusDaOperacao");
 
       switch (status) {
-        case 1:
+        case "1":
           return (
             <div className="text-green-600 font-medium flex items-center">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
               Sucesso
             </div>
           );
-        case 2:
+        case "2":
           return (
             <div className="text-yellow-600 font-medium flex items-center">
               <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
               Processando
             </div>
           );
-        case 3:
+        case "3":
           return (
             <div className="text-orange-600 font-medium flex items-center">
               <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
               Pendente
             </div>
           );
-        case 4:
+        case "4":
           return (
             <div className="text-red-600 font-medium flex items-center">
               <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
@@ -88,16 +90,16 @@ export const columns: ColumnDef<Operation>[] = [
       return (
         <Badge
           className={
-            type == "FGTS"
+            type == "fgts"
               ? "bg-sky-600"
-              : type == "GOV"
+              : type == "gov"
               ? "bg-green-600"
-              : type == "INSS"
+              : type == "inss"
               ? "bg-yellow-600"
               : "bg-indigo-600"
           }
         >
-          {type}
+          {type.toUpperCase()}
         </Badge>
       );
     },

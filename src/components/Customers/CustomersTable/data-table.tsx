@@ -34,6 +34,7 @@ import {
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import React from "react";
 import NewCostumerForm from "@/components/Forms/NewCostumerForm";
+import { useSearchParams } from "react-router-dom";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -48,6 +49,7 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const table = useReactTable({
     data,
@@ -69,12 +71,12 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center justify-between py-2">
         <div className="flex gap-2 items-center">
-          <span className="font-medium mr-2">Filtros</span>
+          <span className="font-medium mr-1">Filtros</span>
           <Input
             placeholder="Nome do cliente"
-            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
-              table.getColumn("name")?.setFilterValue(event.target.value)
+              table.getColumn("nome")?.setFilterValue(event.target.value)
             }
             className="max-w-sm w-64"
           />
@@ -83,7 +85,7 @@ export function DataTable<TData, TValue>({
             variant="ghost"
             className="px-3 text-red-600 hover:text-red-800 hover:bg-red-50"
             onClick={() => {
-              table.getColumn("name")?.setFilterValue("");
+              table.getColumn("nome")?.setFilterValue("");
               table.getColumn("telefone")?.setFilterValue("");
             }}
           >
@@ -92,9 +94,15 @@ export function DataTable<TData, TValue>({
           </Button>
         </div>
 
-        <Dialog>
+        <Dialog
+          open={
+            searchParams.get("modal") && searchParams.get("modal") == "true"
+              ? true
+              : false
+          }
+        >
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={() => setSearchParams({ modal: "true" })}>
               <PlusCircle className="w-4 h-4 mr-2" />
               Novo cliente
             </Button>
@@ -157,8 +165,11 @@ export function DataTable<TData, TValue>({
       <div>
         <div className="flex items-center justify-end space-x-2 py-2">
           <span className="text-sm  ml-2 p-0 text-slate-700">
-            Página {table.getState().pagination.pageIndex + 1} de{" "}
-            {table.getPageCount()}
+            Página{" "}
+            <span className="font-bold">
+              {table.getState().pagination.pageIndex + 1} de{" "}
+              {table.getPageCount()}
+            </span>
           </span>
           <Button
             variant="outline"

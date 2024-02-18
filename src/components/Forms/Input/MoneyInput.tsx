@@ -1,11 +1,5 @@
 import { useReducer } from "react";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../../ui/form"; // Shadcn UI import
+import { FormControl, FormField, FormItem, FormLabel } from "../../ui/form"; // Shadcn UI import
 import { Input } from "../../ui/input"; // Shandcn UI Input
 import { CostumerInputProps } from "@/types/CostumerInputProps";
 
@@ -61,7 +55,6 @@ export default function MoneyInput(props: CostumerInputProps) {
                 value={value}
               />
             </FormControl>
-            <FormMessage />
           </FormItem>
         );
       }}

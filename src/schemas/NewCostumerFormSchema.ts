@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const NewCostumerFormSchema = z.object({
+  id: z.string(),
   nome: z
     .string()
     .min(1)
@@ -13,31 +14,33 @@ const NewCostumerFormSchema = z.object({
         })
         .join(" ");
     }),
-  cpf: z
-    .string()
-    .refine((cpf) => cpf.length > 0 || cpf.length < 11, "Minimo 8"),
+  cpf: z.string(),
   dataDeNascimento: z.string().min(1),
-  sexo: z.string().min(1),
-  estadoCivil: z.string().min(1),
-  naturalidade: z.string().min(1),
+  sexo: z.string(),
+  estadoCivil: z.string(),
+  naturalidade: z.string(),
   telefone: z.string().min(1),
-  cep: z.string().min(1),
-  rua: z.string().min(1),
-  numeroDaRua: z.string().min(1),
-  complemento: z.string().min(1),
-  estado: z.string().min(1),
-  cidade: z.string().min(1),
-  bairro: z.string().min(1),
-  tipoDoDocumento: z.string().min(1),
+  cep: z.string(),
+  rua: z.string(),
+  numeroDaRua: z.string(),
+  complemento: z.string(),
+  estado: z.string(),
+  cidade: z.string(),
+  bairro: z.string(),
+  tipoDoDocumento: z.string(),
   frenteDoDocumento: z
     .instanceof(FileList)
-    .refine((files) => files.length > 0, `Required`)
-    .transform((list) => list.item(0)),
+    .transform((file) => file.length > 0 && file.item(0))
+    .refine((file) => !file || (!!file && file.type?.startsWith("image")), {
+      message: "Only images are allowed to be sent.",
+    }),
   versoDoDocumento: z
     .instanceof(FileList)
-    .refine((files) => files.length > 0, `Required`)
-    .transform((list) => list.item(0))
-    .optional(),
+    .transform((file) => file.length > 0 && file.item(0))
+    .refine((file) => !file || (!!file && file.type?.startsWith("image")), {
+      message: "Only images are allowed to be sent.",
+    }),
+  operacoes: z.instanceof(Array),
 });
 
 export { NewCostumerFormSchema };

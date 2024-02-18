@@ -2,54 +2,27 @@ import { collection, addDoc, getFirestore, getDocs } from "firebase/firestore";
 import { firebaseApp } from "./main";
 import { getAuth } from "firebase/auth";
 import { toast } from "./components/ui/use-toast";
-
-type ConsumerProps = {
-  nome: string;
-  cpf: string;
-  nascimento: string;
-  sexo: string;
-  estadoCivil: string;
-  naturalidade: string;
-  telefone: string;
-  rua: string;
-  numero: string;
-  complemento: string;
-  estado: string;
-  cidade: string;
-  bairro: string;
-  tipoDocumento: string;
-  frenteDocumento: string | null;
-  versoDocumento: string | null;
-  tipoOperacao: string;
-  statusOperacao: string;
-  dataOperacao: Date | undefined;
-  valorLiberado: string;
-  comissao: string;
-};
+import { NewCostumerFormSchema } from "./schemas/NewCostumerFormSchema";
+import { z } from "zod";
 
 export async function NewConsumer({
   nome,
   cpf,
-  nascimento,
+  dataDeNascimento,
   sexo,
   estadoCivil,
   naturalidade,
   telefone,
   rua,
-  numero,
+  numeroDaRua,
   complemento,
   estado,
   cidade,
   bairro,
-  tipoDocumento,
-  frenteDocumento,
-  versoDocumento,
-  tipoOperacao,
-  statusOperacao,
-  dataOperacao,
-  valorLiberado,
-  comissao,
-}: ConsumerProps) {
+  tipoDoDocumento,
+  frenteDoDocumento,
+  versoDoDocumento,
+}: z.infer<typeof NewCostumerFormSchema>) {
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
 
@@ -58,25 +31,20 @@ export async function NewConsumer({
       await addDoc(collection(db, currentUser.uid, "data", "clientes"), {
         nome: nome,
         cpf: cpf,
-        nascimento: nascimento,
+        dataDeNascimento: Date.parse(dataDeNascimento),
         sexo: sexo,
         estadoCivil: estadoCivil,
         naturalidade: naturalidade,
         telefone: telefone,
         rua: rua,
-        numero: numero,
+        numeroDaRua: numeroDaRua,
         complemento: complemento,
         estado: estado,
         cidade: cidade,
         bairro: bairro,
-        tipoDocumento: tipoDocumento,
-        frenteDocumento: frenteDocumento,
-        versoDocumento: versoDocumento,
-        tipoOperacao: tipoOperacao,
-        statusOperacao: statusOperacao,
-        dataOperacao: dataOperacao,
-        valorLiberado: valorLiberado,
-        comissao: comissao,
+        tipoDoDocumento: tipoDoDocumento,
+        frenteDoDocumento: frenteDoDocumento,
+        versoDoDocumento: versoDoDocumento,
       });
       toast({
         title: "Cliente cadastrado com sucesso!",
@@ -94,17 +62,25 @@ export async function NewConsumer({
   }
 }
 
-export async function GetConsumers() {
+export async function GetCostumers() {
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
 
-  if (currentUser && currentUser.uid) {
-    const querySnapshot = await getDocs(
-      collection(db, currentUser.uid, "data", "clientes")
-    );
-    querySnapshot.forEach((doc) => {
-      // doc.data() is never undefined for query doc snapshots
-      console.log(doc.id, " => ", doc.data());
-    });
+  try {
+    if (currentUser && currentUser.uid) {
+      const querySnapshot = await getDocs(
+        collection(db, currentUser!.uid, "data", "clientes")
+      );
+      const consumers = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as z.infer<typeof NewCostumerFormSchema>),
+      }));
+
+      return consumers;
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    console.log();
   }
 }

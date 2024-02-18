@@ -22,8 +22,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { GetConsumers } from "@/api";
+import {
+  Calendar as CalendarIcon,
+  Check,
+  ChevronDown,
+  ChevronsUpDown,
+} from "lucide-react";
+import { GetCostumers } from "@/api";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -35,8 +40,32 @@ import TextInput from "./Input/TextInput";
 import NumberInput from "./Input/NumberInput";
 import FileInput from "./Input/FileInput";
 import { NewOperationFormSchema } from "@/schemas/NewOperationFormSchema";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "../ui/command";
+import { ScrollArea } from "../ui/scroll-area";
+import {
+  arrayUnion,
+  doc,
+  getDoc,
+  getFirestore,
+  updateDoc,
+} from "firebase/firestore";
+import React from "react";
+import { useSearchParams } from "react-router-dom";
+import { firebaseApp } from "@/main";
+import { getAuth } from "firebase/auth";
+import { toast } from "../ui/use-toast";
 
 export default function NewOperationForm() {
+  const [data, setData] =
+    React.useState<z.infer<typeof NewCostumerFormSchema>[]>();
+  const [_, setSearchParams] = useSearchParams();
+
   const form = useForm<z.infer<typeof NewOperationFormSchema>>({
     resolver: zodResolver(NewOperationFormSchema),
     defaultValues: {
@@ -47,26 +76,47 @@ export default function NewOperationForm() {
       comissao: "",
     },
   });
-  function onSubmit(values: z.infer<typeof NewOperationFormSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof NewOperationFormSchema>) {
+    const db = getFirestore(firebaseApp);
+    const { currentUser } = getAuth(firebaseApp);
+
+    try {
+      const ref = doc(db, currentUser!.uid, "data", "clientes", values.cliente);
+
+      const docSnapshot = await getDoc(ref);
+      const currentOperations = docSnapshot.data()?.operacoes || [];
+
+      const updatedOperations = [...currentOperations, values];
+
+      await updateDoc(ref, {
+        operacoes: updatedOperations,
+      });
+
+      toast({
+        title: "Operação cadastrada com sucesso!",
+        variant: "success",
+        duration: 5000,
+      });
+    } catch (e) {
+      console.log(e);
+      toast({
+        title: "Algo deu errado, tente novamente!",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } finally {
+      setSearchParams({ operationModal: "false" });
+    }
   }
 
-  const SexoItems: SelectItems[] = [
-    {
-      value: "masculino",
-      label: "Masculino",
-    },
-    {
-      value: "feminino",
-      label: "Feminino",
-    },
-    {
-      value: "outro",
-      label: "Outro",
-    },
-  ];
+  async function getConsumers() {
+    const costumers = await GetCostumers();
+    setData(costumers);
+  }
+
+  React.useEffect(() => {
+    getConsumers();
+  }, []);
 
   return (
     <>
@@ -80,61 +130,116 @@ export default function NewOperationForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="grid grid-cols-3 gap-2">
-            <div className="col-span-2">
+            <div className="col-span-3">
               <FormField
                 control={form.control}
                 name="cliente"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Cliente</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="fgts">FGTS</SelectItem>
-                        <SelectItem value="gov">GOV</SelectItem>
-                        <SelectItem value="inss">INSS</SelectItem>
-                        <SelectItem value="prefeitura">Prefeitura</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className="justify-between w-full p-3 font-normal"
+                          >
+                            {field.value && data
+                              ? data.find(
+                                  (language) => language.id === field.value
+                                )?.nome
+                              : "Selecione um cliente"}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[400px] p-0">
+                        <Command>
+                          <CommandInput placeholder="Pesquisar cliente..." />
+                          <CommandEmpty>
+                            Nenhum cliente encontrado.
+                          </CommandEmpty>
+                          <CommandGroup>
+                            <ScrollArea className="max-h-[400px]">
+                              {data !== undefined &&
+                                data.map(
+                                  (
+                                    language: z.infer<
+                                      typeof NewCostumerFormSchema
+                                    >
+                                  ) => (
+                                    <CommandItem
+                                      value={language.id}
+                                      key={language.id}
+                                      onSelect={() => {
+                                        form.setValue("cliente", language.id);
+                                        console.log(field.value);
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          language.id === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                      {language.nome}
+                                    </CommandItem>
+                                  )
+                                )}
+                            </ScrollArea>
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                   </FormItem>
                 )}
               />
             </div>
 
-            <div className="space-y-1">
-              <FormField
-                control={form.control}
-                name="tipoDaOperacao"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo da operação</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="fgts">FGTS</SelectItem>
-                        <SelectItem value="gov">GOV</SelectItem>
-                        <SelectItem value="inss">INSS</SelectItem>
-                        <SelectItem value="prefeitura">Prefeitura</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
-            </div>
+            {/* <FormField
+              control={form.control}
+              name="cliente"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cliente</FormLabel>
+                  <FormControl>
+                    <Button
+                      className="block w-full"
+                      variant={"outline"}
+                    ></Button>
+                  </FormControl>
+                </FormItem>
+              )}
+            /> */}
+
+            <FormField
+              control={form.control}
+              name="tipoDaOperacao"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo da operação</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="fgts">FGTS</SelectItem>
+                      <SelectItem value="gov">GOV</SelectItem>
+                      <SelectItem value="inss">INSS</SelectItem>
+                      <SelectItem value="prefeitura">Prefeitura</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
@@ -152,36 +257,10 @@ export default function NewOperationForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="sucesso">Sucesso</SelectItem>
-                      <SelectItem value="processando">Processando</SelectItem>
-                      <SelectItem value="pendente">Pendente</SelectItem>
-                      <SelectItem value="falha">Falha</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="promotora"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Promotora</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="sucesso">Sucesso</SelectItem>
-                      <SelectItem value="processando">Processando</SelectItem>
-                      <SelectItem value="pendente">Pendente</SelectItem>
-                      <SelectItem value="falha">Falha</SelectItem>
+                      <SelectItem value="1">Sucesso</SelectItem>
+                      <SelectItem value="2">Processando</SelectItem>
+                      <SelectItem value="3">Pendente</SelectItem>
+                      <SelectItem value="4">Falha</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>
@@ -227,6 +306,32 @@ export default function NewOperationForm() {
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="promotora"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Promotora</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="sucesso">Sucesso</SelectItem>
+                      <SelectItem value="processando">Processando</SelectItem>
+                      <SelectItem value="pendente">Pendente</SelectItem>
+                      <SelectItem value="falha">Falha</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+
             <MoneyInput
               form={form}
               name="valorLiberado"
@@ -248,11 +353,15 @@ export default function NewOperationForm() {
             />
           </div>
           <DialogFooter className="mt-8 col-span-2">
-            <DialogClose asChild>
-              <Button variant={"outline"} onClick={GetConsumers}>
-                Cancelar
-              </Button>
-            </DialogClose>
+            <Button
+              type="button"
+              variant={"outline"}
+              onClick={() => {
+                setSearchParams({ operationModal: "false" });
+              }}
+            >
+              Cancelar
+            </Button>
 
             <DialogClose asChild></DialogClose>
             <Button type="submit">Cadastrar</Button>

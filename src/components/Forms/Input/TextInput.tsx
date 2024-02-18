@@ -3,7 +3,6 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { CostumerInputProps } from "@/types/CostumerInputProps";
@@ -32,7 +31,6 @@ export default function TextInput(props: CostumerInputProps) {
               disabled={field.disabled}
             />
           </FormControl>
-          <FormMessage />
         </FormItem>
       )}
     />

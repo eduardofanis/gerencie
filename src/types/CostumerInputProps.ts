@@ -2,7 +2,7 @@ import { NewCostumerFormSchema } from "@/schemas/NewCostumerFormSchema";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 
-export type MyInputProps = {
+export type CostumerInputProps = {
   form: UseFormReturn<z.infer<typeof NewCostumerFormSchema>>;
   name:
     | "nome"
@@ -21,13 +21,7 @@ export type MyInputProps = {
     | "bairro"
     | "tipoDoDocumento"
     | "frenteDoDocumento"
-    | "versoDoDocumento"
-    | "cliente"
-    | "tipoDaOperacao"
-    | "statusDaOperacao"
-    | "dataDaOperacao"
-    | "valorLiberado"
-    | "comissao";
+    | "versoDoDocumento";
   label: string;
   placeholder?: string;
   className?: string;

@@ -12,38 +12,45 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { z } from "zod";
+import { NewCostumerFormSchema } from "@/schemas/NewCostumerFormSchema";
 
-export type Customer = {
-  id: string;
-  name: string;
-  status: 1 | 2 | 3 | 4;
-  type: "FGTS" | "GOV" | "INSS" | "PREFEITURA";
-  amount: number;
-};
-
-export const columns: ColumnDef<Customer>[] = [
+export const columns: ColumnDef<z.infer<typeof NewCostumerFormSchema>>[] = [
   {
-    accessorKey: "name",
+    accessorKey: "nome",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name
+          Nome
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => {
-      return <div className="ml-4">{row.getValue("name")}</div>;
+      return <div className="ml-4">{row.getValue("nome")}</div>;
     },
   },
   {
     accessorKey: "telefone",
     header: "Telefone",
     cell: ({ row }) => {
-      return <div>{row.getValue("telefone")}</div>;
+      return (
+        <div className="flex items-center">
+          {row.getValue("telefone")}
+          {/* <Button
+            className="p-0 ml-2"
+            variant={"link"}
+            onClick={() =>
+              navigator.clipboard.writeText(row.getValue("telefone"))
+            }
+          >
+            <ClipboardCopy className="h-4 w-4 text-slate-700" />
+          </Button> */}
+        </div>
+      );
     },
   },
   {
@@ -60,7 +67,32 @@ export const columns: ColumnDef<Customer>[] = [
       );
     },
     cell: ({ row }) => {
-      return <div className="ml-4">{row.getValue("dataDeNascimento")}</div>;
+      const date = new Date(row.getValue("dataDeNascimento"));
+      const formatted = date.toLocaleDateString("pt-BR");
+
+      return <div className="ml-4">{formatted}</div>;
+    },
+  },
+  {
+    accessorKey: "ultimaOperacao",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Última operação
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const value: string = row.getValue("ultimaOperacao");
+      const date = new Date(value);
+      const formatted = date.toLocaleDateString("pt-BR");
+
+      if (!value) return <div className="ml-4">Nenhuma operação.</div>;
+      return <div className="ml-4">{formatted}</div>;
     },
   },
   {
@@ -94,9 +126,7 @@ export const columns: ColumnDef<Customer>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const payment = row.original;
-
+    cell: () => {
       return (
         <div className="flex justify-end items-center">
           <DropdownMenu>
@@ -108,11 +138,7 @@ export const columns: ColumnDef<Customer>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(payment.id)}
-              >
-                Copy payment ID
-              </DropdownMenuItem>
+              <DropdownMenuItem>Copy payment ID</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>View customer</DropdownMenuItem>
               <DropdownMenuItem>View payment details</DropdownMenuItem>

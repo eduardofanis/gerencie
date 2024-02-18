@@ -53,6 +53,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { useSearchParams } from "react-router-dom";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -68,6 +69,8 @@ export function DataTable<TData, TValue>({
     []
   );
   const [date, setDate] = React.useState<DateRange | undefined>();
+
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const table = useReactTable({
     data,
@@ -166,7 +169,7 @@ export function DataTable<TData, TValue>({
             </SelectContent>
           </Select>
 
-          <Popover>
+          {/* <Popover>
             <PopoverTrigger asChild>
               <Button
                 id="date"
@@ -206,7 +209,7 @@ export function DataTable<TData, TValue>({
                 numberOfMonths={2}
               />
             </PopoverContent>
-          </Popover>
+          </Popover> */}
 
           <Button
             variant="ghost"
@@ -225,9 +228,16 @@ export function DataTable<TData, TValue>({
           </Button>
         </div>
 
-        <Dialog>
+        <Dialog
+          open={
+            searchParams.get("operationModal") &&
+            searchParams.get("operationModal") == "true"
+              ? true
+              : false
+          }
+        >
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={() => setSearchParams({ operationModal: "true" })}>
               <PlusCircle className="w-4 h-4 mr-2" />
               Nova operação
             </Button>
@@ -296,16 +306,6 @@ export function DataTable<TData, TValue>({
               {table.getPageCount()}
             </span>
           </span>
-          <Input
-            type="number"
-            defaultValue={table.getState().pagination.pageIndex + 1}
-            max={2}
-            onChange={(e) => {
-              const page = e.target.value ? Number(e.target.value) - 1 : 0;
-              table.setPageIndex(page);
-            }}
-            className="border p-1 rounded w-10 h-9"
-          />
           <Button
             variant="outline"
             size="sm"
