@@ -6,6 +6,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import Customers from "./components/Customers/Customers";
 import { Toaster } from "./components/ui/toaster";
 import Operations from "./components/Operations/Operations";
+import Preferences from "./components/Preferences/Preferences";
 
 export default function App() {
   return (
@@ -35,6 +36,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <Customers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/preferencias"
+              element={
+                <ProtectedRoute>
+                  <Preferences />
                 </ProtectedRoute>
               }
             />

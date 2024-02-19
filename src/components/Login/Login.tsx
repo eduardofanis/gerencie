@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SignInForm from "../Forms/SignInForm";
 import SignUpForm from "../Forms/SignUpForm";
-import { BarChart, BarChart2, LineChart } from "lucide-react";
+import { LineChart } from "lucide-react";
 
 export default function Login() {
   return (

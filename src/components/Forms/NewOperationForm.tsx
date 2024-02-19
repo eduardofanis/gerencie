@@ -1,3 +1,4 @@
+import React from "react";
 import { Button } from "../ui/button";
 import {
   DialogClose,
@@ -22,12 +23,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Calendar as CalendarIcon,
-  Check,
-  ChevronDown,
-  ChevronsUpDown,
-} from "lucide-react";
+import { Calendar as CalendarIcon, Check, ChevronDown } from "lucide-react";
 import { GetCostumers, NewOperation } from "@/api";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { useForm } from "react-hook-form";
@@ -35,10 +31,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import MoneyInput from "./Input/MoneyInput";
 import { NewCostumerFormSchema } from "../../schemas/NewCostumerFormSchema";
-import SelectInput, { SelectItems } from "./Input/SelectInput";
-import TextInput from "./Input/TextInput";
-import NumberInput from "./Input/NumberInput";
-import FileInput from "./Input/FileInput";
+
 import { NewOperationFormSchema } from "@/schemas/NewOperationFormSchema";
 import {
   Command,
@@ -48,23 +41,13 @@ import {
   CommandItem,
 } from "../ui/command";
 import { ScrollArea } from "../ui/scroll-area";
-import {
-  arrayUnion,
-  doc,
-  getDoc,
-  getFirestore,
-  updateDoc,
-} from "firebase/firestore";
-import React from "react";
 import { useSearchParams } from "react-router-dom";
-import { firebaseApp } from "@/main";
-import { getAuth } from "firebase/auth";
-import { toast } from "../ui/use-toast";
 
 export default function NewOperationForm() {
   const [data, setData] =
     React.useState<z.infer<typeof NewCostumerFormSchema>[]>();
   const [nomeDoCliente, setNomeDoCliente] = React.useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setSearchParams] = useSearchParams();
 
   const form = useForm<z.infer<typeof NewOperationFormSchema>>({
@@ -313,7 +296,6 @@ export default function NewOperationForm() {
               form={form}
               name="valorLiberado"
               label="Valor liberado"
-              placeholder=""
             />
 
             <FormField

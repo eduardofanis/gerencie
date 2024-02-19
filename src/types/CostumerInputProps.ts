@@ -1,9 +1,8 @@
-import { NewCostumerFormSchema } from "@/schemas/NewCostumerFormSchema";
 import { UseFormReturn } from "react-hook-form";
-import { z } from "zod";
 
 export type CostumerInputProps = {
-  form: UseFormReturn<z.infer<typeof NewCostumerFormSchema>>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  form: UseFormReturn<any>;
   name:
     | "nome"
     | "cpf"
@@ -21,7 +20,13 @@ export type CostumerInputProps = {
     | "bairro"
     | "tipoDoDocumento"
     | "frenteDoDocumento"
-    | "versoDoDocumento";
+    | "versoDoDocumento"
+    | "cliente"
+    | "tipoDaOperacao"
+    | "statusDaOperacao"
+    | "dataDaOperacao"
+    | "valorLiberado"
+    | "comissao";
   label: string;
   placeholder?: string;
   className?: string;

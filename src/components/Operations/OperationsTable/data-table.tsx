@@ -33,7 +33,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  CalendarIcon,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -46,14 +45,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import React from "react";
 import NewOperationForm from "@/components/Forms/NewOperationForm";
 import { DateRange } from "react-day-picker";
-import { format } from "date-fns";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+
 import { useSearchParams } from "react-router-dom";
 
 interface DataTableProps<TData, TValue> {

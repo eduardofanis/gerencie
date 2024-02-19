@@ -8,24 +8,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { NewOperationFormSchema } from "@/schemas/NewOperationFormSchema";
 import { z } from "zod";
-import {
-  Timestamp,
-  collection,
-  getFirestore,
-  onSnapshot,
-  query,
-  updateDoc,
-} from "firebase/firestore";
-import { firebaseApp } from "@/main";
-import { getAuth } from "firebase/auth";
-import { isEqual } from "date-fns";
+import { Timestamp } from "firebase/firestore";
 import { DeleteOperation } from "@/api";
 
 export type Operation = {
@@ -47,35 +35,35 @@ export const columns: ColumnDef<z.infer<typeof NewOperationFormSchema>>[] = [
   },
   {
     accessorKey: "statusDaOperacao",
-    header: "Status",
+    header: () => <div className="ml-4">Status</div>,
     cell: ({ row }) => {
       const status = row.getValue("statusDaOperacao");
 
       switch (status) {
         case "1":
           return (
-            <div className="text-green-600 font-medium flex items-center">
+            <div className="text-green-600 font-medium flex items-center ml-4">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
               Sucesso
             </div>
           );
         case "2":
           return (
-            <div className="text-yellow-600 font-medium flex items-center">
+            <div className="text-yellow-600 font-medium flex items-center ml-4">
               <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
               Processando
             </div>
           );
         case "3":
           return (
-            <div className="text-orange-600 font-medium flex items-center">
+            <div className="text-orange-600 font-medium flex items-center ml-4">
               <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
               Pendente
             </div>
           );
         case "4":
           return (
-            <div className="text-red-600 font-medium flex items-center">
+            <div className="text-red-600 font-medium flex items-center ml-4">
               <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
               Falha
             </div>
