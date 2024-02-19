@@ -28,7 +28,7 @@ import {
   ChevronDown,
   ChevronsUpDown,
 } from "lucide-react";
-import { GetCostumers } from "@/api";
+import { GetCostumers, NewOperation } from "@/api";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -64,49 +64,22 @@ import { toast } from "../ui/use-toast";
 export default function NewOperationForm() {
   const [data, setData] =
     React.useState<z.infer<typeof NewCostumerFormSchema>[]>();
+  const [nomeDoCliente, setNomeDoCliente] = React.useState("");
   const [_, setSearchParams] = useSearchParams();
 
   const form = useForm<z.infer<typeof NewOperationFormSchema>>({
     resolver: zodResolver(NewOperationFormSchema),
     defaultValues: {
-      cliente: "",
+      clienteID: "",
       tipoDaOperacao: "",
       statusDaOperacao: "",
       valorLiberado: 0,
       comissao: "",
     },
   });
-  async function onSubmit(values: z.infer<typeof NewOperationFormSchema>) {
-    const db = getFirestore(firebaseApp);
-    const { currentUser } = getAuth(firebaseApp);
-
-    try {
-      const ref = doc(db, currentUser!.uid, "data", "clientes", values.cliente);
-
-      const docSnapshot = await getDoc(ref);
-      const currentOperations = docSnapshot.data()?.operacoes || [];
-
-      const updatedOperations = [...currentOperations, values];
-
-      await updateDoc(ref, {
-        operacoes: updatedOperations,
-      });
-
-      toast({
-        title: "Operação cadastrada com sucesso!",
-        variant: "success",
-        duration: 5000,
-      });
-    } catch (e) {
-      console.log(e);
-      toast({
-        title: "Algo deu errado, tente novamente!",
-        variant: "destructive",
-        duration: 5000,
-      });
-    } finally {
-      setSearchParams({ operationModal: "false" });
-    }
+  function onSubmit(values: z.infer<typeof NewOperationFormSchema>) {
+    NewOperation(values, nomeDoCliente);
+    setSearchParams({ operationModal: "false" });
   }
 
   async function getConsumers() {
@@ -133,7 +106,7 @@ export default function NewOperationForm() {
             <div className="col-span-3">
               <FormField
                 control={form.control}
-                name="cliente"
+                name="clienteID"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Cliente</FormLabel>
@@ -165,27 +138,31 @@ export default function NewOperationForm() {
                               {data !== undefined &&
                                 data.map(
                                   (
-                                    language: z.infer<
+                                    cliente: z.infer<
                                       typeof NewCostumerFormSchema
                                     >
                                   ) => (
                                     <CommandItem
-                                      value={language.id}
-                                      key={language.id}
+                                      value={cliente.id}
+                                      key={cliente.id}
                                       onSelect={() => {
-                                        form.setValue("cliente", language.id);
-                                        console.log(field.value);
+                                        form.setValue(
+                                          "clienteID",
+                                          cliente.id ? cliente.id : ""
+                                        );
+                                        console.log(cliente.nome);
+                                        setNomeDoCliente(cliente.nome);
                                       }}
                                     >
                                       <Check
                                         className={cn(
                                           "mr-2 h-4 w-4",
-                                          language.id === field.value
+                                          cliente.id === field.value
                                             ? "opacity-100"
                                             : "opacity-0"
                                         )}
                                       />
-                                      {language.nome}
+                                      {cliente.nome}
                                     </CommandItem>
                                   )
                                 )}

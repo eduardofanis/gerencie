@@ -4,6 +4,7 @@ import {
   ColumnDef,
   ColumnFiltersState,
   SortingState,
+  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -69,6 +70,10 @@ export function DataTable<TData, TValue>({
     []
   );
   const [date, setDate] = React.useState<DateRange | undefined>();
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({
+      id: false,
+    });
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -83,8 +88,10 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
+      columnVisibility,
       columnFilters,
     },
+    onColumnVisibilityChange: setColumnVisibility,
     columnResizeMode: "onChange",
   });
 

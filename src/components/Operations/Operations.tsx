@@ -21,15 +21,12 @@ export default function Operations() {
     const db = getFirestore(firebaseApp);
     const { currentUser } = getAuth(firebaseApp);
 
-    const q = query(collection(db, currentUser!.uid, "data", "clientes"));
+    const q = query(collection(db, currentUser!.uid, "data", "operacoes"));
     onSnapshot(q, (querySnapshot) => {
-      const operations = querySnapshot.docs.flatMap((doc) => {
-        const operacoes = doc.data().operacoes as z.infer<
-          typeof NewOperationFormSchema
-        >;
-        return operacoes ? operacoes : [];
-      });
-      setData(operations);
+      const costumers = querySnapshot.docs.map((doc) => ({
+        ...(doc.data() as z.infer<typeof NewOperationFormSchema>),
+      }));
+      setData(costumers);
     });
   }
 

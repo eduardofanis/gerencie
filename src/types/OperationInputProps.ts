@@ -5,7 +5,7 @@ import { z } from "zod";
 export type CostumerInputProps = {
   form: UseFormReturn<z.infer<typeof NewOperationFormSchema>>;
   name:
-    | "cliente"
+    | "clienteID"
     | "tipoDaOperacao"
     | "statusDaOperacao"
     | "dataDaOperacao"

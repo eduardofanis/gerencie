@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, Edit, MoreHorizontal, Trash } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,11 +15,24 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { NewOperationFormSchema } from "@/schemas/NewOperationFormSchema";
 import { z } from "zod";
+import {
+  Timestamp,
+  collection,
+  getFirestore,
+  onSnapshot,
+  query,
+  updateDoc,
+} from "firebase/firestore";
+import { firebaseApp } from "@/main";
+import { getAuth } from "firebase/auth";
+import { isEqual } from "date-fns";
+import { DeleteOperation } from "@/api";
 
 export type Operation = {
-  statusDaOperacao: 1 | 2 | 3 | 4;
+  statusDaOperacao: string;
   cliente: string;
-  tipoDaOperacao: "FGTS" | "GOV" | "INSS" | "PREFEITURA";
+  clienteID: string;
+  tipoDaOperacao: string;
   promotora: string;
   dataDaOperacao: number;
   valorRecebido: number;
@@ -27,6 +40,11 @@ export type Operation = {
 };
 
 export const columns: ColumnDef<z.infer<typeof NewOperationFormSchema>>[] = [
+  {
+    accessorKey: "id",
+    header: "",
+    cell: "",
+  },
   {
     accessorKey: "statusDaOperacao",
     header: "Status",
@@ -122,12 +140,15 @@ export const columns: ColumnDef<z.infer<typeof NewOperationFormSchema>>[] = [
       );
     },
     cell: ({ row }) => {
-      const date = new Date(row.getValue("dataDaOperacao"));
+      const dateRow: Timestamp = row.getValue("dataDaOperacao");
+      const date = dateRow.toDate();
+      console.log(row.getValue("dataDaOperacao"));
       const formatted = date.toLocaleDateString("pt-BR");
 
       return <div className="ml-4">{formatted}</div>;
     },
   },
+
   {
     accessorKey: "valorRecebido",
     header: ({ column }) => {
@@ -184,7 +205,7 @@ export const columns: ColumnDef<z.infer<typeof NewOperationFormSchema>>[] = [
   },
   {
     id: "actions",
-    cell: () => {
+    cell: ({ row }) => {
       return (
         <div className="flex justify-end items-center">
           <DropdownMenu>
@@ -195,11 +216,17 @@ export const columns: ColumnDef<z.infer<typeof NewOperationFormSchema>>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem>Copy payment ID</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>View customer</DropdownMenuItem>
-              <DropdownMenuItem>View payment details</DropdownMenuItem>
+              <DropdownMenuItem>
+                <Edit className="w-4 h-4 mr-2 " />
+                Editar operação
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => DeleteOperation(row.getValue("id"))}
+                className="text-red-700 hover:text-red-700 font-medium "
+              >
+                <Trash className="w-4 h-4 mr-2 " />
+                Remover operação
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

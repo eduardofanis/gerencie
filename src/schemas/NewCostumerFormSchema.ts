@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const NewCostumerFormSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   nome: z
     .string()
     .min(1)
@@ -40,7 +40,7 @@ const NewCostumerFormSchema = z.object({
     .refine((file) => !file || (!!file && file.type?.startsWith("image")), {
       message: "Only images are allowed to be sent.",
     }),
-  operacoes: z.instanceof(Array),
+  operacoes: z.instanceof(Array).optional(),
 });
 
 export { NewCostumerFormSchema };
