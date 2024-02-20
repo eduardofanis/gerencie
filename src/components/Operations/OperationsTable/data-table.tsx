@@ -91,7 +91,6 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center justify-between py-2">
         <div className="flex gap-2 items-center">
-          <span className="font-medium mr-1">Filtros</span>
           <Input
             placeholder="Nome do cliente"
             value={
@@ -211,8 +210,8 @@ export function DataTable<TData, TValue>({
           </Popover> */}
 
           <Button
-            variant="ghost"
-            className="px-3 text-red-600 hover:text-red-800 hover:bg-red-50"
+            variant="link"
+            className="p-1 text-red-600 hover:text-red-800"
             onClick={() => {
               console.log(date?.from?.getTime());
               table.getColumn("statusDaOperacao")?.setFilterValue("");
@@ -289,7 +288,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-16 text-center"
                 >
-                  No results.
+                  Nenhum resultado.
                 </TableCell>
               </TableRow>
             )}

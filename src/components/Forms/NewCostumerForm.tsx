@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { NewConsumer } from "@/api";
+import { NewCostumer } from "@/api";
 import { Form } from "../ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -41,8 +41,7 @@ export default function NewCostumerForm() {
     },
   });
   function onSubmit(values: z.infer<typeof NewCostumerFormSchema>) {
-    NewConsumer(values);
-    console.log(values);
+    NewCostumer(values);
     _;
     setSearchParams({ modal: "false" });
   }

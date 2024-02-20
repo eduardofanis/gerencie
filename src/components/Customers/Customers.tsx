@@ -12,39 +12,37 @@ import {
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { firebaseApp } from "@/main";
+import Loading from "../ui/Loading";
 
 export default function Customers() {
   const [data, setData] =
     React.useState<z.infer<typeof NewCostumerFormSchema>[]>();
 
-  function setCostumers() {
-    const db = getFirestore(firebaseApp);
-    const { currentUser } = getAuth(firebaseApp);
+  const db = getFirestore(firebaseApp);
+  const { currentUser } = getAuth(firebaseApp);
 
+  React.useEffect(() => {
     const q = query(collection(db, currentUser!.uid, "data", "clientes"));
-    onSnapshot(q, (querySnapshot) => {
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const costumers = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...(doc.data() as z.infer<typeof NewCostumerFormSchema>),
       }));
       setData(costumers);
     });
-  }
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [db, currentUser]);
 
-  React.useEffect(() => {
-    setCostumers();
-  }, []);
+  return (
+    <div className="flex">
+      <Sidebar />
+      <div className="p-8 w-full h-screen">
+        <h1 className="text-3xl font-bold mb-8">Clientes</h1>
 
-  if (!data) return <div>Loading</div>;
-  if (data)
-    return (
-      <div className="flex">
-        <Sidebar />
-        <div className="p-8 w-full h-screen">
-          <h1 className="text-3xl font-bold mb-8">Clientes</h1>
-
-          <DataTable columns={columns} data={data} />
-        </div>
+        {data ? <DataTable columns={columns} data={data} /> : <Loading />}
       </div>
-    );
+    </div>
+  );
 }

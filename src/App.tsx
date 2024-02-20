@@ -7,6 +7,8 @@ import Customers from "./components/Customers/Customers";
 import { Toaster } from "./components/ui/toaster";
 import Operations from "./components/Operations/Operations";
 import Preferences from "./components/Preferences/Preferences";
+import SignUp from "./components/SignUp/SignUp";
+import ForgotPassword from "./components/ForgotPassword/ForgotPassword";
 
 export default function App() {
   return (
@@ -23,6 +25,8 @@ export default function App() {
               }
             />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/password_reset" element={<ForgotPassword />} />
             <Route
               path="/operacoes"
               element={

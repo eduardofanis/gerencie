@@ -12,39 +12,36 @@ import {
 import { getAuth } from "firebase/auth";
 import { firebaseApp } from "@/main";
 import { NewOperationFormSchema } from "@/schemas/NewOperationFormSchema";
+import Loading from "../ui/Loading";
 
 export default function Operations() {
   const [data, setData] =
     React.useState<z.infer<typeof NewOperationFormSchema>[]>();
 
-  function getOperations() {
+  React.useEffect(() => {
     const db = getFirestore(firebaseApp);
     const { currentUser } = getAuth(firebaseApp);
 
     const q = query(collection(db, currentUser!.uid, "data", "operacoes"));
-    onSnapshot(q, (querySnapshot) => {
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const costumers = querySnapshot.docs.map((doc) => ({
         ...(doc.data() as z.infer<typeof NewOperationFormSchema>),
       }));
       setData(costumers);
     });
-  }
-
-  React.useEffect(() => {
-    getOperations();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
-  if (!data) return <div>Loading!</div>;
+  return (
+    <div className="flex">
+      <Sidebar />
+      <div className="p-8 w-full h-screen">
+        <h1 className="text-3xl font-bold mb-8">Operações</h1>
 
-  if (data)
-    return (
-      <div className="flex">
-        <Sidebar />
-        <div className="p-8 w-full h-screen">
-          <h1 className="text-3xl font-bold mb-8">Operações</h1>
-
-          <DataTable columns={columns} data={data} />
-        </div>
+        {data ? <DataTable columns={columns} data={data} /> : <Loading />}
       </div>
-    );
+    </div>
+  );
 }

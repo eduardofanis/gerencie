@@ -78,7 +78,6 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center justify-between py-2">
         <div className="flex gap-2 items-center">
-          <span className="font-medium mr-1">Filtros</span>
           <Input
             placeholder="Nome do cliente"
             value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
@@ -87,10 +86,20 @@ export function DataTable<TData, TValue>({
             }
             className="max-w-sm w-64"
           />
+          <Input
+            placeholder="Telefone"
+            value={
+              (table.getColumn("telefone")?.getFilterValue() as string) ?? ""
+            }
+            onChange={(event) =>
+              table.getColumn("telefone")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm w-40"
+          />
 
           <Button
-            variant="ghost"
-            className="px-3 text-red-600 hover:text-red-800 hover:bg-red-50"
+            variant="link"
+            className="p-1 text-red-600 hover:text-red-800"
             onClick={() => {
               table.getColumn("nome")?.setFilterValue("");
               table.getColumn("telefone")?.setFilterValue("");
@@ -162,7 +171,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-16 text-center"
                 >
-                  No results.
+                  Nenhum resultado.
                 </TableCell>
               </TableRow>
             )}

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 import { z } from "zod";
 import { NewCostumerFormSchema } from "@/schemas/NewCostumerFormSchema";
-import DropdownMenu from "./DropdownMenu";
+import CostumerDropdown from "./CostumerDropdown";
 
 export const columns: ColumnDef<z.infer<typeof NewCostumerFormSchema>>[] = [
   {
@@ -124,7 +124,7 @@ export const columns: ColumnDef<z.infer<typeof NewCostumerFormSchema>>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      return <DropdownMenu row={row} />;
+      return <CostumerDropdown row={row} />;
     },
   },
 ];

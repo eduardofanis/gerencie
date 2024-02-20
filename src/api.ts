@@ -8,6 +8,7 @@ import {
   deleteDoc,
   where,
   query,
+  Timestamp,
 } from "firebase/firestore";
 import { firebaseApp } from "./main";
 import { getAuth } from "firebase/auth";
@@ -16,7 +17,7 @@ import { NewCostumerFormSchema } from "./schemas/NewCostumerFormSchema";
 import { z } from "zod";
 import { NewOperationFormSchema } from "./schemas/NewOperationFormSchema";
 
-export async function NewConsumer(
+export async function NewCostumer(
   values: z.infer<typeof NewCostumerFormSchema>
 ) {
   const db = getFirestore(firebaseApp);
@@ -28,6 +29,7 @@ export async function NewConsumer(
         collection(db, currentUser.uid, "data", "clientes"),
         {
           ...values,
+          createdAt: Timestamp.now(),
           dataDeNascimento: Date.parse(values.dataDeNascimento),
         }
       );
@@ -38,7 +40,7 @@ export async function NewConsumer(
         "clientes",
         docRef.id
       );
-      updateDoc(clienteRef, { id: docRef.id });
+      updateDoc(clienteRef, { id: `${values.nome}-${docRef.id}` });
       toast({
         title: "Cliente cadastrado com sucesso!",
         variant: "success",
@@ -68,6 +70,7 @@ export async function NewOperation(
         collection(db, currentUser.uid, "data", "operacoes"),
         {
           ...values,
+          createdAt: Timestamp.now(),
           valorRecebido: (values.valorLiberado * Number(values.comissao)) / 100,
         }
       );
@@ -152,22 +155,19 @@ export async function DeleteCostumer(
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
 
+  const partes = clienteId.split("-");
+  const restante = partes.slice(1).join("-");
+
   try {
     if (currentUser && currentUser.uid) {
-      const clienteRef = doc(
-        db,
-        currentUser.uid,
-        "data",
-        "clientes",
-        clienteId
-      );
+      const clienteRef = doc(db, currentUser.uid, "data", "clientes", restante);
 
       await deleteDoc(clienteRef);
 
       if (removerOperacoes) {
         const operacoesQuery = query(
           collection(db, currentUser.uid, "data", "operacoes"),
-          where("clienteID", "==", clienteId)
+          where("clienteId", "==", clienteId)
         );
         const operacoesSnapshot = await getDocs(operacoesQuery);
         operacoesSnapshot.forEach((doc) => {

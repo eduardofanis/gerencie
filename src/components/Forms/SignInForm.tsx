@@ -1,19 +1,11 @@
 import { Button } from "../ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
 import { Input } from "../ui/input";
-import { Label } from "../ui/label";
 import React from "react";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { firebaseApp } from "@/main";
 import { useNavigate } from "react-router-dom";
 import { toast } from "../ui/use-toast";
+import { FirebaseError } from "firebase/app";
 
 export default function SignInForm() {
   const [email, setEmail] = React.useState("");
@@ -24,6 +16,7 @@ export default function SignInForm() {
 
   async function handleSignIn() {
     const auth = getAuth(firebaseApp);
+    auth.useDeviceLanguage();
 
     try {
       setLoading(true);
@@ -36,44 +29,60 @@ export default function SignInForm() {
 
       navigate("/");
     } catch (e) {
-      console.log(e);
+      if (e instanceof FirebaseError && e.code == "auth/invalid-credential") {
+        toast({
+          title: "E-mail ou senha inválidos, tente novamente.",
+          variant: "destructive",
+          duration: 5000,
+        });
+      } else {
+        toast({
+          title: "Algo deu errado, tente novamente.",
+          variant: "destructive",
+          duration: 5000,
+        });
+      }
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Entrar</CardTitle>
-        <CardDescription>
-          Ao entrar você será redirecionado a página principal.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="space-y-1">
-          <Label htmlFor="email">E-mail</Label>
-          <Input
-            id="email"
-            type="email"
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="password">Senha</Label>
-          <Input
-            id="password"
-            type="password"
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-      </CardContent>
-      <CardFooter className="space-x-1">
-        <Button disabled={loading} onClick={handleSignIn}>
-          Entrar
+    <div className="w-[340px] flex flex-col gap-3">
+      <div className="text-center space-y-2 mb-2">
+        <h2 className="text-2xl font-bold  ">Entrar</h2>
+        <p className="opacity-85 text-sm">
+          Preencha os campos para ser redirecionado.
+        </p>
+      </div>
+
+      <Input
+        id="email"
+        type="email"
+        placeholder="E-mail"
+        onChange={(e) => setEmail(e.target.value)}
+      />
+
+      <Input
+        id="password"
+        type="password"
+        placeholder="Senha"
+        onChange={(e) => setPassword(e.target.value)}
+      />
+
+      <Button disabled={loading} onClick={handleSignIn}>
+        Entrar
+      </Button>
+      <div className="text-center text-sm">
+        <span className="opacity-85">Esqueceu a senha?</span>
+        <Button
+          variant="link"
+          className="p-1"
+          onClick={() => navigate("/password_reset")}
+        >
+          Clique aqui
         </Button>
-        <Button variant="outline">Esqueci a senha</Button>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }

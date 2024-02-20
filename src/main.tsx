@@ -8,8 +8,16 @@ import { firebaseConfig } from "./FirebaseSettings.ts";
 
 export const firebaseApp = initializeApp(firebaseConfig);
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+let container: HTMLElement | null = null;
+
+document.addEventListener("DOMContentLoaded", function () {
+  if (!container) {
+    container = document.getElementById("root") as HTMLElement;
+    const root = ReactDOM.createRoot(container);
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+  }
+});

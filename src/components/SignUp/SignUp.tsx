@@ -1,9 +1,9 @@
-import SignInForm from "../Forms/SignInForm";
+import SignUpForm from "../Forms/SignUpForm";
 import { GanttChart } from "lucide-react";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
 
-export default function Login() {
+export default function SignUp() {
   const navigate = useNavigate();
 
   return (
@@ -27,12 +27,12 @@ export default function Login() {
         <Button
           className="absolute top-8 right-8"
           variant="ghost"
-          onClick={() => navigate("/signup")}
+          onClick={() => navigate("/login")}
         >
-          Criar conta
+          Entrar
         </Button>
 
-        <SignInForm />
+        <SignUpForm />
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import {
   BarChart4,
   Factory,
   Settings2,
+  Phone,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
@@ -35,81 +36,84 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="w-[280px] h-screen border-slate-100 border-r p-4">
-      <div className="flex justify-between">
-        <div className="flex items-center space-x-2 ">
-          <Avatar>
-            <AvatarImage src="" />
-            <AvatarFallback>
-              {auth.currentUser?.displayName?.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
-
-          <h2 className="font-medium">{auth.currentUser?.displayName}</h2>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button className="p-0 m-0" variant={"ghost"}>
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem
-              onClick={handleSignOut}
-              className="text-red-700 hover:text-red-700 font-medium cursor-pointer"
-            >
-              <LogOut className="w-4 h-4 mr-2 " />
-              Sair da conta
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+    <div className="h-screen border-slate-100 border-r p-4">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <div className="flex items-center space-x-2 hover:bg-slate-50 rounded-md p-2 cursor-pointer">
+            <Avatar>
+              <AvatarImage src="" />
+              <AvatarFallback>
+                {auth.currentUser?.displayName?.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h2 className="font-medium">{auth.currentUser?.displayName}</h2>
+              <span className="text-sm text-ellipsis break-words opacity-85">
+                {auth.currentUser?.email}
+              </span>
+            </div>
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={handleSignOut}
+            className="text-red-700 hover:text-red-700 font-medium cursor-pointer"
+          >
+            <LogOut className="w-4 h-4 mr-2 " />
+            Sair da conta
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       <Separator className="my-4" />
 
-      <div className="grid content-between ">
-        <div className="space-y-2">
-          <Button
-            className={`w-full space-x-4 justify-start ${
-              pathname == "/" && "bg-slate-50"
-            }`}
-            variant={"ghost"}
-            onClick={() => navigate("/")}
-          >
-            <BarChart4 className="h-5 w-5" />
-            <span>Dashboard</span>
-          </Button>
-          <Button
-            className={`w-full space-x-4 justify-start ${
-              pathname == "/operacoes" && "bg-slate-50"
-            }`}
-            variant={"ghost"}
-            onClick={() => navigate("/operacoes")}
-          >
-            <Factory className="h-5 w-5 " />
-            <span>Operações</span>
-          </Button>
-          <Button
-            className={`w-full space-x-4 justify-start ${
-              pathname == "/clientes" && "bg-slate-50"
-            }`}
-            variant={"ghost"}
-            onClick={() => navigate("/clientes")}
-          >
-            <Users className="h-5 w-5 " />
-            <span>Clientes</span>
-          </Button>
-          <Button
-            className={`w-full space-x-4 justify-start ${
-              pathname == "/preferencias" && "bg-slate-50"
-            }`}
-            variant={"ghost"}
-            onClick={() => navigate("/preferencias")}
-          >
-            <Settings2 className="h-5 w-5 " />
-            <span>Preferências</span>
-          </Button>
-        </div>
+      <div className="grid gap-2">
+        <Button
+          className={` space-x-4 justify-start ${
+            pathname == "/" && "bg-slate-50"
+          }`}
+          variant={"ghost"}
+          onClick={() => navigate("/")}
+        >
+          <BarChart4 className="h-5 w-5" />
+          <span>Dashboard</span>
+        </Button>
+        <Button
+          className={` space-x-4 justify-start ${
+            pathname == "/operacoes" && "bg-slate-50"
+          }`}
+          variant={"ghost"}
+          onClick={() => navigate("/operacoes")}
+        >
+          <Factory className="h-5 w-5 " />
+          <span>Operações</span>
+        </Button>
+        <Button
+          className={` space-x-4 justify-start ${
+            pathname == "/clientes" && "bg-slate-50"
+          }`}
+          variant={"ghost"}
+          onClick={() => navigate("/clientes")}
+        >
+          <Users className="h-5 w-5 " />
+          <span>Clientes</span>
+        </Button>
+        <Button
+          className={` space-x-4 justify-start ${
+            pathname == "/preferencias" && "bg-slate-50"
+          }`}
+          variant={"ghost"}
+          onClick={() => navigate("/preferencias")}
+        >
+          <Settings2 className="h-5 w-5 " />
+          <span>Preferências</span>
+        </Button>
+        <Button asChild className=" space-x-4 justify-start" variant={"ghost"}>
+          <a href="https://wa.me/5541997590249" target="_blank">
+            <Phone className="h-5 w-5 " />
+            <span>Suporte</span>
+          </a>
+        </Button>
       </div>
     </div>
   );

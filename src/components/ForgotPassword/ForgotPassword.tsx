@@ -1,9 +1,9 @@
-import SignInForm from "../Forms/SignInForm";
 import { GanttChart } from "lucide-react";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
+import ForgotPasswordForm from "../Forms/FogortPasswordForm";
 
-export default function Login() {
+export default function ForgotPassword() {
   const navigate = useNavigate();
 
   return (
@@ -32,7 +32,7 @@ export default function Login() {
           Criar conta
         </Button>
 
-        <SignInForm />
+        <ForgotPasswordForm />
       </div>
     </div>
   );

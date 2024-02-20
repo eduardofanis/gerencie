@@ -53,7 +53,7 @@ export default function NewOperationForm() {
   const form = useForm<z.infer<typeof NewOperationFormSchema>>({
     resolver: zodResolver(NewOperationFormSchema),
     defaultValues: {
-      clienteID: "",
+      clienteId: "",
       tipoDaOperacao: "",
       statusDaOperacao: "",
       valorLiberado: 0,
@@ -89,7 +89,7 @@ export default function NewOperationForm() {
             <div className="col-span-3">
               <FormField
                 control={form.control}
-                name="clienteID"
+                name="clienteId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Cliente</FormLabel>
@@ -130,7 +130,7 @@ export default function NewOperationForm() {
                                       key={cliente.id}
                                       onSelect={() => {
                                         form.setValue(
-                                          "clienteID",
+                                          "clienteId",
                                           cliente.id ? cliente.id : ""
                                         );
                                         console.log(cliente.nome);

@@ -17,11 +17,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { DeleteCostumer } from "@/api";
+import { DeleteOperation } from "@/api";
+
 import React from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function DropdownMenu({ row }: any) {
+export default function OperationDropdown({ row }: any) {
   const [dialog, setDialog] = React.useState(false);
 
   return (
@@ -29,21 +30,21 @@ export default function DropdownMenu({ row }: any) {
       <DropdownMenuRoot>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">Abrir menu</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem>
             <Edit className="w-4 h-4 mr-2 " />
-            Editar cliente
+            Editar operação
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => setDialog(true)}
             className="text-red-700 hover:text-red-700 font-medium "
           >
             <Trash className="w-4 h-4 mr-2 " />
-            Remover cliente
+            Remover operação
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenuRoot>
@@ -51,28 +52,26 @@ export default function DropdownMenu({ row }: any) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmação</AlertDialogTitle>
-            <AlertDialogDescription>
-              Deseja remover todos as operações relacionadas a este cliente?
-              (clicando em manter, o cliente ainda é removido mas as operações
-              relacionadas serão mantidas)
+            <AlertDialogDescription className="text-red-600">
+              Deseja mesmo remover esta operação? Está ação não pode ser
+              desfeita
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => {
-                DeleteCostumer(row.getValue("id"), false);
-                setDialog(false);
-              }}
-            >
-              Manter operações
+            <AlertDialogCancel onClick={() => setDialog(false)}>
+              Cancelar
             </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                DeleteCostumer(row.getValue("id"), true);
-                setDialog(false);
-              }}
-            >
-              Apagar operações
+            <AlertDialogAction asChild>
+              <Button
+                variant="destructive"
+                className="bg-red-600 hover:bg-red-700"
+                onClick={() => {
+                  DeleteOperation(row.getValue("id"));
+                  setDialog(false);
+                }}
+              >
+                Remover
+              </Button>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

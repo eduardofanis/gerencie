@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const NewOperationFormSchema = z.object({
-  clienteID: z.string().min(1),
+  clienteId: z.string().min(1),
   tipoDaOperacao: z.string().min(1),
   statusDaOperacao: z.string().min(1),
   dataDaOperacao: z.date(),

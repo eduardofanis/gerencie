@@ -1,9 +1,13 @@
+@import url("non.geist");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
+    --font-geist: "Geist Variable";
+    --font-geist-mono: "Geist Mono Variable";
+
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -75,10 +79,9 @@
   }
 }
 
-@layer base {
-  input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
+.recharts-tooltip-item-unit {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  position: absolute;
 }

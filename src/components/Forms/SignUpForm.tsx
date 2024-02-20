@@ -1,15 +1,6 @@
 import React from "react";
 import { Button } from "../ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
 import { Input } from "../ui/input";
-import { Label } from "../ui/label";
 import {
   createUserWithEmailAndPassword,
   getAuth,
@@ -18,6 +9,7 @@ import {
 import { firebaseApp } from "@/main";
 import { useNavigate } from "react-router-dom";
 import { toast } from "../ui/use-toast";
+import { FirebaseError } from "firebase/app";
 
 export default function SignUpForm() {
   const [name, setName] = React.useState("");
@@ -52,59 +44,59 @@ export default function SignUpForm() {
         toast({ title: "Teste" });
       }
     } catch (e) {
-      console.log(e);
+      if (e instanceof FirebaseError && e.code == "auth/email-already-in-use") {
+        toast({
+          title: "Este e-mail já está em uso.",
+          variant: "destructive",
+          duration: 5000,
+        });
+      } else {
+        toast({
+          title: "Algo deu errado, tente novamente.",
+          variant: "destructive",
+          duration: 5000,
+        });
+      }
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Criar conta</CardTitle>
-        <CardDescription>
-          Ao criar sua conta você será redirecionado a página principal.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="space-y-1">
-          <Label htmlFor="name">Nome completo</Label>
-          <Input
-            id="name"
-            type="text"
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="email">E-mail</Label>
-          <Input
-            id="email"
-            type="email"
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="password">Senha</Label>
-          <Input
-            id="password"
-            type="password"
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="confirm-password">Confirmar senha</Label>
-          <Input
-            id="confirm-password"
-            type="password"
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-        </div>
-      </CardContent>
-      <CardFooter>
-        <Button disabled={loading} onClick={handleSignUp}>
-          Criar conta
-        </Button>
-      </CardFooter>
-    </Card>
+    <div className="w-[340px] flex flex-col gap-3">
+      <div className="text-center space-y-2 mb-2">
+        <h2 className="text-2xl font-bold  ">Criar conta</h2>
+        <p className="opacity-85 text-sm">
+          Preencha todos os campos para criar sua conta.
+        </p>
+      </div>
+      <Input
+        id="name"
+        type="text"
+        placeholder="Nome completo"
+        onChange={(e) => setName(e.target.value)}
+      />
+      <Input
+        id="email"
+        type="email"
+        placeholder="E-mail"
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <Input
+        id="password"
+        type="password"
+        placeholder="Senha"
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <Input
+        id="confirm-password"
+        type="password"
+        placeholder="Confirmar senha"
+        onChange={(e) => setConfirmPassword(e.target.value)}
+      />
+      <Button disabled={loading} onClick={handleSignUp}>
+        Criar conta
+      </Button>
+    </div>
   );
 }
