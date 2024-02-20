@@ -6,6 +6,7 @@ import {
   Factory,
   Settings2,
   Phone,
+  User,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
@@ -55,6 +56,10 @@ export default function Sidebar() {
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem className="font-medium cursor-pointer">
+            <User className="w-4 h-4 mr-2 " />
+            Gerenciar conta
+          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={handleSignOut}
             className="text-red-700 hover:text-red-700 font-medium cursor-pointer"

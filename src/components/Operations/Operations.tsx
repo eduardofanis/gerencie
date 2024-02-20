@@ -24,10 +24,10 @@ export default function Operations() {
 
     const q = query(collection(db, currentUser!.uid, "data", "operacoes"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const costumers = querySnapshot.docs.map((doc) => ({
+      const operations = querySnapshot.docs.map((doc) => ({
         ...(doc.data() as z.infer<typeof NewOperationFormSchema>),
       }));
-      setData(costumers);
+      setData(operations);
     });
     return () => {
       if (unsubscribe) unsubscribe();

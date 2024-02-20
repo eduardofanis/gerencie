@@ -78,10 +78,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-.recharts-tooltip-item-unit {
-  display: none !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  position: absolute;
-}
