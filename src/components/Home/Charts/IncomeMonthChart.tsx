@@ -135,7 +135,7 @@ export default function IncomeMonthChart() {
     function getDataToCreateChart() {
       if (thisMonthOperations) {
         const thisMonthValues = thisMonthOperations.map((operation) => ({
-          [operation.tipoDaOperacao]: operation.valorLiberado,
+          value: operation.valorLiberado,
         }));
         setThisMonthData(thisMonthValues);
       }
@@ -156,15 +156,15 @@ export default function IncomeMonthChart() {
         <div className="text-2xl font-bold">{data.somaThisMonth}</div>
         <p
           className={`text-xs ${
-            data.diferencaPercentual >= 0 ? "text-green-500" : "text-red-600"
+            data.diferencaPercentual > 0 ? "text-green-500" : "text-red-600"
           } text-muted-foreground`}
         >
-          {data.diferencaPercentual >= 0
+          {data.diferencaPercentual > 0
             ? "+" + data.diferencaPercentual
             : data.diferencaPercentual}
           % em relação ao mês passado
         </p>
-        <div className="h-[60px] mt-8">
+        {/* <div className="h-[60px] mt-8">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={thisMonthData}
@@ -183,7 +183,7 @@ export default function IncomeMonthChart() {
               />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );

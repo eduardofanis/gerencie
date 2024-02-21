@@ -1,6 +1,15 @@
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { firebaseApp } from "@/main";
+import { format } from "date-fns";
 import { getAuth } from "firebase/auth";
 import {
   Timestamp,
@@ -10,9 +19,19 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { DollarSign } from "lucide-react";
+import { CalendarIcon, DollarSign } from "lucide-react";
 import React from "react";
-import { Area, AreaChart, ResponsiveContainer } from "recharts";
+import { DateRange } from "react-day-picker";
+import {
+  Area,
+  AreaChart,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 type DataProps = {
   somaThisMonth: string;
@@ -20,7 +39,8 @@ type DataProps = {
 };
 
 type ThisMonthDataProps = {
-  value: number;
+  [key: string]: number;
+  day: number;
 };
 
 type ThisMonthOperationsProps = {
@@ -42,6 +62,7 @@ export default function IncomeByPeriodChart() {
   const [thisMonthData, setThisMonthData] = React.useState<
     ThisMonthDataProps[] | null
   >(null);
+  const [date, setDate] = React.useState<DateRange | undefined>();
 
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
@@ -135,7 +156,7 @@ export default function IncomeByPeriodChart() {
     function getDataToCreateChart() {
       if (thisMonthOperations) {
         const thisMonthValues = thisMonthOperations.map((operation) => ({
-          value: operation.valorLiberado,
+          [operation.tipoDaOperacao]: operation.valorLiberado,
         }));
         setThisMonthData(thisMonthValues);
       }
@@ -143,45 +164,146 @@ export default function IncomeByPeriodChart() {
     getDataToCreateChart();
   }, [thisMonthOperations]);
 
+  function CustomTooltip({
+    active,
+    payload,
+    label,
+  }: TooltipProps<ValueType, NameType>) {
+    if (active && payload && payload.length) {
+      let soma = 0;
+      const somaDosValores = payload.map((pld) => {
+        soma += Number(pld.value);
+        return soma;
+      });
+
+      return (
+        <div className="custom-tooltip w-[240px] bg-white py-2 px-4 rounded-lg border shadow-md">
+          <div className="flex items-center justify-between border-b pb-1 mb-2">
+            <p className="label text-sm font-medium">{label}</p>
+            <span className="font-medium">
+              R$ {somaDosValores[somaDosValores.length - 1]}
+            </span>
+          </div>
+
+          <div>
+            {payload.map((pld) => (
+              <div
+                key={payload.indexOf(pld)}
+                className="text-sm"
+                style={{ display: "flex", justifyContent: "space-between" }}
+              >
+                <div className="flex items-center gap-2">
+                  <div
+                    style={{ backgroundColor: pld.color }}
+                    className="h-2 w-2 rounded-full"
+                  ></div>
+                  <span className="text-slate-500">{pld.dataKey}</span>
+                </div>
+                <div>R$ {pld.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  }
+
   if (!data || !thisMonthData) return <Skeleton />;
   return (
-    <Card>
+    <Card className="col-span-2 relative">
       <CardHeader className="pb-2">
-        <CardTitle className="text-base flex items-center justify-between font-normal">
-          <div className="font-medium">Receita total (mês)</div>
-          <DollarSign className="h-4 w-4" />
+        <CardTitle className="text-base font-medium">
+          Receita por período
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{data.somaThisMonth}</div>
-        <p
-          className={`text-xs ${
-            data.diferencaPercentual >= 0 ? "text-green-500" : "text-red-600"
-          } text-muted-foreground`}
-        >
-          {data.diferencaPercentual >= 0
-            ? "+" + data.diferencaPercentual
-            : data.diferencaPercentual}
-          % em relação ao mês passado
+        <div className="text-2xl font-bold">R$ 15.231,89</div>
+        <p className="text-xs text-muted-foreground">
+          Receita total no período selecionado
         </p>
-        <div className="h-[60px] mt-8">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              id="date"
+              variant="outline"
+              className={cn(
+                "justify-start text-left font-normal absolute top-4 right-4",
+                !date && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {date?.from ? (
+                date.to ? (
+                  <>
+                    {format(date.from, "LLL dd, y")} -{" "}
+                    {format(date.to, "LLL dd, y")}
+                  </>
+                ) : (
+                  format(date.from, "LLL dd, y")
+                )
+              ) : (
+                <span>Selecione um período</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="end">
+            <Calendar
+              initialFocus
+              mode="range"
+              selected={date}
+              defaultMonth={date?.from}
+              onSelect={setDate}
+              numberOfMonths={1}
+            />
+          </PopoverContent>
+        </Popover>
+        <div className="h-[440px] mt-8">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={thisMonthData}
+            <LineChart
+              data={data}
               margin={{
-                top: 0,
-                right: 0,
-                left: 0,
+                top: 5,
+                right: 20,
+                left: 5,
                 bottom: 0,
               }}
             >
-              <Area
-                type="monotone"
-                dataKey="value"
-                stroke="#334155"
-                fill="#334155"
+              <XAxis
+                dataKey="day"
+                stroke="#888888"
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
               />
-            </AreaChart>
+              <YAxis
+                stroke="#888888"
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(value) => `R$${value}`}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Line
+                type="monotone"
+                strokeWidth={2}
+                stroke="#0284c7"
+                dataKey="FGTS"
+              />
+              <Line
+                type="monotone"
+                strokeWidth={2}
+                stroke="#16a34a"
+                dataKey="GOV"
+              />
+              <Line
+                type="monotone"
+                strokeWidth={2}
+                stroke="#4f46e5"
+                dataKey="PREFEITURA"
+              />
+            </LineChart>
           </ResponsiveContainer>
         </div>
       </CardContent>

@@ -26,6 +26,8 @@ import { DateRange } from "react-day-picker";
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import IncomeMonthChart from "./Charts/IncomeMonthChart";
+import OperationsMonthChart from "./Charts/OperationsMonthChart";
+import OperationsDayChart from "./Charts/OperationsDayChart";
 
 const data = [
   {
@@ -72,52 +74,6 @@ const data = [
   },
 ];
 
-function CustomTooltip({
-  active,
-  payload,
-  label,
-}: TooltipProps<ValueType, NameType>) {
-  if (active && payload && payload.length) {
-    let soma = 0;
-    const somaDosValores = payload.map((pld) => {
-      soma += Number(pld.value);
-      return soma;
-    });
-
-    return (
-      <div className="custom-tooltip w-[240px] bg-white py-2 px-4 rounded-lg border shadow-md">
-        <div className="flex items-center justify-between border-b pb-1 mb-2">
-          <p className="label text-sm font-medium">{label}</p>
-          <span className="font-medium">
-            R$ {somaDosValores[somaDosValores.length - 1]}
-          </span>
-        </div>
-
-        <div>
-          {payload.map((pld) => (
-            <div
-              key={payload.indexOf(pld)}
-              className="text-sm"
-              style={{ display: "flex", justifyContent: "space-between" }}
-            >
-              <div className="flex items-center gap-2">
-                <div
-                  style={{ backgroundColor: pld.color }}
-                  className="h-2 w-2 rounded-full"
-                ></div>
-                <span className="text-slate-500">{pld.dataKey}</span>
-              </div>
-              <div>R$ {pld.value}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  return null;
-}
-
 export default function Dashboard() {
   const [date, setDate] = React.useState<DateRange | undefined>();
 
@@ -125,74 +81,8 @@ export default function Dashboard() {
     <div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <IncomeMonthChart />
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center justify-between font-normal">
-              <div className="font-medium">Operações (mês)</div>{" "}
-              <PieChart className="h-4 w-4" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+56</div>
-            <p className="text-xs text-muted-foreground">
-              +122.1% em relação ao mês passado
-            </p>
-            <div className="h-[60px] mt-8">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={data}
-                  margin={{
-                    top: 0,
-                    right: 0,
-                    left: 0,
-                    bottom: 0,
-                  }}
-                >
-                  <Area
-                    type="monotone"
-                    dataKey="GOV"
-                    stroke="#334155"
-                    fill="#334155"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center justify-between font-normal">
-              <div className="font-medium">Operações (dia)</div>{" "}
-              <PieChart className="h-4 w-4" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+12</div>
-            <p className="text-xs text-muted-foreground">
-              +180.1% em relação ao dia anterior
-            </p>
-            <div className="h-[60px] mt-8">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={data}
-                  margin={{
-                    top: 0,
-                    right: 0,
-                    left: 0,
-                    bottom: 0,
-                  }}
-                >
-                  <Area
-                    type="monotone"
-                    dataKey="PREFEITURA"
-                    stroke="#334155"
-                    fill="#334155"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+        <OperationsMonthChart />
+        <OperationsDayChart />
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center justify-between font-normal">
@@ -205,7 +95,7 @@ export default function Dashboard() {
             <p className="text-xs text-muted-foreground">
               +122.1% em relação ao mês passado
             </p>
-            <div className="h-[60px] mt-8">
+            {/* <div className="h-[60px] mt-8">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={data}
@@ -224,7 +114,7 @@ export default function Dashboard() {
                   />
                 </AreaChart>
               </ResponsiveContainer>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
       </div>
@@ -276,7 +166,7 @@ export default function Dashboard() {
                 />
               </PopoverContent>
             </Popover>
-            <div className="h-[300px] mt-8">
+            <div className="h-[440px] mt-8">
               <ResponsiveContainer width="100%" height="100%">
                 <LineContainer
                   data={data}
