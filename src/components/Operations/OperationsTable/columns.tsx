@@ -10,17 +10,7 @@ import { NewOperationFormSchema } from "@/schemas/NewOperationFormSchema";
 import { z } from "zod";
 import { Timestamp } from "firebase/firestore";
 import OperationDropdown from "./OperationDropdown";
-
-export type Operation = {
-  statusDaOperacao: string;
-  cliente: string;
-  clienteID: string;
-  tipoDaOperacao: string;
-  promotora: string;
-  dataDaOperacao: number;
-  valorRecebido: number;
-  valorLiberado: number;
-};
+import { getUserData } from "@/api";
 
 export const columns: ColumnDef<z.infer<typeof NewOperationFormSchema>>[] = [
   {
@@ -87,27 +77,38 @@ export const columns: ColumnDef<z.infer<typeof NewOperationFormSchema>>[] = [
     accessorKey: "tipoDaOperacao",
     header: "Tipo",
     cell: ({ row }) => {
+      let backgroundColor = "#000000";
       const type: string = row.getValue("tipoDaOperacao");
+
+      getUserData().then((data) => {
+        const tipoOperacao = data?.tiposDeOperacoes.find(
+          (tipo) => tipo.name === type
+        );
+        if (tipoOperacao) {
+          backgroundColor = tipoOperacao.color;
+          updateBadgeStyle(backgroundColor, type);
+        }
+      });
+
+      const updateBadgeStyle = (backgroundColor: string, type: string) => {
+        const badgeElements = document.querySelectorAll(`.badge-${type}`);
+        badgeElements.forEach((badgeElement) => {
+          if (badgeElement instanceof HTMLElement) {
+            badgeElement.style.backgroundColor = backgroundColor;
+          }
+        });
+      };
+
       return (
         <Badge
-          className={
-            type == "fgts"
-              ? "bg-sky-600"
-              : type == "gov"
-              ? "bg-green-600"
-              : type == "inss"
-              ? "bg-yellow-600"
-              : "bg-indigo-600"
-          }
+          id={`badge-${type}`}
+          className={`badge badge-${type}`}
+          style={{ backgroundColor: backgroundColor }}
         >
           {type.toUpperCase()}
         </Badge>
       );
     },
-  },
-  {
-    accessorKey: "promotora",
-    header: "Promotora",
   },
   {
     accessorKey: "dataDaOperacao",
@@ -125,13 +126,52 @@ export const columns: ColumnDef<z.infer<typeof NewOperationFormSchema>>[] = [
     cell: ({ row }) => {
       const dateRow: Timestamp = row.getValue("dataDaOperacao");
       const date = dateRow.toDate();
-      console.log(row.getValue("dataDaOperacao"));
       const formatted = date.toLocaleDateString("pt-BR");
 
       return <div className="ml-4">{formatted}</div>;
     },
   },
+  {
+    accessorKey: "createdAt",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Data da criação
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const dateRow: Timestamp = row.getValue("createdAt");
 
+      function formatTime(time: Timestamp) {
+        const agora = Timestamp.now().toMillis(); // Obtém o timestamp atual do Firebase em milissegundos
+        const timestamp = time.toMillis(); // Obtém o timestamp fornecido em milissegundos
+
+        const diferenca = agora - timestamp;
+
+        const segundos = Math.floor(diferenca / 1000);
+        const minutos = Math.floor(segundos / 60);
+        const horas = Math.floor(minutos / 60);
+        const dias = Math.floor(horas / 24);
+
+        if (dias > 0) {
+          return `Há ${dias} dia${dias > 1 ? "s" : ""} atrás`;
+        } else if (horas > 0) {
+          return `Há ${horas} hora${horas > 1 ? "s" : ""} atrás`;
+        } else if (minutos > 0) {
+          return `Há ${minutos} minuto${minutos > 1 ? "s" : ""} atrás`;
+        } else {
+          return `Há poucos segundos atrás`;
+        }
+      }
+
+      return <div className="ml-4">{formatTime(dateRow)}</div>;
+    },
+  },
   {
     accessorKey: "valorRecebido",
     header: ({ column }) => {

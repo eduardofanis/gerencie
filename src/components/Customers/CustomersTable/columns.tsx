@@ -71,28 +71,6 @@ export const columns: ColumnDef<z.infer<typeof NewCostumerFormSchema>>[] = [
     },
   },
   {
-    accessorKey: "ultimaOperacao",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Última operação
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => {
-      const value: string = row.getValue("ultimaOperacao");
-      const date = new Date(value);
-      const formatted = date.toLocaleDateString("pt-BR");
-
-      if (!value) return <div className="ml-4">Nenhuma operação.</div>;
-      return <div className="ml-4">{formatted}</div>;
-    },
-  },
-  {
     accessorKey: "valorTotalLiberado",
     header: ({ column }) => {
       return (

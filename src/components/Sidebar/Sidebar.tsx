@@ -1,13 +1,4 @@
-import {
-  Users,
-  MoreVertical,
-  LogOut,
-  BarChart4,
-  Factory,
-  Settings2,
-  Phone,
-  User,
-} from "lucide-react";
+import { Users, LogOut, BarChart4, Factory, Phone, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
@@ -102,16 +93,6 @@ export default function Sidebar() {
         >
           <Users className="h-5 w-5 " />
           <span>Clientes</span>
-        </Button>
-        <Button
-          className={` space-x-4 justify-start ${
-            pathname == "/preferencias" && "bg-slate-50"
-          }`}
-          variant={"ghost"}
-          onClick={() => navigate("/preferencias")}
-        >
-          <Settings2 className="h-5 w-5 " />
-          <span>Preferências</span>
         </Button>
         <Button asChild className=" space-x-4 justify-start" variant={"ghost"}>
           <a href="https://wa.me/5541997590249" target="_blank">

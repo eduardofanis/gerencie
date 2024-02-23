@@ -21,7 +21,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import React from "react";
 import { DateRange } from "react-day-picker";
 import {
@@ -39,7 +39,7 @@ import {
 } from "recharts/types/component/DefaultTooltipContent";
 
 type DataProps = {
-  day: string;
+  day: number;
 };
 
 type OperationProps = {
@@ -58,7 +58,7 @@ type OperationsByDay = {
 };
 
 type InitialValues = {
-  [key: string]: number; // Define as chaves como string e os valores como número
+  [key: string]: number;
 };
 
 export default function IncomeByPeriodChart() {
@@ -67,6 +67,7 @@ export default function IncomeByPeriodChart() {
   const [data, setData] = React.useState<DataProps[] | null>(null);
   const [data2, setData2] = React.useState<DataProps[] | null>(null);
   const [date, setDate] = React.useState<DateRange | undefined>();
+  const [somaValues, setSomaValues] = React.useState<string>();
   const [operationTypes, setOperationTypes] =
     React.useState<UserDataProps | null>();
 
@@ -90,20 +91,17 @@ export default function IncomeByPeriodChart() {
     const firstDayOfMonth = new Date(
       new Date().getFullYear(),
       new Date().getMonth(),
-      1
+      new Date().getDate() - 6
     );
     const lastDayOfMonth = new Date(
       new Date().getFullYear(),
-      new Date().getMonth() + 1,
-      0
+      new Date().getMonth(),
+      new Date().getDate()
     );
 
     const allDaysArray = [];
     const firstDate = new Date(date && date.from ? date.from : firstDayOfMonth); // Iniciar a partir da data inicial
     const lastDate = new Date(date && date.to ? date.to : lastDayOfMonth);
-
-    console.log(firstDate);
-    console.log(lastDate);
 
     // Enquanto a data atual for menor ou igual à data final
     if (
@@ -118,20 +116,19 @@ export default function IncomeByPeriodChart() {
       while (firstDate <= lastDate) {
         allDaysArray.push({
           ...initialValues,
-          day: firstDate.getDate() + "/" + firstDate.getUTCMonth(),
+          day: firstDate.getTime(),
         }); // Adicionar o dia atual à array
         firstDate.setDate(firstDate.getDate() + 1); // Avançar para o próximo dia
       }
     } else {
       while (firstDate <= lastDate) {
         allDaysArray.push({
-          day: firstDate.getDate() + "/" + firstDate.getUTCMonth(),
+          day: firstDate.getTime(),
         }); // Adicionar o dia atual à array
         firstDate.setDate(firstDate.getDate() + 1); // Avançar para o próximo dia
       }
     }
 
-    console.log(allDaysArray);
     setData2(allDaysArray);
 
     const q = query(
@@ -145,17 +142,32 @@ export default function IncomeByPeriodChart() {
       }));
       setThisMonthOperations(operations);
     });
+
     return () => {
       if (unsubscribe) unsubscribe();
     };
   }, [db, currentUser, date, operationTypes]);
 
   React.useEffect(() => {
+    let somaThisMonth = 0;
     if (thisMonthOperations) {
       const thisMonthValues = thisMonthOperations.map((operation) => ({
         [operation.tipoDaOperacao]: operation.valorRecebido,
         day: new Date(operation.dataDaOperacao.toDate().setHours(0, 0, 0, 0)),
       }));
+
+      const thisMonthSomaValues = thisMonthOperations.map(
+        (operation) => operation.valorRecebido
+      );
+
+      thisMonthSomaValues.map((value) => (somaThisMonth += value));
+
+      setSomaValues(
+        Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(somaThisMonth)
+      );
 
       const operationsByDay: OperationsByDay = {};
 
@@ -179,11 +191,10 @@ export default function IncomeByPeriodChart() {
       const finalArray = Object.entries(operationsByDay).map(
         ([day, operations]) => ({
           ...operations,
-          day: new Date(day).getDate() + "/" + new Date(day).getUTCMonth(),
+          day: new Date(day).getTime(),
         })
       );
       const chartData = mergeArrays(finalArray, data2!);
-      console.log(chartData);
       setData(chartData);
     }
   }, [thisMonthOperations, date, data2]);
@@ -213,20 +224,7 @@ export default function IncomeByPeriodChart() {
     });
 
     // Ordenar a array resultante em ordem crescente por 'day'
-    mergedArray.sort((a, b) => {
-      // Dividir a string da data e criar um objeto Date
-      const dateA = new Date(a.day.split("/").reverse().join("/"));
-      const dateB = new Date(b.day.split("/").reverse().join("/"));
-
-      // Verificar se as datas são válidas
-      if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
-        console.error("Formato de data inválido.");
-        return 0; // Retorna 0 para manter a ordem original
-      }
-
-      // Comparar as datas
-      return dateA - dateB;
-    });
+    mergedArray.sort((a, b) => a.day - b.day);
 
     return mergedArray;
   }
@@ -243,10 +241,33 @@ export default function IncomeByPeriodChart() {
         return soma;
       });
 
+      const mesesAbreviados = [
+        "Jan",
+        "Fev",
+        "Mar",
+        "Abr",
+        "Mai",
+        "Jun",
+        "Jul",
+        "Ago",
+        "Set",
+        "Out",
+        "Nov",
+        "Dez",
+      ];
+
+      const dia = new Date(label).getDate();
+      const ano = new Date(label).getFullYear();
+
+      const mesIndex = new Date(label).getMonth();
+      const mesAbreviado = mesesAbreviados[mesIndex];
+
+      const diaFormatado = `${dia} de ${mesAbreviado}, ${ano}`;
+
       return (
         <div className="custom-tooltip w-[240px] bg-white py-2 px-4 rounded-lg border shadow-md">
           <div className="flex items-center justify-between border-b pb-1 mb-2">
-            <p className="label text-sm font-medium">{label}</p>
+            <p className="label text-sm font-medium">{diaFormatado}</p>
             <span className="font-medium">
               R$ {somaDosValores[somaDosValores.length - 1]}
             </span>
@@ -277,7 +298,7 @@ export default function IncomeByPeriodChart() {
     return null;
   }
 
-  if (!data) return <Skeleton />;
+  if (!data || !somaValues) return <Skeleton className="col-span-2" />;
   return (
     <Card className="col-span-2 relative">
       <CardHeader className="pb-2">
@@ -286,47 +307,64 @@ export default function IncomeByPeriodChart() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">R$ 15.231,89</div>
+        <div className="text-2xl font-bold">{somaValues}</div>
 
         <p className="text-xs text-muted-foreground">
           Receita total no período selecionado
         </p>
-        <Popover>
-          <PopoverTrigger asChild>
+
+        <div className="flex items-center gap-2 absolute top-4 right-4">
+          {date ? (
             <Button
-              id="date"
               variant="outline"
-              className={cn(
-                "justify-start text-left font-normal absolute top-4 right-4",
-                !date && "text-muted-foreground"
-              )}
+              className="p-3 hover:bg-red-50 border-red-100"
+              onClick={() => setDate(undefined)}
             >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {date?.from ? (
-                date.to ? (
-                  <>
-                    {format(date.from, "LLL dd, y")} -{" "}
-                    {format(date.to, "LLL dd, y")}
-                  </>
-                ) : (
-                  format(date.from, "LLL dd, y")
-                )
-              ) : (
-                <span>Selecione um período</span>
-              )}
+              <X className="w-4 h-4 text-red-600" />
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="end">
-            <Calendar
-              initialFocus
-              mode="range"
-              selected={date}
-              defaultMonth={date?.from}
-              onSelect={setDate}
-              numberOfMonths={1}
-            />
-          </PopoverContent>
-        </Popover>
+          ) : (
+            <></>
+          )}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                id="date"
+                variant="outline"
+                className={cn(
+                  "justify-start text-left font-normal",
+                  !date && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date?.from ? (
+                  date.to ? (
+                    <>
+                      {format(date.from, "LLL dd, y")} -{" "}
+                      {format(date.to, "LLL dd, y")}
+                    </>
+                  ) : (
+                    format(date.from, "LLL dd, y")
+                  )
+                ) : (
+                  <span>Selecione um período</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                initialFocus
+                mode="range"
+                selected={date}
+                defaultMonth={date?.from}
+                disabled={(date) =>
+                  date > new Date() || date < new Date("1900-01-01")
+                }
+                onSelect={setDate}
+                numberOfMonths={1}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
         <div className="h-[360px] mt-8">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
@@ -344,6 +382,28 @@ export default function IncomeByPeriodChart() {
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
+                tickFormatter={(value) => {
+                  const mesesAbreviados = [
+                    "Jan",
+                    "Fev",
+                    "Mar",
+                    "Abr",
+                    "Mai",
+                    "Jun",
+                    "Jul",
+                    "Ago",
+                    "Set",
+                    "Out",
+                    "Nov",
+                    "Dez",
+                  ];
+
+                  const dia = new Date(value).getDate();
+                  const mesIndex = new Date(value).getMonth();
+                  const mesAbreviado = mesesAbreviados[mesIndex];
+
+                  return `${dia} de ${mesAbreviado}`;
+                }}
               />
               <YAxis
                 stroke="#888888"

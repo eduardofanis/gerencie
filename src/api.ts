@@ -9,9 +9,9 @@ import {
   where,
   query,
   Timestamp,
-  setDoc,
   arrayUnion,
   arrayRemove,
+  getDoc,
 } from "firebase/firestore";
 import { firebaseApp } from "./main";
 import { getAuth } from "firebase/auth";
@@ -19,6 +19,7 @@ import { toast } from "./components/ui/use-toast";
 import { NewCostumerFormSchema } from "./schemas/NewCostumerFormSchema";
 import { z } from "zod";
 import { NewOperationFormSchema } from "./schemas/NewOperationFormSchema";
+import { UserDataProps } from "./components/Forms/NewOperationTypeForm";
 
 export async function NewCostumer(
   values: z.infer<typeof NewCostumerFormSchema>
@@ -172,6 +173,24 @@ export async function GetCostumers() {
       const consumers = querySnapshot.docs.map((doc) => ({
         ...(doc.data() as z.infer<typeof NewCostumerFormSchema>),
       }));
+
+      return consumers;
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    console.log();
+  }
+}
+
+export async function getUserData() {
+  const db = getFirestore(firebaseApp);
+  const { currentUser } = getAuth(firebaseApp);
+
+  try {
+    if (currentUser && currentUser.uid) {
+      const querySnapshot = await getDoc(doc(db, currentUser!.uid, "data"));
+      const consumers = querySnapshot.data() as UserDataProps;
 
       return consumers;
     }

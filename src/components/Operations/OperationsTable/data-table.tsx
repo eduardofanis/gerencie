@@ -44,24 +44,25 @@ import {
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import React from "react";
 import NewOperationForm from "@/components/Forms/NewOperationForm";
-import { DateRange } from "react-day-picker";
 
 import { useSearchParams } from "react-router-dom";
+import { UserDataProps } from "@/components/Forms/NewOperationTypeForm";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  userData: UserDataProps;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  userData,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-  const [date, setDate] = React.useState<DateRange | undefined>();
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({
       id: false,
@@ -139,86 +140,24 @@ export function DataTable<TData, TValue>({
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Tipo</SelectLabel>
-                <SelectItem value="fgts">FGTS</SelectItem>
-                <SelectItem value="gov">GOV</SelectItem>
-                <SelectItem value="prefeitura">PREFEITURA</SelectItem>
-                <SelectItem value="inss">INSS</SelectItem>
-                <SelectItem value="bolsa-familia">BOLSA FAMÍLIA</SelectItem>
+                {userData &&
+                  userData.tiposDeOperacoes.map((tipo) => (
+                    <SelectItem value={tipo.name} key={tipo.name + tipo.color}>
+                      {tipo.name}
+                    </SelectItem>
+                  ))}
               </SelectGroup>
             </SelectContent>
           </Select>
-          <Select
-            value={
-              (table.getColumn("promotora")?.getFilterValue() as string) ?? ""
-            }
-            onValueChange={(event) =>
-              table.getColumn("promotora")?.setFilterValue(event)
-            }
-          >
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Promotora" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Promotora</SelectLabel>
-                <SelectItem value="inove">Inove</SelectItem>
-                <SelectItem value="pineapple">Pineapple</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-
-          {/* <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                id="date"
-                variant="outline"
-                className={cn(
-                  "justify-start text-left font-normal",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date?.from ? (
-                  date.to ? (
-                    <>
-                      {format(date.from, "LLL dd, y")} -{" "}
-                      {format(date.to, "LLL dd, y")}
-                    </>
-                  ) : (
-                    format(date.from, "LLL dd, y")
-                  )
-                ) : (
-                  <span>Data da operação</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                initialFocus
-                mode="range"
-                selected={date}
-                defaultMonth={date?.from}
-                onSelect={(e) => {
-                  table
-                    .getColumn("dataDaOperacao")
-                    ?.setFilterValue([e?.from, e?.to]);
-                  setDate(e);
-                }}
-                numberOfMonths={2}
-              />
-            </PopoverContent>
-          </Popover> */}
 
           <Button
             variant="link"
             className="p-1 text-red-600 hover:text-red-800"
             onClick={() => {
-              console.log(date?.from?.getTime());
               table.getColumn("statusDaOperacao")?.setFilterValue("");
               table.getColumn("tipoDaOperacao")?.setFilterValue("");
               table.getColumn("cliente")?.setFilterValue("");
-              table.getColumn("promotora")?.setFilterValue("");
-              setDate(undefined);
+              // setDate(undefined);
             }}
           >
             <X className="h-4 w-4 mr-2 " />

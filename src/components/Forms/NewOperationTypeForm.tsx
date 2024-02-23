@@ -27,7 +27,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-type OperationType = {
+export type OperationType = {
   name: string;
   color: string;
 };

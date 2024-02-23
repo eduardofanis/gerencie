@@ -72,6 +72,7 @@ export default function NewOperationForm() {
       statusDaOperacao: "",
       valorLiberado: 0,
       comissao: "",
+      dataDaOperacao: new Date(),
     },
   });
   function onSubmit(values: z.infer<typeof NewOperationFormSchema>) {
@@ -298,36 +299,13 @@ export default function NewOperationForm() {
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
+                        disabled={(date) =>
+                          date > new Date() || date < new Date("1900-01-01")
+                        }
                         initialFocus
                       />
                     </PopoverContent>
                   </Popover>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="promotora"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Promotora</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="sucesso">Sucesso</SelectItem>
-                      <SelectItem value="processando">Processando</SelectItem>
-                      <SelectItem value="pendente">Pendente</SelectItem>
-                      <SelectItem value="falha">Falha</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </FormItem>
               )}
             />

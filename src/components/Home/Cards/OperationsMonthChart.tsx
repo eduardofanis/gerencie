@@ -57,8 +57,6 @@ export default function OperationsMonthChart() {
       0
     );
 
-    console.log({ firstDayOfMonth, lastDayOfMonth });
-
     const q = query(
       collection(db, currentUser!.uid, "data", "operacoes"),
       where("dataDaOperacao", ">=", firstDayOfMonth),
@@ -86,8 +84,6 @@ export default function OperationsMonthChart() {
       new Date().getMonth(),
       0
     );
-
-    console.log({ firstDayOfMonth, lastDayOfMonth });
 
     const q = query(
       collection(db, currentUser!.uid, "data", "operacoes"),
