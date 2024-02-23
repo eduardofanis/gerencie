@@ -9,6 +9,9 @@ import {
   where,
   query,
   Timestamp,
+  setDoc,
+  arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 import { firebaseApp } from "./main";
 import { getAuth } from "firebase/auth";
@@ -85,6 +88,64 @@ export async function NewOperation(
       updateDoc(operationRef, { id: docRef.id, cliente: nomeDoCliente });
       toast({
         title: "Operação cadastrada com sucesso!",
+        variant: "success",
+        duration: 5000,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    toast({
+      title: "Algo deu errado, tente novamente!",
+      variant: "destructive",
+      duration: 5000,
+    });
+  }
+}
+
+export async function NewOperationType(name: string, color: string) {
+  const db = getFirestore(firebaseApp);
+  const { currentUser } = getAuth(firebaseApp);
+
+  try {
+    if (currentUser && currentUser.uid) {
+      const docRef = doc(db, currentUser.uid, "data");
+      await updateDoc(docRef, {
+        tiposDeOperacoes: arrayUnion({
+          name: name,
+          color: color,
+        }),
+      });
+      toast({
+        title: "Tipo de Operação adicionado com sucesso!",
+        variant: "success",
+        duration: 5000,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    toast({
+      title: "Algo deu errado, tente novamente!",
+      variant: "destructive",
+      duration: 5000,
+    });
+  }
+}
+
+export async function RemoveOperationType(name: string, color: string) {
+  const db = getFirestore(firebaseApp);
+  const { currentUser } = getAuth(firebaseApp);
+
+  try {
+    if (currentUser && currentUser.uid) {
+      const docRef = doc(db, currentUser.uid, "data");
+      await updateDoc(docRef, {
+        tiposDeOperacoes: arrayRemove({
+          name: name,
+          color: color,
+        }),
+      });
+      toast({
+        title: "Tipo de Operação removido com sucesso!",
         variant: "success",
         duration: 5000,
       });

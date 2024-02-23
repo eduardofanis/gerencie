@@ -1,11 +1,13 @@
 import React from "react";
 import { Button } from "../ui/button";
 import {
+  Dialog,
   DialogClose,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import {
@@ -23,7 +25,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar as CalendarIcon, Check, ChevronDown } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  Check,
+  ChevronDown,
+  Plus,
+} from "lucide-react";
 import { GetCostumers, NewOperation } from "@/api";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { useForm } from "react-hook-form";
@@ -42,6 +49,11 @@ import {
 } from "../ui/command";
 import { ScrollArea } from "../ui/scroll-area";
 import { useSearchParams } from "react-router-dom";
+import { Separator } from "../ui/separator";
+import NewOperationTypeForm, { UserDataProps } from "./NewOperationTypeForm";
+import { firebaseApp } from "@/main";
+import { getAuth } from "firebase/auth";
+import { getFirestore, onSnapshot, doc } from "firebase/firestore";
 
 export default function NewOperationForm() {
   const [data, setData] =
@@ -49,6 +61,8 @@ export default function NewOperationForm() {
   const [nomeDoCliente, setNomeDoCliente] = React.useState("");
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setSearchParams] = useSearchParams();
+  const [operationTypes, setOperationTypes] =
+    React.useState<UserDataProps | null>(null);
 
   const form = useForm<z.infer<typeof NewOperationFormSchema>>({
     resolver: zodResolver(NewOperationFormSchema),
@@ -65,13 +79,28 @@ export default function NewOperationForm() {
     setSearchParams({ operationModal: "false" });
   }
 
-  async function getConsumers() {
-    const costumers = await GetCostumers();
-    setData(costumers);
-  }
+  React.useEffect(() => {
+    async function getConsumers() {
+      const costumers = await GetCostumers();
+      setData(costumers);
+    }
+    getConsumers();
+  }, []);
 
   React.useEffect(() => {
-    getConsumers();
+    const db = getFirestore(firebaseApp);
+    const { currentUser } = getAuth(firebaseApp);
+
+    const unsubscribe = onSnapshot(
+      doc(db, currentUser!.uid, "data"),
+      (docSnapshot) => {
+        setOperationTypes(docSnapshot.data() as UserDataProps);
+      }
+    );
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   return (
@@ -159,22 +188,6 @@ export default function NewOperationForm() {
               />
             </div>
 
-            {/* <FormField
-              control={form.control}
-              name="cliente"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cliente</FormLabel>
-                  <FormControl>
-                    <Button
-                      className="block w-full"
-                      variant={"outline"}
-                    ></Button>
-                  </FormControl>
-                </FormItem>
-              )}
-            /> */}
-
             <FormField
               control={form.control}
               name="tipoDaOperacao"
@@ -191,10 +204,37 @@ export default function NewOperationForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="fgts">FGTS</SelectItem>
-                      <SelectItem value="gov">GOV</SelectItem>
-                      <SelectItem value="inss">INSS</SelectItem>
-                      <SelectItem value="prefeitura">Prefeitura</SelectItem>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="w-full flex justify-between"
+                          >
+                            Adicionar novo tipo
+                            <Plus className="w-4 h-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <NewOperationTypeForm />
+                      </Dialog>
+
+                      <Separator className="mb-2" />
+
+                      {operationTypes &&
+                      operationTypes.tiposDeOperacoes &&
+                      operationTypes.tiposDeOperacoes.length > 0 ? (
+                        operationTypes.tiposDeOperacoes.map((tipo) => (
+                          <SelectItem
+                            key={tipo.name + tipo.color}
+                            value={tipo.name}
+                          >
+                            {tipo.name.toUpperCase()}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <div className="text-sm text-center my-2">
+                          Nenhum tipo encontrado
+                        </div>
+                      )}
                     </SelectContent>
                   </Select>
                 </FormItem>

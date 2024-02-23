@@ -12,10 +12,9 @@ import {
 } from "firebase/firestore";
 import { DollarSign } from "lucide-react";
 import React from "react";
-import { Area, AreaChart, ResponsiveContainer } from "recharts";
 
 type DataProps = {
-  somaThisMonth: string;
+  somaThisMonth: number;
   diferencaPercentual: number;
 };
 
@@ -33,7 +32,7 @@ type ThisMonthOperationsProps = {
   comissao: string;
 };
 
-export default function IncomeMonthChart() {
+export default function OperationsMonthChart() {
   const [thisMonthOperations, setThisMonthOperations] =
     React.useState<ThisMonthOperationsProps[]>();
   const [lastMonthOperations, setLastMonthOperations] =
@@ -57,6 +56,8 @@ export default function IncomeMonthChart() {
       new Date().getMonth() + 1,
       0
     );
+
+    console.log({ firstDayOfMonth, lastDayOfMonth });
 
     const q = query(
       collection(db, currentUser!.uid, "data", "operacoes"),
@@ -86,6 +87,8 @@ export default function IncomeMonthChart() {
       0
     );
 
+    console.log({ firstDayOfMonth, lastDayOfMonth });
+
     const q = query(
       collection(db, currentUser!.uid, "data", "operacoes"),
       where("dataDaOperacao", ">=", firstDayOfMonth),
@@ -104,26 +107,14 @@ export default function IncomeMonthChart() {
 
   React.useEffect(() => {
     function compareMonths() {
-      let somaThisMonth = 0;
-      let somaLastMonth = 0;
       let diferencaPercentual = 0;
       if (thisMonthOperations && lastMonthOperations) {
-        const thisMonthValues = thisMonthOperations.map(
-          (operation) => operation.valorLiberado
-        );
-        const lastMonthValues = lastMonthOperations.map(
-          (operation) => operation.valorLiberado
-        );
-        thisMonthValues.map((value) => (somaThisMonth += value));
-        lastMonthValues.map((value) => (somaLastMonth += value));
-
         diferencaPercentual =
-          ((somaThisMonth - somaLastMonth) / somaLastMonth) * 100;
+          ((thisMonthOperations.length - lastMonthOperations.length) /
+            lastMonthOperations.length) *
+          100;
         setData({
-          somaThisMonth: Intl.NumberFormat("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-          }).format(somaThisMonth),
+          somaThisMonth: thisMonthOperations.length,
           diferencaPercentual: Math.round(diferencaPercentual),
         });
       }
@@ -148,7 +139,7 @@ export default function IncomeMonthChart() {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center justify-between font-normal">
-          <div className="font-medium">Receita total (mês)</div>
+          <div className="font-medium">Operações (mês)</div>
           <DollarSign className="h-4 w-4" />
         </CardTitle>
       </CardHeader>
@@ -156,13 +147,20 @@ export default function IncomeMonthChart() {
         <div className="text-2xl font-bold">{data.somaThisMonth}</div>
         <p
           className={`text-xs ${
-            data.diferencaPercentual > 0 ? "text-green-500" : "text-red-600"
-          } text-muted-foreground`}
+            lastMonthOperations!.length > 0 && data.diferencaPercentual > 0
+              ? "text-green-500"
+              : data.diferencaPercentual < 0
+              ? "text-red-600"
+              : "text-muted-foreground"
+          }`}
         >
-          {data.diferencaPercentual > 0
-            ? "+" + data.diferencaPercentual
-            : data.diferencaPercentual}
-          % em relação ao mês passado
+          {lastMonthOperations!.length <= 0
+            ? "Sem dados relacionados ao mês anterior"
+            : data.diferencaPercentual > 0
+            ? "+" + data.diferencaPercentual + "% em relação ao mês anterior"
+            : data.diferencaPercentual < 0
+            ? data.diferencaPercentual + "% em relação ao mês anterior"
+            : "0% em relação ao mês anterior"}
         </p>
         {/* <div className="h-[60px] mt-8">
           <ResponsiveContainer width="100%" height="100%">

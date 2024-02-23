@@ -1,220 +1,23 @@
-import {
-  Area,
-  AreaChart,
-  Line,
-  LineChart as LineContainer,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { TooltipProps } from "recharts";
-// for recharts v2.1 and above
-import {
-  ValueType,
-  NameType,
-} from "recharts/types/component/DefaultTooltipContent";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarIcon, PieChart, Users } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { cn } from "@/lib/utils";
-import { Button } from "../ui/button";
-import { format } from "date-fns";
-import { Calendar } from "../ui/calendar";
-import { DateRange } from "react-day-picker";
-import React from "react";
+import { PieChart } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import IncomeMonthChart from "./Charts/IncomeMonthChart";
-import OperationsMonthChart from "./Charts/OperationsMonthChart";
-import OperationsDayChart from "./Charts/OperationsDayChart";
-
-const data = [
-  {
-    FGTS: 4000,
-    GOV: 4212,
-    PREFEITURA: 4356,
-    day: "Seg",
-  },
-  {
-    FGTS: 6000,
-    GOV: 3245,
-    PREFEITURA: 7453,
-    day: "Ter",
-  },
-  {
-    FGTS: 8000,
-    GOV: 1234,
-    PREFEITURA: 6453,
-    day: "Qua",
-  },
-  {
-    FGTS: 10000,
-    GOV: 5342,
-    PREFEITURA: 4532,
-    day: "Qui",
-  },
-  {
-    FGTS: 11000,
-    GOV: 3456,
-    PREFEITURA: 7543,
-    day: "Sex",
-  },
-  {
-    FGTS: 12000,
-    GOV: 3568,
-    PREFEITURA: 5673,
-    day: "Sab",
-  },
-  {
-    FGTS: 13000,
-    GOV: 6776,
-    PREFEITURA: 5576,
-    day: "Dom",
-  },
-];
+import IncomeMonthChart from "./Cards/IncomeMonthChart";
+import CostumersChart from "./Cards/CostumersChart";
+import IncomeByPeriodChart from "./Cards/IncomeByPeriodChart";
+import OperationsDayChart from "./Cards/OperationsDayChart";
+import OperationsMonthChart from "./Cards/OperationsMonthChart";
 
 export default function Dashboard() {
-  const [date, setDate] = React.useState<DateRange | undefined>();
-
   return (
     <div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <IncomeMonthChart />
         <OperationsMonthChart />
         <OperationsDayChart />
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center justify-between font-normal">
-              <div className="font-medium">Clientes</div>{" "}
-              <Users className="h-4 w-4" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+56</div>
-            <p className="text-xs text-muted-foreground">
-              +122.1% em relação ao mês passado
-            </p>
-            {/* <div className="h-[60px] mt-8">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={data}
-                  margin={{
-                    top: 0,
-                    right: 0,
-                    left: 0,
-                    bottom: 0,
-                  }}
-                >
-                  <Area
-                    type="monotone"
-                    dataKey="FGTS"
-                    stroke="#334155"
-                    fill="#334155"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div> */}
-          </CardContent>
-        </Card>
+        <CostumersChart />
       </div>
       <div className="grid sm:grid-cols-2 xl:grid-cols-3 mt-4 gap-4">
-        <Card className="col-span-2 relative">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium">
-              Receita por período
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">R$ 15.231,89</div>
-            <p className="text-xs text-muted-foreground">
-              Receita total no período selecionado
-            </p>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  id="date"
-                  variant="outline"
-                  className={cn(
-                    "justify-start text-left font-normal absolute top-4 right-4",
-                    !date && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date?.from ? (
-                    date.to ? (
-                      <>
-                        {format(date.from, "LLL dd, y")} -{" "}
-                        {format(date.to, "LLL dd, y")}
-                      </>
-                    ) : (
-                      format(date.from, "LLL dd, y")
-                    )
-                  ) : (
-                    <span>Selecione um período</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  initialFocus
-                  mode="range"
-                  selected={date}
-                  defaultMonth={date?.from}
-                  onSelect={setDate}
-                  numberOfMonths={1}
-                />
-              </PopoverContent>
-            </Popover>
-            <div className="h-[440px] mt-8">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineContainer
-                  data={data}
-                  margin={{
-                    top: 5,
-                    right: 20,
-                    left: 5,
-                    bottom: 0,
-                  }}
-                >
-                  <XAxis
-                    dataKey="day"
-                    stroke="#888888"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    stroke="#888888"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => `R$${value}`}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Line
-                    type="monotone"
-                    strokeWidth={2}
-                    stroke="#0284c7"
-                    dataKey="FGTS"
-                  />
-                  <Line
-                    type="monotone"
-                    strokeWidth={2}
-                    stroke="#16a34a"
-                    dataKey="GOV"
-                  />
-                  <Line
-                    type="monotone"
-                    strokeWidth={2}
-                    stroke="#4f46e5"
-                    dataKey="PREFEITURA"
-                  />
-                </LineContainer>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+        <IncomeByPeriodChart />
         <Card className="sm:col-span-2 xl:col-span-1">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center justify-between font-normal">
