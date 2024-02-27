@@ -1,4 +1,4 @@
-import { Edit, MoreHorizontal, Trash } from "lucide-react";
+import { Edit, Eye, MoreHorizontal, Trash } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,11 +21,18 @@ import { DeleteCostumer } from "@/api";
 import { Switch } from "@/components/ui/switch";
 
 import React from "react";
+import { useSearchParams } from "react-router-dom";
+import CostumersView from "../CostumersView";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function CostumerDropdown({ row }: any) {
   const [dialog, setDialog] = React.useState(false);
   const [remove, setRemove] = React.useState(false);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, setSearchParams] = useSearchParams();
+
+  const clienteId = row.getValue("id").split("-").slice(1).join("-");
 
   return (
     <div className="flex justify-end items-center">
@@ -37,6 +44,12 @@ export default function CostumerDropdown({ row }: any) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={() => setSearchParams({ clienteId: clienteId })}
+          >
+            <Eye className="w-4 h-4 mr-2 " />
+            Visualizar cliente
+          </DropdownMenuItem>
           <DropdownMenuItem>
             <Edit className="w-4 h-4 mr-2 " />
             Editar cliente
@@ -50,6 +63,7 @@ export default function CostumerDropdown({ row }: any) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenuRoot>
+      <CostumersView />
       <AlertDialog open={dialog}>
         <AlertDialogContent>
           <AlertDialogHeader>

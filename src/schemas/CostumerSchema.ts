@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const NewCostumerFormSchema = z.object({
+const CostumerSchema = z.object({
   id: z.string().optional(),
   nome: z
     .string()
@@ -20,7 +20,7 @@ const NewCostumerFormSchema = z.object({
   estadoCivil: z.string(),
   naturalidade: z.string(),
   telefone: z.string().min(1),
-  cep: z.string(),
+  cep: z.string().min(8),
   rua: z.string(),
   numeroDaRua: z.string(),
   complemento: z.string(),
@@ -42,4 +42,4 @@ const NewCostumerFormSchema = z.object({
     }),
 });
 
-export { NewCostumerFormSchema };
+export { CostumerSchema };

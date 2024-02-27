@@ -6,13 +6,13 @@ import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { Badge } from "@/components/ui/badge";
-import { NewOperationFormSchema } from "@/schemas/NewOperationFormSchema";
+import { OperationSchema } from "@/schemas/OperationSchema";
 import { z } from "zod";
 import { Timestamp } from "firebase/firestore";
 import OperationDropdown from "./OperationDropdown";
 import { getUserData } from "@/api";
 
-export const columns: ColumnDef<z.infer<typeof NewOperationFormSchema>>[] = [
+export const columns: ColumnDef<z.infer<typeof OperationSchema>>[] = [
   {
     accessorKey: "id",
     header: "",
@@ -25,28 +25,28 @@ export const columns: ColumnDef<z.infer<typeof NewOperationFormSchema>>[] = [
       const status = row.getValue("statusDaOperacao");
 
       switch (status) {
-        case "1":
+        case "concluido":
           return (
             <div className="text-green-600 font-medium flex items-center ml-4">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-              Sucesso
+              Concluido
             </div>
           );
-        case "2":
+        case "processando":
           return (
             <div className="text-yellow-600 font-medium flex items-center ml-4">
               <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
               Processando
             </div>
           );
-        case "3":
+        case "pendente":
           return (
             <div className="text-orange-600 font-medium flex items-center ml-4">
               <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
               Pendente
             </div>
           );
-        case "4":
+        case "falha":
           return (
             <div className="text-red-600 font-medium flex items-center ml-4">
               <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
@@ -79,6 +79,7 @@ export const columns: ColumnDef<z.infer<typeof NewOperationFormSchema>>[] = [
     cell: ({ row }) => {
       let backgroundColor = "#000000";
       const type: string = row.getValue("tipoDaOperacao");
+      const formattedType = type.toLowerCase().replace(/\s+/g, "-");
 
       getUserData().then((data) => {
         const tipoOperacao = data?.tiposDeOperacoes.find(
@@ -86,7 +87,7 @@ export const columns: ColumnDef<z.infer<typeof NewOperationFormSchema>>[] = [
         );
         if (tipoOperacao) {
           backgroundColor = tipoOperacao.color;
-          updateBadgeStyle(backgroundColor, type);
+          updateBadgeStyle(backgroundColor, formattedType);
         }
       });
 
@@ -101,8 +102,8 @@ export const columns: ColumnDef<z.infer<typeof NewOperationFormSchema>>[] = [
 
       return (
         <Badge
-          id={`badge-${type}`}
-          className={`badge badge-${type}`}
+          id={`badge-${formattedType}`}
+          className={`badge badge-${formattedType}`}
           style={{ backgroundColor: backgroundColor }}
         >
           {type.toUpperCase()}
@@ -139,7 +140,7 @@ export const columns: ColumnDef<z.infer<typeof NewOperationFormSchema>>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Data da criação
+          Criado em
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );

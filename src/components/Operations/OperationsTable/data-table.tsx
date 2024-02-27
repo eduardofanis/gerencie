@@ -118,10 +118,10 @@ export function DataTable<TData, TValue>({
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Status</SelectLabel>
-                <SelectItem value="1">Sucesso</SelectItem>
-                <SelectItem value="2">Processando</SelectItem>
-                <SelectItem value="3">Pendente</SelectItem>
-                <SelectItem value="4">Falha</SelectItem>
+                <SelectItem value="concluido">Concluído</SelectItem>
+                <SelectItem value="processando">Processando</SelectItem>
+                <SelectItem value="pendente">Pendente</SelectItem>
+                <SelectItem value="falha">Falha</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -142,7 +142,10 @@ export function DataTable<TData, TValue>({
                 <SelectLabel>Tipo</SelectLabel>
                 {userData &&
                   userData.tiposDeOperacoes.map((tipo) => (
-                    <SelectItem value={tipo.name} key={tipo.name + tipo.color}>
+                    <SelectItem
+                      value={tipo.name + tipo.color}
+                      key={`${tipo.color}-${tipo.name}`}
+                    >
                       {tipo.name}
                     </SelectItem>
                   ))}

@@ -1,8 +1,8 @@
 import { FormControl, FormField, FormItem, FormLabel } from "../../ui/form"; // Shadcn UI import
 import { Input } from "../../ui/input"; // Shandcn UI Input
-import { CostumerInputProps } from "@/types/CostumerInputProps";
+import { InputProps } from "@/types/InputProps";
 
-export default function FileInput(props: CostumerInputProps) {
+export default function FileInput(props: InputProps) {
   return (
     <FormField
       control={props.form.control}

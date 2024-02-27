@@ -6,10 +6,11 @@ import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { z } from "zod";
-import { NewCostumerFormSchema } from "@/schemas/NewCostumerFormSchema";
+import { CostumerSchema } from "@/schemas/CostumerSchema";
 import CostumerDropdown from "./CostumerDropdown";
+import { Timestamp } from "firebase/firestore";
 
-export const columns: ColumnDef<z.infer<typeof NewCostumerFormSchema>>[] = [
+export const columns: ColumnDef<z.infer<typeof CostumerSchema>>[] = [
   {
     accessorKey: "id",
   },
@@ -34,21 +35,15 @@ export const columns: ColumnDef<z.infer<typeof NewCostumerFormSchema>>[] = [
     accessorKey: "telefone",
     header: "Telefone",
     cell: ({ row }) => {
-      return (
-        <div className="flex items-center">
-          {row.getValue("telefone")}
-          {/* <Button
-            className="p-0 ml-2"
-            variant={"link"}
-            onClick={() =>
-              navigator.clipboard.writeText(row.getValue("telefone"))
-            }
-          >
-            <ClipboardCopy className="h-4 w-4 text-slate-700" />
-          </Button> */}
-        </div>
-      );
+      const value = row.getValue("telefone") as string;
+      const formatted = value.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+
+      return <div className="flex items-center">{formatted}</div>;
     },
+  },
+  {
+    accessorKey: "estado",
+    header: "Estado",
   },
   {
     accessorKey: "dataDeNascimento",
@@ -64,10 +59,11 @@ export const columns: ColumnDef<z.infer<typeof NewCostumerFormSchema>>[] = [
       );
     },
     cell: ({ row }) => {
-      const date = new Date(row.getValue("dataDeNascimento"));
-      const formatted = date.toLocaleDateString("pt-BR");
+      const { seconds } = row.getValue("dataDeNascimento") as Timestamp;
+      const milliseconds = seconds * 1000;
+      const date = new Date(milliseconds).toLocaleDateString("pt-BR");
 
-      return <div className="ml-4">{formatted}</div>;
+      return <div className="ml-4">{date}</div>;
     },
   },
   {

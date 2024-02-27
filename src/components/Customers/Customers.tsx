@@ -3,7 +3,7 @@ import { DataTable } from "./CustomersTable/data-table";
 import { columns } from "./CustomersTable/columns";
 import React from "react";
 import { z } from "zod";
-import { NewCostumerFormSchema } from "@/schemas/NewCostumerFormSchema";
+import { CostumerSchema } from "@/schemas/CostumerSchema";
 import {
   collection,
   getFirestore,
@@ -15,8 +15,7 @@ import { firebaseApp } from "@/main";
 import Loading from "../ui/Loading";
 
 export default function Customers() {
-  const [data, setData] =
-    React.useState<z.infer<typeof NewCostumerFormSchema>[]>();
+  const [data, setData] = React.useState<z.infer<typeof CostumerSchema>[]>();
 
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
@@ -26,7 +25,7 @@ export default function Customers() {
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const costumers = querySnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...(doc.data() as z.infer<typeof NewCostumerFormSchema>),
+        ...(doc.data() as z.infer<typeof CostumerSchema>),
       }));
       setData(costumers);
     });

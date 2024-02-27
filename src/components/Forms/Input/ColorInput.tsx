@@ -7,7 +7,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { InputProps } from "@/types/InputProps";
 
-export default function TextInput(props: InputProps) {
+export default function ColorInput(props: InputProps) {
   return (
     <FormField
       control={props.form.control}
@@ -19,7 +19,7 @@ export default function TextInput(props: InputProps) {
             <Input
               placeholder={props.placeholder}
               className={props.className}
-              type="text"
+              type="color"
               {...field}
             />
           </FormControl>

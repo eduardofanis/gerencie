@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { Input } from "../ui/input";
 import React from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
@@ -16,16 +15,12 @@ import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 import { firebaseApp } from "@/main";
 import { getAuth } from "firebase/auth";
 import { NewOperationType, RemoveOperationType } from "@/api";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import TextInput from "./Input/TextInput";
+import ColorInput from "./Input/ColorInput";
 
 export type OperationType = {
   name: string;
@@ -83,36 +78,20 @@ export default function NewOperationTypeForm() {
       </DialogHeader>
       <div>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleNewOperationType)}
-            className="mt-1 grid gap-2"
-            id="form"
-          >
-            <FormField
-              control={form.control}
-              name="color"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cor</FormLabel>
-                  <FormControl>
-                    <Input type="color" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
+          <form className="mt-1 grid gap-2" id="form">
+            <ColorInput form={form} name="color" label="Cor" />
+            <TextInput
+              form={form}
               name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex: FGTS" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
+              placeholder="Ex: FGTS"
+              label="Nome"
             />
-            <Button type="submit" formTarget="form">
+
+            <Button
+              type="button"
+              formTarget="form"
+              onClick={form.handleSubmit(handleNewOperationType)}
+            >
               <PlusCircle className="h-4 w-4 mr-2" />
               Clique para Adicionar
             </Button>
@@ -125,13 +104,13 @@ export default function NewOperationTypeForm() {
           <Separator className="my-2" />
 
           <ScrollArea className="h-[140px] border rounded-lg p-2">
-            <div className="space-y-1">
+            <div className="divide-y">
               {data.tiposDeOperacoes.map((tipo) => (
                 <div
-                  key={tipo.name + tipo.color}
-                  className="flex items-center justify-between py-1 px-2 rounded-lg hover:bg-slate-100"
+                  key={`${tipo.color}-${tipo.name}`}
+                  className="flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-100"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <div
                       className={`h-2 w-2 rounded-full`}
                       style={{ backgroundColor: tipo.color }}
@@ -140,6 +119,7 @@ export default function NewOperationTypeForm() {
                   </div>
                   <Button
                     variant="ghost"
+                    type="button"
                     className="h-6 w-6 p-0 hover:bg-red-400"
                     onClick={() => RemoveOperationType(tipo.name, tipo.color)}
                   >
@@ -155,7 +135,9 @@ export default function NewOperationTypeForm() {
       )}
       <DialogFooter>
         <DialogClose asChild>
-          <Button>Fechar</Button>
+          <Button variant={"secondary"} type="button">
+            Fechar
+          </Button>
         </DialogClose>
       </DialogFooter>
     </DialogContent>

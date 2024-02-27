@@ -3,34 +3,23 @@ import { FormControl, FormField, FormItem, FormLabel } from "../../ui/form"; // 
 import { Input } from "../../ui/input"; // Shandcn UI Input
 import { InputProps } from "@/types/InputProps";
 
-// Brazilian currency config
-const moneyFormatter = Intl.NumberFormat("pt-BR", {
-  currency: "BRL",
-  currencyDisplay: "symbol",
-  currencySign: "standard",
-  style: "currency",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
+export default function CPFInput(props: InputProps) {
+  const initialValue = "";
 
-export default function MoneyInput(props: InputProps) {
-  const initialValue = props.form.getValues()[props.name]
-    ? moneyFormatter.format(Number(props.form.getValues()[props.name]))
-    : "";
+  function formatCPF(value: string) {
+    const digits = value.replace(/\D/g, "");
+    let formattedValue = digits.replace(
+      /(\d{3})(\d{3})(\d{3})(\d{2})/,
+      "$1.$2.$3-$4"
+    );
+    formattedValue = formattedValue.slice(0, 14);
+    return formattedValue;
+  }
 
   const [value, setValue] = useReducer((_: unknown, next: string) => {
-    const digits = next.replace(/\D/g, "");
-    return moneyFormatter.format(Number(digits) / 100);
+    const formattedValue = formatCPF(next);
+    return formattedValue;
   }, initialValue);
-
-  function handleChange(
-    realChangeFn: (...event: unknown[]) => void,
-    formattedValue: string
-  ) {
-    const digits = formattedValue.replace(/\D/g, "");
-    const realValue = Number(digits) / 100;
-    realChangeFn(realValue);
-  }
 
   return (
     <FormField
@@ -38,7 +27,6 @@ export default function MoneyInput(props: InputProps) {
       name={props.name}
       render={({ field }) => {
         field.value = value;
-        const _change = field.onChange;
 
         return (
           <FormItem>
@@ -47,10 +35,11 @@ export default function MoneyInput(props: InputProps) {
               <Input
                 placeholder={props.placeholder}
                 type="text"
+                className={props.className}
                 {...field}
                 onChange={(ev) => {
                   setValue(ev.target.value);
-                  handleChange(_change, ev.target.value);
+                  field.onChange(ev.target.value);
                 }}
                 value={value}
               />

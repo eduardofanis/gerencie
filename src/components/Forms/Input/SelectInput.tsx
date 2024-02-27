@@ -12,14 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CostumerInputProps } from "@/types/CostumerInputProps";
+import { InputProps } from "@/types/InputProps";
 
 export type SelectItems = {
   value: string;
   label: string;
 };
 
-interface SelectProps extends CostumerInputProps {
+interface SelectProps extends InputProps {
   selectItems: Array<SelectItems>;
   placeholder: string;
 }
@@ -44,7 +44,7 @@ export default function SelectInput(props: SelectProps) {
             <SelectContent>
               {props.selectItems.length >= 1 ? (
                 props.selectItems.map((i) => (
-                  <SelectItem value={i.value} key={i.value}>
+                  <SelectItem value={i.value} key={i.value + i.label}>
                     {i.label}
                   </SelectItem>
                 ))

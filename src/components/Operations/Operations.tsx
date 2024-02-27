@@ -13,13 +13,12 @@ import {
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { firebaseApp } from "@/main";
-import { NewOperationFormSchema } from "@/schemas/NewOperationFormSchema";
+import { OperationSchema } from "@/schemas/OperationSchema";
 import Loading from "../ui/Loading";
 import { UserDataProps } from "../Forms/NewOperationTypeForm";
 
 export default function Operations() {
-  const [data, setData] =
-    React.useState<z.infer<typeof NewOperationFormSchema>[]>();
+  const [data, setData] = React.useState<z.infer<typeof OperationSchema>[]>();
   const [userData, setUserData] = React.useState<UserDataProps>();
 
   React.useEffect(() => {
@@ -32,7 +31,7 @@ export default function Operations() {
     );
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const operations = querySnapshot.docs.map((doc) => ({
-        ...(doc.data() as z.infer<typeof NewOperationFormSchema>),
+        ...(doc.data() as z.infer<typeof OperationSchema>),
       }));
       setData(operations);
     });

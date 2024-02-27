@@ -16,25 +16,41 @@ import {
 import { firebaseApp } from "./main";
 import { getAuth } from "firebase/auth";
 import { toast } from "./components/ui/use-toast";
-import { NewCostumerFormSchema } from "./schemas/NewCostumerFormSchema";
+import { CostumerSchema } from "./schemas/CostumerSchema";
 import { z } from "zod";
-import { NewOperationFormSchema } from "./schemas/NewOperationFormSchema";
+import { OperationSchema } from "./schemas/OperationSchema";
 import { UserDataProps } from "./components/Forms/NewOperationTypeForm";
+import { UseFormReturn } from "react-hook-form";
+import {
+  deleteObject,
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytes,
+} from "firebase/storage";
+import { CostumerProps } from "./components/Customers/CostumersView";
 
-export async function NewCostumer(
-  values: z.infer<typeof NewCostumerFormSchema>
-) {
+export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
+  const storage = getStorage();
 
   try {
     if (currentUser && currentUser.uid) {
+      const date = values.dataDeNascimento.replace(
+        /(\d{2})(\d{2})(\d{4})/,
+        "$1/$2/$3"
+      );
+      const [day, month, year] = date.split("/");
+      const dateObject = new Date(`${month}/${day}/${year}`);
       const docRef = await addDoc(
         collection(db, currentUser.uid, "data", "clientes"),
         {
           ...values,
           createdAt: Timestamp.now(),
-          dataDeNascimento: Date.parse(values.dataDeNascimento),
+          dataDeNascimento: dateObject,
+          frenteDoDocumento: "",
+          versoDoDocumento: "",
         }
       );
       const clienteRef = doc(
@@ -50,6 +66,49 @@ export async function NewCostumer(
         variant: "success",
         duration: 5000,
       });
+      if (
+        values.frenteDoDocumento instanceof File &&
+        values.frenteDoDocumento.type.startsWith("image/")
+      ) {
+        const frenteRef = ref(
+          storage,
+          `documentos/${docRef.id}-frente-documento`
+        );
+        await uploadBytes(frenteRef, values.frenteDoDocumento);
+        const frenteURL = await getDownloadURL(frenteRef);
+        updateDoc(clienteRef, {
+          frenteDoDocumento: frenteURL,
+        });
+      } else {
+        toast({
+          title: "Somente imagens são permitidas!",
+          variant: "destructive",
+          duration: 5000,
+        });
+      }
+      if (
+        values.versoDoDocumento instanceof File &&
+        values.versoDoDocumento.type.startsWith("image/")
+      ) {
+        const versoRef = ref(
+          storage,
+          `documentos/${docRef.id}-verso-documento`
+        );
+
+        await uploadBytes(versoRef, values.versoDoDocumento);
+
+        // Obtém o URL do arquivo enviado (verso)
+        const versoURL = await getDownloadURL(versoRef);
+        updateDoc(clienteRef, {
+          versoDoDocumento: versoURL,
+        });
+      } else {
+        toast({
+          title: "Somente imagens são permitidas!",
+          variant: "destructive",
+          duration: 5000,
+        });
+      }
     }
   } catch (error) {
     console.log(error);
@@ -62,7 +121,7 @@ export async function NewCostumer(
 }
 
 export async function NewOperation(
-  values: z.infer<typeof NewOperationFormSchema>,
+  values: z.infer<typeof OperationSchema>,
   nomeDoCliente: string
 ) {
   const db = getFirestore(firebaseApp);
@@ -110,17 +169,41 @@ export async function NewOperationType(name: string, color: string) {
   try {
     if (currentUser && currentUser.uid) {
       const docRef = doc(db, currentUser.uid, "data");
-      await updateDoc(docRef, {
-        tiposDeOperacoes: arrayUnion({
-          name: name,
-          color: color,
-        }),
-      });
-      toast({
-        title: "Tipo de Operação adicionado com sucesso!",
-        variant: "success",
-        duration: 5000,
-      });
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (
+          data &&
+          data.tiposDeOperacoes &&
+          Array.isArray(data.tiposDeOperacoes)
+        ) {
+          // Verifica se algum objeto na array possui a chave e valor especificados
+          const objetoEncontrado = data.tiposDeOperacoes.some(
+            (obj) => obj["name"] === name
+          );
+
+          if (objetoEncontrado) {
+            toast({
+              title: "Você já possui um tipo de operação com este nome!",
+              variant: "destructive",
+              duration: 5000,
+            });
+          } else {
+            await updateDoc(docRef, {
+              tiposDeOperacoes: arrayUnion({
+                name: name,
+                color: color,
+              }),
+            });
+            toast({
+              title: "Tipo de Operação adicionado com sucesso!",
+              variant: "success",
+              duration: 5000,
+            });
+          }
+        }
+      }
     }
   } catch (error) {
     console.log(error);
@@ -145,6 +228,17 @@ export async function RemoveOperationType(name: string, color: string) {
           color: color,
         }),
       });
+
+      const operacoesSnapshot = await getDocs(
+        query(
+          collection(db, currentUser.uid, "data", "operacoes"),
+          where("tipoDaOperacao", "==", name)
+        )
+      );
+      operacoesSnapshot.forEach(async (doc) => {
+        deleteDoc(doc.ref);
+      });
+
       toast({
         title: "Tipo de Operação removido com sucesso!",
         variant: "success",
@@ -171,10 +265,30 @@ export async function GetCostumers() {
         collection(db, currentUser!.uid, "data", "clientes")
       );
       const consumers = querySnapshot.docs.map((doc) => ({
-        ...(doc.data() as z.infer<typeof NewCostumerFormSchema>),
+        ...(doc.data() as z.infer<typeof CostumerSchema>),
       }));
 
       return consumers;
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    console.log();
+  }
+}
+
+export async function GetCostumer(clienteId: string) {
+  const db = getFirestore(firebaseApp);
+  const { currentUser } = getAuth(firebaseApp);
+
+  try {
+    if (currentUser && currentUser.uid) {
+      const docRef = await getDoc(
+        doc(db, currentUser!.uid, "data", "clientes", clienteId)
+      );
+      const costumers = docRef.data() as CostumerProps;
+
+      return costumers;
     }
   } catch (error) {
     console.log(error);
@@ -234,15 +348,22 @@ export async function DeleteCostumer(
 ) {
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
+  const storage = getStorage();
 
   const partes = clienteId.split("-");
   const restante = partes.slice(1).join("-");
+
+  const frenteRef = ref(storage, `documentos/${restante}-frente-documento`);
+  const versoRef = ref(storage, `documentos/${restante}-verso-documento`);
 
   try {
     if (currentUser && currentUser.uid) {
       const clienteRef = doc(db, currentUser.uid, "data", "clientes", restante);
 
       await deleteDoc(clienteRef);
+
+      if (frenteRef) await deleteObject(frenteRef);
+      if (versoRef) await deleteObject(versoRef);
 
       if (removerOperacoes) {
         const operacoesQuery = query(
@@ -275,5 +396,47 @@ export async function DeleteCostumer(
       duration: 5000,
     });
     throw error;
+  }
+}
+
+type CepProps = {
+  cep: string;
+  logradouro: string;
+  complemento: string;
+  bairro: string;
+  localidade: string;
+  uf: string;
+  ddd: string;
+  erro: boolean;
+};
+
+export async function fetchCep(
+  cep: string,
+  form: UseFormReturn<z.infer<typeof CostumerSchema>>
+) {
+  try {
+    if (cep.length == 8) {
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data: CepProps = await response.json();
+      form.setValue("rua", data.logradouro);
+      form.setValue("bairro", data.bairro);
+      form.setValue("cidade", data.localidade);
+      form.setValue("estado", data.uf);
+
+      if (data && data.erro) {
+        toast({
+          title: "Insira um CEP válido!",
+          variant: "destructive",
+          duration: 5000,
+        });
+      }
+    }
+  } catch (error) {
+    toast({
+      title: "Erro ao buscar cep!",
+      description: "Por favor, tente novamente.",
+      variant: "destructive",
+      duration: 5000,
+    });
   }
 }

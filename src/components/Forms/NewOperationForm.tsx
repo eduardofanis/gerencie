@@ -9,7 +9,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
-import { Input } from "../ui/input";
 import {
   Select,
   SelectContent,
@@ -37,9 +36,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import MoneyInput from "./Input/MoneyInput";
-import { NewCostumerFormSchema } from "../../schemas/NewCostumerFormSchema";
-
-import { NewOperationFormSchema } from "@/schemas/NewOperationFormSchema";
+import { OperationSchema } from "@/schemas/OperationSchema";
 import {
   Command,
   CommandEmpty,
@@ -54,18 +51,39 @@ import NewOperationTypeForm, { UserDataProps } from "./NewOperationTypeForm";
 import { firebaseApp } from "@/main";
 import { getAuth } from "firebase/auth";
 import { getFirestore, onSnapshot, doc } from "firebase/firestore";
+import NumberInput from "./Input/NumberInput";
+import SelectInput, { SelectItems } from "./Input/SelectInput";
+import { CostumerSchema } from "@/schemas/CostumerSchema";
+
+const StatusList: SelectItems[] = [
+  {
+    value: "concluido",
+    label: "Concluído",
+  },
+  {
+    value: "processando",
+    label: "Processando",
+  },
+  {
+    value: "pendente",
+    label: "Pendente",
+  },
+  {
+    value: "falha",
+    label: "Falha",
+  },
+];
 
 export default function NewOperationForm() {
-  const [data, setData] =
-    React.useState<z.infer<typeof NewCostumerFormSchema>[]>();
+  const [data, setData] = React.useState<z.infer<typeof CostumerSchema>[]>();
   const [nomeDoCliente, setNomeDoCliente] = React.useState("");
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setSearchParams] = useSearchParams();
   const [operationTypes, setOperationTypes] =
     React.useState<UserDataProps | null>(null);
 
-  const form = useForm<z.infer<typeof NewOperationFormSchema>>({
-    resolver: zodResolver(NewOperationFormSchema),
+  const form = useForm<z.infer<typeof OperationSchema>>({
+    resolver: zodResolver(OperationSchema),
     defaultValues: {
       clienteId: "",
       tipoDaOperacao: "",
@@ -75,17 +93,17 @@ export default function NewOperationForm() {
       dataDaOperacao: new Date(),
     },
   });
-  function onSubmit(values: z.infer<typeof NewOperationFormSchema>) {
+  function onSubmit(values: z.infer<typeof OperationSchema>) {
     NewOperation(values, nomeDoCliente);
     setSearchParams({ operationModal: "false" });
   }
 
   React.useEffect(() => {
-    async function getConsumers() {
+    async function getCostumers() {
       const costumers = await GetCostumers();
       setData(costumers);
     }
-    getConsumers();
+    getCostumers();
   }, []);
 
   React.useEffect(() => {
@@ -150,11 +168,7 @@ export default function NewOperationForm() {
                             <ScrollArea className="max-h-[400px]">
                               {data !== undefined &&
                                 data.map(
-                                  (
-                                    cliente: z.infer<
-                                      typeof NewCostumerFormSchema
-                                    >
-                                  ) => (
+                                  (cliente: z.infer<typeof CostumerSchema>) => (
                                     <CommandItem
                                       value={cliente.id}
                                       key={cliente.id}
@@ -225,8 +239,8 @@ export default function NewOperationForm() {
                       operationTypes.tiposDeOperacoes.length > 0 ? (
                         operationTypes.tiposDeOperacoes.map((tipo) => (
                           <SelectItem
-                            key={tipo.name + tipo.color}
                             value={tipo.name}
+                            key={`${tipo.color}-${tipo.name}`}
                           >
                             {tipo.name.toUpperCase()}
                           </SelectItem>
@@ -242,30 +256,12 @@ export default function NewOperationForm() {
               )}
             />
 
-            <FormField
-              control={form.control}
+            <SelectInput
               name="statusDaOperacao"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status da operação</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="1">Sucesso</SelectItem>
-                      <SelectItem value="2">Processando</SelectItem>
-                      <SelectItem value="3">Pendente</SelectItem>
-                      <SelectItem value="4">Falha</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
+              form={form}
+              label="Status da operação"
+              selectItems={StatusList}
+              placeholder="Selecione"
             />
 
             <FormField
@@ -316,17 +312,19 @@ export default function NewOperationForm() {
               label="Valor liberado"
             />
 
-            <FormField
-              control={form.control}
+            <NumberInput
+              form={form}
+              name="parcelas"
+              label="Número de parcelas"
+            />
+
+            <NumberInput
+              form={form}
               name="comissao"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Comissão</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
+              label="Comissao %"
+              decimals={2}
+              maxLength={6}
+              maxValue={100}
             />
           </div>
           <DialogFooter className="mt-8 col-span-2">
