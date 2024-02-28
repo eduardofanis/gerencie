@@ -37,7 +37,7 @@ export default function CepInput(props: InputProps) {
                 {...field}
                 onChange={(ev) => {
                   setValue(ev.target.value);
-                  field.onChange(ev.target.value);
+                  field.onChange(value);
                   if (ev.target.value.length == 8) {
                     fetchCep(ev.target.value.replace("-", ""), props.form);
                   }

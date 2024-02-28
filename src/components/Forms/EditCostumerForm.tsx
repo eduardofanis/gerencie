@@ -23,8 +23,9 @@ import BirthDateInput from "./Input/BirthDateInput";
 import ComboInput from "./Input/ComboInput";
 import React from "react";
 import { CostumerProps } from "../Customers/CostumersView";
+import Loading from "../ui/Loading";
 
-export default function NewCostumerForm() {
+export default function EditCostumerForm() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [costumer, setCostumer] = React.useState<CostumerProps>();
 
@@ -51,34 +52,14 @@ export default function NewCostumerForm() {
 
   React.useEffect(() => {
     async function getCostumer() {
-      const id: string = searchParams.get("cliente")!;
-      if (searchParams.get("cliente")) {
+      const id: string = searchParams.get("editarCliente")!;
+      if (searchParams.get("editarCliente")) {
         const costumerData = await GetCostumer(id);
         setCostumer(costumerData);
       }
     }
     getCostumer();
   }, [searchParams]);
-
-  React.useEffect(() => {
-    if (costumer) {
-      form.setValue("nome", costumer.nome);
-      form.setValue("bairro", costumer.bairro);
-      form.setValue("cep", costumer.cep);
-      form.setValue("cidade", costumer.cidade);
-      form.setValue("complemento", costumer.complemento);
-      form.setValue("cpf", costumer.cpf);
-      form.setValue("dataDeNascimento", costumer.dataDeNascimento.toString());
-      form.setValue("estado", costumer.estado);
-      form.setValue("estadoCivil", costumer.estadoCivil);
-      form.setValue("naturalidade", costumer.naturalidade);
-      form.setValue("numeroDaRua", costumer.numeroDaRua);
-      form.setValue("rua", costumer.rua);
-      form.setValue("sexo", costumer.sexo);
-      form.setValue("telefone", costumer.telefone);
-      form.setValue("tipoDoDocumento", costumer.tipoDoDocumento);
-    }
-  }, [costumer, form]);
 
   function onSubmit(values: z.infer<typeof CostumerSchema>) {
     NewCostumer(values);
@@ -164,10 +145,11 @@ export default function NewCostumerForm() {
     { value: "TO", label: "TO" },
   ];
 
+  if (!costumer) return <Loading />;
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Cadastrar novo cliente</DialogTitle>
+        <DialogTitle>Editar cliente</DialogTitle>
         <DialogDescription>
           Preencha os campos obrigatórios (*) e clique em cadastrar em seguida.
         </DialogDescription>
@@ -204,7 +186,7 @@ export default function NewCostumerForm() {
                 form={form}
                 name="sexo"
                 label="Sexo"
-                defaultValue={costumer?.sexo}
+                defaultValue={costumer.sexo}
                 placeholder="Selecione"
                 selectItems={SexoItems}
               />
@@ -214,6 +196,7 @@ export default function NewCostumerForm() {
                 name="estadoCivil"
                 label="Estado civil"
                 placeholder="Selecione"
+                defaultValue={costumer.estadoCivil}
                 selectItems={EstadoCivilItems}
               />
 
@@ -255,6 +238,7 @@ export default function NewCostumerForm() {
                 name="tipoDoDocumento"
                 label="Tipo do documento"
                 placeholder="Selecione"
+                defaultValue={costumer.tipoDoDocumento}
                 selectItems={DocumentoItems}
               />
               <FileInput

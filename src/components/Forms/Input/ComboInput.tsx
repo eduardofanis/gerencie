@@ -55,7 +55,7 @@ export default function ComboInput(props: ComboProps) {
                 </Button>
               </FormControl>
             </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0">
+            <PopoverContent className="w-full p-0">
               <Command>
                 <CommandInput
                   placeholder="Digite para procurar..."

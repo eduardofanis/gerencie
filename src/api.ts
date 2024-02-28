@@ -12,6 +12,7 @@ import {
   arrayUnion,
   arrayRemove,
   getDoc,
+  limit,
 } from "firebase/firestore";
 import { firebaseApp } from "./main";
 import { getAuth } from "firebase/auth";
@@ -28,7 +29,10 @@ import {
   ref,
   uploadBytes,
 } from "firebase/storage";
-import { CostumerProps } from "./components/Customers/CostumersView";
+import {
+  CostumerProps,
+  OperationProps,
+} from "./components/Customers/CostumersView";
 
 export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
   const db = getFirestore(firebaseApp);
@@ -66,48 +70,47 @@ export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
         variant: "success",
         duration: 5000,
       });
-      if (
-        values.frenteDoDocumento instanceof File &&
-        values.frenteDoDocumento.type.startsWith("image/")
-      ) {
-        const frenteRef = ref(
-          storage,
-          `documentos/${docRef.id}-frente-documento`
-        );
-        await uploadBytes(frenteRef, values.frenteDoDocumento);
-        const frenteURL = await getDownloadURL(frenteRef);
-        updateDoc(clienteRef, {
-          frenteDoDocumento: frenteURL,
-        });
-      } else {
-        toast({
-          title: "Somente imagens são permitidas!",
-          variant: "destructive",
-          duration: 5000,
-        });
+      if (values.frenteDoDocumento instanceof File) {
+        if (values.frenteDoDocumento.type.startsWith("image/")) {
+          const frenteRef = ref(
+            storage,
+            `documentos/${docRef.id}-frente-documento`
+          );
+          await uploadBytes(frenteRef, values.frenteDoDocumento);
+          const frenteURL = await getDownloadURL(frenteRef);
+          updateDoc(clienteRef, {
+            frenteDoDocumento: frenteURL,
+          });
+        } else {
+          toast({
+            title: "Somente imagens são permitidas!",
+            variant: "destructive",
+            duration: 5000,
+          });
+        }
       }
-      if (
-        values.versoDoDocumento instanceof File &&
-        values.versoDoDocumento.type.startsWith("image/")
-      ) {
-        const versoRef = ref(
-          storage,
-          `documentos/${docRef.id}-verso-documento`
-        );
 
-        await uploadBytes(versoRef, values.versoDoDocumento);
+      if (values.versoDoDocumento instanceof File) {
+        if (values.versoDoDocumento.type.startsWith("image/")) {
+          const versoRef = ref(
+            storage,
+            `documentos/${docRef.id}-verso-documento`
+          );
 
-        // Obtém o URL do arquivo enviado (verso)
-        const versoURL = await getDownloadURL(versoRef);
-        updateDoc(clienteRef, {
-          versoDoDocumento: versoURL,
-        });
-      } else {
-        toast({
-          title: "Somente imagens são permitidas!",
-          variant: "destructive",
-          duration: 5000,
-        });
+          await uploadBytes(versoRef, values.versoDoDocumento);
+
+          // Obtém o URL do arquivo enviado (verso)
+          const versoURL = await getDownloadURL(versoRef);
+          updateDoc(clienteRef, {
+            versoDoDocumento: versoURL,
+          });
+        } else {
+          toast({
+            title: "Somente imagens são permitidas!",
+            variant: "destructive",
+            duration: 5000,
+          });
+        }
       }
     }
   } catch (error) {
@@ -264,11 +267,11 @@ export async function GetCostumers() {
       const querySnapshot = await getDocs(
         collection(db, currentUser!.uid, "data", "clientes")
       );
-      const consumers = querySnapshot.docs.map((doc) => ({
+      const costumers = querySnapshot.docs.map((doc) => ({
         ...(doc.data() as z.infer<typeof CostumerSchema>),
       }));
 
-      return consumers;
+      return costumers;
     }
   } catch (error) {
     console.log(error);
@@ -286,9 +289,42 @@ export async function GetCostumer(clienteId: string) {
       const docRef = await getDoc(
         doc(db, currentUser!.uid, "data", "clientes", clienteId)
       );
-      const costumers = docRef.data() as CostumerProps;
+      const costumer = docRef.data() as CostumerProps;
 
-      return costumers;
+      return costumer;
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    console.log();
+  }
+}
+
+export async function GetCostumerOperations(
+  clienteId: string,
+  operationLimit?: number
+) {
+  const db = getFirestore(firebaseApp);
+  const { currentUser } = getAuth(firebaseApp);
+
+  try {
+    if (currentUser && currentUser.uid) {
+      const queryRef = operationLimit
+        ? query(
+            collection(db, currentUser!.uid, "data", "operacoes"),
+            where("clienteId", "==", clienteId),
+            limit(operationLimit)
+          )
+        : query(
+            collection(db, currentUser!.uid, "data", "operacoes"),
+            where("clienteId", "==", clienteId)
+          );
+      const querySnapshot = await getDocs(queryRef);
+      const operations = querySnapshot.docs.map((doc) => ({
+        ...(doc.data() as OperationProps),
+      }));
+
+      return operations;
     }
   } catch (error) {
     console.log(error);

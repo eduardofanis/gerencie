@@ -45,7 +45,7 @@ export default function CostumerDropdown({ row }: any) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
-            onClick={() => setSearchParams({ clienteId: clienteId })}
+            onClick={() => setSearchParams({ visualizarCliente: clienteId })}
           >
             <Eye className="w-4 h-4 mr-2 " />
             Visualizar cliente

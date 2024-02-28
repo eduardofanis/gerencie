@@ -34,7 +34,7 @@ export default function SelectInput(props: SelectProps) {
           <FormLabel>{props.label}</FormLabel>
           <Select
             onValueChange={field.onChange}
-            defaultValue={field.value!.toString()}
+            defaultValue={props.defaultValue}
           >
             <FormControl>
               <SelectTrigger>

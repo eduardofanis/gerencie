@@ -2,10 +2,10 @@ import { useSearchParams } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogFooter } from "../ui/dialog";
 import { Skeleton } from "../ui/skeleton";
-import { GetCostumer } from "@/api";
+import { GetCostumer, GetCostumerOperations } from "@/api";
 import React from "react";
 import { Timestamp } from "firebase/firestore";
-import { ClipboardCopy, Edit } from "lucide-react";
+import { ClipboardCopy, Edit, EditIcon } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -13,6 +13,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "../ui/use-toast";
+import {
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "../ui/input";
 
 export type CostumerProps = {
   estadoCivil: string;
@@ -36,7 +42,19 @@ export type CostumerProps = {
   createdAt: Timestamp;
 };
 
-export type OperationProps = {};
+export type OperationProps = {
+  dataDaOperacao: Timestamp;
+  comissao: string;
+  valorRecebido: string;
+  tipoDaOperacao: string;
+  id: string;
+  parcelas: string;
+  createdAt: Timestamp;
+  valorLiberado: string;
+  cliente: string;
+  clienteId: string;
+  statusDaOperacao: string;
+};
 
 type ClipboardTextProps = {
   children: string;
@@ -51,6 +69,8 @@ function ClipboardText({
   clipboard = true,
   className,
 }: ClipboardTextProps) {
+  const [open, setOpen] = React.useState(false);
+
   function copyToClipboard() {
     navigator.clipboard.writeText(children);
     toast({
@@ -63,13 +83,23 @@ function ClipboardText({
   return (
     <div className={className}>
       <h3 className="font-medium">{label}</h3>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <p>{children}</p>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger onClick={() => setOpen(true)}>
+              <EditIcon className="h-4 w-4 ml-1" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Editar campo</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         {clipboard && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger onClick={copyToClipboard}>
-                <ClipboardCopy className="h-4 w-4" />
+                <ClipboardCopy className="h-4 w-4 " />
               </TooltipTrigger>
               <TooltipContent>
                 <p>Clique para copiar</p>
@@ -78,6 +108,20 @@ function ClipboardText({
           </TooltipProvider>
         )}
       </div>
+      <Dialog open={open}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar {label}</DialogTitle>
+          </DialogHeader>
+          <Input />
+          <DialogFooter>
+            <Button variant={"outline"} onClick={() => setOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={() => setOpen(false)}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -85,14 +129,14 @@ function ClipboardText({
 export default function CostumersView() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [costumer, setCostumer] = React.useState<CostumerProps>();
-  const [operations, setOperations] = React.useState();
+  const [operations, setOperations] = React.useState<OperationProps[]>();
 
-  const isOpen = searchParams.get("clienteId") ? true : false;
+  const isOpen = searchParams.get("visualizarCliente") ? true : false;
 
   React.useEffect(() => {
     async function getCostumer() {
-      const id: string = searchParams.get("clienteId")!;
-      if (searchParams.get("clienteId")) {
+      const id: string = searchParams.get("visualizarCliente")!;
+      if (searchParams.get("visualizarCliente")) {
         const costumerData = await GetCostumer(id);
         setCostumer(costumerData);
       }
@@ -100,7 +144,21 @@ export default function CostumersView() {
     getCostumer();
   }, [searchParams]);
 
-  if (!costumer)
+  React.useEffect(() => {
+    async function getOperations() {
+      const id: string = searchParams.get("visualizarCliente")!;
+      if (searchParams.get("visualizarCliente") && costumer) {
+        const operationsData = await GetCostumerOperations(
+          `${costumer.nome}-${id}`,
+          3
+        );
+        setOperations(operationsData);
+      }
+    }
+    getOperations();
+  }, [searchParams, costumer]);
+
+  if (!costumer || !operations)
     return (
       <Dialog open={isOpen}>
         <DialogContent className="sm:max-w-[800px]">
@@ -203,11 +261,42 @@ export default function CostumersView() {
             </div>
             <div className="mt-8">
               <h2 className="text-lg font-medium mb-4">Últimas operações</h2>
+              <div className="divide-y">
+                {operations.map((operation) => {
+                  const date = new Date(
+                    operation.dataDaOperacao.seconds * 1000
+                  ).toLocaleDateString("pt-BR");
+
+                  const formatted = new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  }).format(parseFloat(operation.valorLiberado));
+
+                  return (
+                    <div
+                      key={operation.id}
+                      className="flex justify-between py-2"
+                    >
+                      <span>
+                        {operation.tipoDaOperacao} - {date}
+                      </span>
+                      <span>{formatted}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
         <DialogFooter>
-          <Button variant={"outline"}>
+          <Button
+            variant={"outline"}
+            onClick={() => {
+              setSearchParams({
+                editarCliente: costumer.id.split("-").slice(1).join("-"),
+              });
+            }}
+          >
             <Edit className="h-4 w-4 mr-2" />
             Editar cliente
           </Button>

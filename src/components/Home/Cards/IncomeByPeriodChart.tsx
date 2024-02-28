@@ -96,8 +96,17 @@ export default function IncomeByPeriodChart() {
     const lastDayOfMonth = new Date(
       new Date().getFullYear(),
       new Date().getMonth(),
-      new Date().getDate()
+      new Date().getDate(),
+      23,
+      59,
+      59
     );
+
+    if (date && date.to) {
+      date.to.setHours(23);
+      date.to.setMinutes(59);
+      date.to.setSeconds(59);
+    }
 
     const allDaysArray = [];
     const firstDate = new Date(date && date.from ? date.from : firstDayOfMonth); // Iniciar a partir da data inicial
@@ -140,6 +149,7 @@ export default function IncomeByPeriodChart() {
       const operations = querySnapshot.docs.map((doc) => ({
         ...(doc.data() as OperationProps),
       }));
+      console.log(operations);
       setThisMonthOperations(operations);
     });
 

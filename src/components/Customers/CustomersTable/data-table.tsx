@@ -36,6 +36,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import React from "react";
 import NewCostumerForm from "@/components/Forms/NewCostumerForm";
 import { useSearchParams } from "react-router-dom";
+import EditCostumerForm from "@/components/Forms/EditCostumerForm";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -112,19 +113,26 @@ export function DataTable<TData, TValue>({
 
         <Dialog
           open={
-            searchParams.get("modal") && searchParams.get("modal") == "true"
+            searchParams.get("formularioCliente") ||
+            searchParams.get("editarCliente")
               ? true
               : false
           }
         >
           <DialogTrigger asChild>
-            <Button onClick={() => setSearchParams({ modal: "true" })}>
+            <Button
+              onClick={() => setSearchParams({ formularioCliente: "true" })}
+            >
               <PlusCircle className="w-4 h-4 mr-2" />
               Novo cliente
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[1000px]">
-            <NewCostumerForm />
+            {!searchParams.get("editarCliente") ? (
+              <NewCostumerForm />
+            ) : (
+              <EditCostumerForm />
+            )}
           </DialogContent>
         </Dialog>
       </div>
