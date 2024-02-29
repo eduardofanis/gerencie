@@ -5,7 +5,7 @@ import { Skeleton } from "../ui/skeleton";
 import { GetCostumer, GetCostumerOperations } from "@/services/api";
 import React from "react";
 import { Timestamp } from "firebase/firestore";
-import { ClipboardCopy, Download, Edit } from "lucide-react";
+import { ClipboardCopy, Edit } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -126,10 +126,6 @@ export default function CostumersView() {
     getOperations();
   }, [searchParams, costumer]);
 
-  async function downloadPhoto(imageUrl: string) {
-    console.log(imageUrl);
-  }
-
   if (!costumer)
     return (
       <Dialog open={isOpen}>
@@ -153,34 +149,24 @@ export default function CostumersView() {
                 ? costumer.tipoDoDocumento
                 : "Não definido"}
             </ClipboardText>
+
             {costumer.frenteDoDocumento ? (
-              <div className="relative">
+              <div className="">
                 <img
                   src={costumer.frenteDoDocumento}
-                  className="h-[320px] object-cover"
+                  className="h-[320px] object-cover rounded"
                 />
-                <Button className="absolute bottom-2 right-2 p-3">
-                  <Download
-                    onClick={() => downloadPhoto(costumer.frenteDoDocumento)}
-                    className="h-4 w-4"
-                  />
-                </Button>
               </div>
             ) : (
               <Skeleton className="h-[320px]"></Skeleton>
             )}
+
             {costumer.versoDoDocumento ? (
-              <div className="relative">
+              <div className="">
                 <img
                   src={costumer.versoDoDocumento}
-                  className="h-[320px] object-cover"
+                  className="h-[320px] object-cover rounded"
                 />
-                <Button className="absolute bottom-2 right-2 p-3">
-                  <Download
-                    onClick={() => downloadPhoto(costumer.versoDoDocumento)}
-                    className="h-4 w-4"
-                  />
-                </Button>
               </div>
             ) : (
               <Skeleton className="h-[320px]"></Skeleton>
@@ -191,11 +177,18 @@ export default function CostumersView() {
             <div>
               <h2 className="text-lg font-medium mb-4">Dados pessoais</h2>
               <div className="grid grid-cols-3 gap-2">
-                <ClipboardText label="CPF">
-                  {costumer.cpf.replace(
-                    /(\d{3})(\d{3})(\d{3})(\d{2})/,
-                    "$1.$2.$3-$4"
-                  )}
+                <ClipboardText label="CPF/RG">
+                  {costumer.cpf.length === 11
+                    ? costumer.cpf.replace(
+                        /(\d{3})(\d{3})(\d{3})(\d{2})/,
+                        "$1.$2.$3-$4"
+                      )
+                    : costumer.cpf.length === 9
+                    ? costumer.cpf.replace(
+                        /(\d{2})(\d{3})(\d{3})(\d{1})/,
+                        "$1.$2.$3-$4"
+                      )
+                    : costumer.cpf}
                 </ClipboardText>
                 <ClipboardText label="Telefone">
                   {costumer.telefone.replace(

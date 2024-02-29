@@ -14,12 +14,12 @@ export default function TextInput(props: InputProps) {
       name={props.name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{props.label}</FormLabel>
+          {props.label && <FormLabel>{props.label}</FormLabel>}
           <FormControl>
             <Input
               placeholder={props.placeholder}
               className={props.className}
-              type="text"
+              type={props.type || "text"}
               {...field}
             />
           </FormControl>

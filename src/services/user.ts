@@ -1,5 +1,6 @@
 import { toast } from "@/components/ui/use-toast";
 import { firebaseApp } from "@/main";
+import { addDays } from "date-fns";
 import { FirebaseError } from "firebase/app";
 import {
   createUserWithEmailAndPassword,
@@ -9,6 +10,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 
 export async function userSignIn(email: string, password: string) {
   const auth = getAuth(firebaseApp);
@@ -42,16 +44,13 @@ export async function userSignUp(
   email: string,
   password: string,
   confirmPassword: string,
-  name: string
+  name: string,
+  plan: string
 ) {
   const db = getFirestore(firebaseApp);
   const auth = getAuth(firebaseApp);
 
-  const date = new Date(
-    new Date().getFullYear(),
-    new Date().getMonth(),
-    new Date().getDate() + 2
-  );
+  const date = addDays(new Date(), 2);
 
   try {
     if (password == confirmPassword) {
@@ -72,7 +71,7 @@ export async function userSignUp(
         });
 
         await setDoc(doc(db, auth.currentUser!.uid, "data"), {
-          plano: "Básico",
+          plano: plan,
           dataDeVencimento: date,
           tiposDeOperacoes: [],
         });
@@ -98,13 +97,51 @@ export async function userSignUp(
         duration: 5000,
       });
     } else {
-      console.log(e);
       toast({
         title: "Algo deu errado, tente novamente.",
         variant: "destructive",
         duration: 5000,
       });
     }
+  }
+}
+
+export async function updateProfilePicture(photo: File) {
+  const auth = getAuth(firebaseApp);
+  const storage = getStorage();
+
+  try {
+    if (photo instanceof File && auth.currentUser) {
+      if (photo.type.startsWith("image/")) {
+        const photoRef = ref(storage, `fotosDePerfil/${auth.currentUser.uid}`);
+
+        await uploadBytes(photoRef, photo);
+
+        // Obtém o URL do arquivo enviado (verso)
+        const photoURL = await getDownloadURL(photoRef);
+        updateProfile(auth.currentUser, {
+          photoURL: photoURL,
+        });
+
+        toast({
+          title: "Foto de perfil atualizada com sucesso!",
+          variant: "success",
+          duration: 5000,
+        });
+      } else {
+        toast({
+          title: "Somente imagens são permitidas!",
+          variant: "destructive",
+          duration: 5000,
+        });
+      }
+    }
+  } catch (error) {
+    toast({
+      title: "Algo deu errado, tente novamente!",
+      variant: "destructive",
+      duration: 5000,
+    });
   }
 }
 

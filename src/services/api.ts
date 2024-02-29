@@ -125,7 +125,12 @@ export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
 }
 
 export async function EditCostumer(
-  values: z.infer<typeof CostumerSchema>,
+  {
+    frenteDoDocumento,
+    versoDoDocumento,
+    ...values
+  }: z.infer<typeof CostumerSchema>,
+
   id: string
 ) {
   const db = getFirestore(firebaseApp);
@@ -143,56 +148,17 @@ export async function EditCostumer(
       await updateDoc(doc(db, currentUser.uid, "data", "clientes", id), {
         ...values,
         dataDeNascimento: dateObject,
-        frenteDoDocumento: "",
-        versoDoDocumento: "",
       });
       toast({
         title: "Cliente editado com sucesso!",
         variant: "success",
         duration: 5000,
       });
-      // if (values.frenteDoDocumento instanceof File) {
-      //   if (values.frenteDoDocumento.type.startsWith("image/")) {
-      //     const frenteRef = ref(
-      //       storage,
-      //       `documentos/${docRef.id}-frente-documento`
-      //     );
-      //     await uploadBytes(frenteRef, values.frenteDoDocumento);
-      //     const frenteURL = await getDownloadURL(frenteRef);
-      //     updateDoc(clienteRef, {
-      //       frenteDoDocumento: frenteURL,
-      //     });
-      //   } else {
-      //     toast({
-      //       title: "Somente imagens são permitidas!",
-      //       variant: "destructive",
-      //       duration: 5000,
-      //     });
-      //   }
-      // }
 
-      // if (values.versoDoDocumento instanceof File) {
-      //   if (values.versoDoDocumento.type.startsWith("image/")) {
-      //     const versoRef = ref(
-      //       storage,
-      //       `documentos/${docRef.id}-verso-documento`
-      //     );
-
-      //     await uploadBytes(versoRef, values.versoDoDocumento);
-
-      //     // Obtém o URL do arquivo enviado (verso)
-      //     const versoURL = await getDownloadURL(versoRef);
-      //     updateDoc(clienteRef, {
-      //       versoDoDocumento: versoURL,
-      //     });
-      //   } else {
-      //     toast({
-      //       title: "Somente imagens são permitidas!",
-      //       variant: "destructive",
-      //       duration: 5000,
-      //     });
-      //   }
-      // }
+      if (frenteDoDocumento)
+        updateCostumerDocuments(frenteDoDocumento, "frente-documento", id);
+      if (versoDoDocumento)
+        updateCostumerDocuments(versoDoDocumento, "verso-documento", id);
     }
   } catch (error) {
     console.log(error);
@@ -544,6 +510,43 @@ export async function DeleteCostumer(
       duration: 5000,
     });
     throw error;
+  }
+}
+
+export async function updateCostumerDocuments(
+  file: File,
+  fileName: string,
+  id: string
+) {
+  const db = getFirestore(firebaseApp);
+  const { currentUser } = getAuth(firebaseApp);
+  const storage = getStorage();
+
+  try {
+    const clienteRef = doc(db, currentUser!.uid, "data", "clientes", id);
+    if (file instanceof File) {
+      if (file.type.startsWith("image/")) {
+        const frenteRef = ref(storage, `documentos/${id}-${fileName}`);
+        await uploadBytes(frenteRef, file);
+        const frenteURL = await getDownloadURL(frenteRef);
+        updateDoc(clienteRef, {
+          frenteDoDocumento: frenteURL,
+        });
+      } else {
+        toast({
+          title: "Somente imagens são permitidas!",
+          variant: "destructive",
+          duration: 5000,
+        });
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    toast({
+      title: "Algo deu errado, tente novamente!",
+      variant: "destructive",
+      duration: 5000,
+    });
   }
 }
 

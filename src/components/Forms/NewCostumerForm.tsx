@@ -150,8 +150,8 @@ export default function NewCostumerForm() {
               <CPFInput
                 form={form}
                 name="cpf"
-                label="CPF"
-                placeholder="000.000.000-00"
+                label="CPF/RG"
+                placeholder="000.000.000-00/00.000.000-0"
               />
               <PhoneNumberInput
                 form={form}

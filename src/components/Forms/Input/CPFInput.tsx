@@ -9,11 +9,14 @@ export default function CPFInput(props: InputProps) {
 
   function formatCPF(value: string) {
     const digits = value.replace(/\D/g, "");
-    let formattedValue = digits.replace(
-      /(\d{3})(\d{3})(\d{3})(\d{2})/,
-      "$1.$2.$3-$4"
-    );
-    formattedValue = formattedValue.slice(0, 14);
+    let formattedValue =
+      digits.length === 11
+        ? digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4")
+        : digits.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, "$1.$2.$3-$4");
+    formattedValue =
+      digits.length === 11
+        ? formattedValue.slice(0, 14)
+        : formattedValue.slice(0, 12);
     return formattedValue;
   }
 
@@ -37,7 +40,7 @@ export default function CPFInput(props: InputProps) {
 
         return (
           <FormItem>
-            <FormLabel>{props.label}</FormLabel>
+            {props.label && <FormLabel>{props.label}</FormLabel>}
             <FormControl>
               <Input
                 placeholder={props.placeholder}

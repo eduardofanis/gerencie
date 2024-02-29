@@ -10,7 +10,9 @@ export default function FileInput(props: InputProps) {
       render={() => {
         return (
           <FormItem>
-            <FormLabel htmlFor={props.name}>{props.label}</FormLabel>
+            {props.label && (
+              <FormLabel htmlFor={props.name}>{props.label}</FormLabel>
+            )}
             <FormControl>
               <Input
                 accept="image/png, image/jpeg, image/webp"

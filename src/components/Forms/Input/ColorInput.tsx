@@ -14,7 +14,7 @@ export default function ColorInput(props: InputProps) {
       name={props.name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{props.label}</FormLabel>
+          {props.label && <FormLabel>{props.label}</FormLabel>}
           <FormControl>
             <Input
               placeholder={props.placeholder}

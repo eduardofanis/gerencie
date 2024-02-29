@@ -41,7 +41,7 @@ export default function ComboInput(props: ComboProps) {
       name={props.name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{props.label}</FormLabel>
+          {props.label && <FormLabel>{props.label}</FormLabel>}
           <Popover>
             <PopoverTrigger asChild>
               <FormControl>

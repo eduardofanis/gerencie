@@ -2,7 +2,7 @@ import {
   Users,
   LogOut,
   BarChart4,
-  Factory,
+  HandCoins,
   Phone,
   User,
   Contact,
@@ -32,13 +32,15 @@ export default function Sidebar() {
         <DropdownMenuTrigger asChild>
           <div className="flex items-center space-x-2 hover:bg-slate-50 rounded-md p-2 cursor-pointer">
             <Avatar>
-              <AvatarImage src="" />
+              <AvatarImage src={auth.currentUser?.photoURL || ""} />
               <AvatarFallback>
                 {auth.currentUser?.displayName?.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h2 className="font-medium">{auth.currentUser?.displayName}</h2>
+              <h2 className="font-medium whitespace-nowrap">
+                {auth.currentUser?.displayName}
+              </h2>
               <span className="text-sm text-ellipsis break-words opacity-85">
                 {auth.currentUser?.email}
               </span>
@@ -83,7 +85,7 @@ export default function Sidebar() {
           variant={"ghost"}
           onClick={() => navigate("/operacoes")}
         >
-          <Factory className="h-5 w-5 " />
+          <HandCoins className="h-5 w-5 " />
           <span>Operações</span>
         </Button>
         <Button

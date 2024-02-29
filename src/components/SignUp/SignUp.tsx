@@ -1,10 +1,34 @@
 import SignUpForm from "../Forms/SignUpForm";
-import { GanttChart } from "lucide-react";
+import { GanttChart, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { useForm } from "react-hook-form";
+import { CreateAccountSchema } from "@/schemas/CreateAccountSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 export default function SignUp() {
   const navigate = useNavigate();
+
+  const form = useForm<z.infer<typeof CreateAccountSchema>>({
+    resolver: zodResolver(CreateAccountSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      plan: "",
+    },
+  });
 
   return (
     <div className="grid grid-cols-2 w-full h-screen">
@@ -24,15 +48,83 @@ export default function SignUp() {
         </div>
       </div>
       <div className="flex flex-col p-8 place-content-center items-center relative">
-        <Button
-          className="absolute top-8 right-8"
-          variant="ghost"
-          onClick={() => navigate("/login")}
-        >
-          Entrar
-        </Button>
+        <div className="absolute flex gap-2 top-8 right-8">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost">Planos</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[800px]">
+              <DialogHeader>
+                <DialogTitle>Planos</DialogTitle>
+                <DialogDescription>
+                  Selecione o plano que mais se enquadra nas suas necessidades.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-3 h-[320px] gap-4 pt-4">
+                <div className="text-center rounded-lg p-4 flex bg-slate-50 flex-col justify-between">
+                  <h2>Individual</h2>
+                  <span className="text-lg font-medium">R$ 89,90/mês</span>
+                  <ul className="list-disc list-inside text-sm mt-4 mb-8 text-slate-600">
+                    <li>Função de funcionários desativada.</li>
+                  </ul>
+                  <DialogClose asChild>
+                    <Button
+                      variant={"outline"}
+                      className="w-full mt-auto border-0"
+                      onClick={() => form.setValue("plan", "Individual")}
+                    >
+                      Selecionar plano
+                    </Button>
+                  </DialogClose>
+                </div>
+                <div className="text-center rounded-lg p-4 flex bg-slate-950 flex-col justify-between">
+                  <h2 className="text-white">Empresarial</h2>
+                  <span className="text-lg font-medium text-white">
+                    R$ 349,90/mês
+                  </span>
+                  <ul className="list-disc list-inside text-sm mt-4 mb-8 text-slate-300">
+                    <li>Função de funcionários ativada.</li>
+                    <li>Número de funcionários ilimitado.</li>
+                  </ul>
+                  <DialogClose asChild>
+                    <Button
+                      className="w-full mt-auto bg-slate-900"
+                      onClick={() => form.setValue("plan", "Empresarial")}
+                    >
+                      Selecionar plano
+                    </Button>
+                  </DialogClose>
+                </div>
+                <div className="text-center rounded-lg p-4 flex flex-col bg-slate-50 justify-between">
+                  <h2>Time</h2>
+                  <span className="text-lg font-medium">R$ 149,90/mês</span>
+                  <ul className="list-disc list-inside text-sm mt-4 mb-8 text-slate-600">
+                    <li>Função de funcionários ativada.</li>
+                    <li>Limite de 3 funcionários.</li>
+                  </ul>
+                  <DialogClose asChild>
+                    <Button
+                      variant={"outline"}
+                      className="w-full mt-auto border-0"
+                      onClick={() => form.setValue("plan", "Time")}
+                    >
+                      Selecionar plano
+                    </Button>
+                  </DialogClose>
+                </div>
+              </div>
+              <DialogClose className="absolute top-4 right-4">
+                <X className="h-4 w-4" />
+              </DialogClose>
+            </DialogContent>
+          </Dialog>
 
-        <SignUpForm />
+          <Button variant="ghost" onClick={() => navigate("/login")}>
+            Entrar
+          </Button>
+        </div>
+
+        <SignUpForm form={form} />
       </div>
     </div>
   );

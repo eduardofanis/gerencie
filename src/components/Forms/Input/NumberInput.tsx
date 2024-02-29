@@ -51,7 +51,7 @@ export default function NumberInput(props: NumberInputProps) {
 
         return (
           <FormItem>
-            <FormLabel>{props.label}</FormLabel>
+            {props.label && <FormLabel>{props.label}</FormLabel>}
             <FormControl>
               <Input
                 placeholder={props.placeholder}

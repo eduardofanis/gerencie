@@ -132,7 +132,7 @@ export function DataTable<TData, TValue>({
             onChange={(event) =>
               table.getColumn("nome")?.setFilterValue(event.target.value)
             }
-            className="max-w-sm w-64"
+            className="max-w-sm w-[300px]"
           />
           <Input
             placeholder="Telefone"

@@ -8,7 +8,7 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import React from "react";
 import { toast } from "../ui/use-toast";
-import { userSignIn, userSignOut } from "@/services/user";
+import { updateProfilePicture, userSignIn, userSignOut } from "@/services/user";
 import { Separator } from "../ui/separator";
 import { Timestamp, doc, getFirestore, onSnapshot } from "firebase/firestore";
 import Loading from "../ui/Loading";
@@ -17,7 +17,6 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -36,6 +35,8 @@ export default function Account() {
   const [data, setData] = React.useState<DataProps | null>();
 
   const auth = getAuth(firebaseApp);
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     const db = getFirestore(firebaseApp);
@@ -124,6 +125,17 @@ export default function Account() {
     return daysDifference;
   }
 
+  function handleProfilePhotoClick() {
+    fileInputRef!.current!.click();
+  }
+
+  function handleProfilePhotoSelect(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const file = event.target.files![0];
+    updateProfilePicture(file);
+  }
+
   if (!data)
     return (
       <div className="flex">
@@ -140,11 +152,20 @@ export default function Account() {
         <h1 className="text-3xl font-bold mb-8">Minha conta</h1>
         <div className="grid w-full gap-12">
           <div className="flex items-center space-x-4">
-            <Avatar className="h-20 w-20 relative">
+            <Avatar
+              className="h-20 w-20 relative cursor-pointer"
+              onClick={handleProfilePhotoClick}
+            >
               <AvatarImage src={auth.currentUser?.photoURL || ""} />
-              <AvatarFallback className="text-xl cursor-pointer">
+              <AvatarFallback className="text-xl">
                 <Camera className="h-6 w-6 text-black" />
               </AvatarFallback>
+              <Input
+                ref={fileInputRef}
+                className="hidden"
+                type="file"
+                onChange={(e) => handleProfilePhotoSelect(e)}
+              />
             </Avatar>
             <div>
               <h2 className="font-medium text-lg">
@@ -168,7 +189,17 @@ export default function Account() {
             <div className="space-y-1">
               <p>
                 Plano:{" "}
-                <span className="font-medium text-green-800">{data.plano}</span>
+                <span
+                  className={`font-medium ${
+                    data.plano == "Individual"
+                      ? "text-green-800"
+                      : data.plano == "Time"
+                      ? "text-yellow-700"
+                      : "text-blue-700"
+                  }`}
+                >
+                  {data.plano}
+                </span>
               </p>
               <p>
                 Data de Vencimento:{" "}
@@ -182,11 +213,14 @@ export default function Account() {
                   "text-red-600"
                 }`}
               >
-                Sua assinatura vence em{" "}
-                {formatValidityMessage(data.dataDeVencimento) >= 1
-                  ? formatValidityMessage(data.dataDeVencimento) + " dia"
-                  : formatValidityMessage(data.dataDeVencimento) + " dias"}
-                .
+                {formatValidityMessage(data.dataDeVencimento) <= 0
+                  ? "Sua assinatura venceu, renove para continuar utilizando nosso sistema."
+                  : `Sua assinatura vence em ${
+                      formatValidityMessage(data.dataDeVencimento) <= 1
+                        ? formatValidityMessage(data.dataDeVencimento) + " dia."
+                        : formatValidityMessage(data.dataDeVencimento) +
+                          " dias."
+                    }`}
               </p>
 
               <Dialog>

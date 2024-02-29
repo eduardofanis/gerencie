@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 const CostumerSchema = z.object({
-  id: z.string().optional(),
   nome: z
     .string()
     .min(1)
@@ -21,25 +20,27 @@ const CostumerSchema = z.object({
   naturalidade: z.string(),
   telefone: z.string().min(1),
   cep: z.string().min(8),
-  rua: z.string(),
-  numeroDaRua: z.string(),
+  rua: z.string().min(1),
+  numeroDaRua: z.string().min(1),
   complemento: z.string(),
-  estado: z.string(),
-  cidade: z.string(),
-  bairro: z.string(),
+  estado: z.string().min(1),
+  cidade: z.string().min(1),
+  bairro: z.string().min(1),
   tipoDoDocumento: z.string(),
   frenteDoDocumento: z
     .instanceof(FileList)
     .transform((file) => file.length > 0 && file.item(0))
     .refine((file) => !file || (!!file && file.type?.startsWith("image")), {
       message: "Only images are allowed to be sent.",
-    }),
+    })
+    .optional(),
   versoDoDocumento: z
     .instanceof(FileList)
     .transform((file) => file.length > 0 && file.item(0))
     .refine((file) => !file || (!!file && file.type?.startsWith("image")), {
       message: "Only images are allowed to be sent.",
-    }),
+    })
+    .optional(),
 });
 
 export { CostumerSchema };

@@ -31,7 +31,7 @@ export default function SelectInput(props: SelectProps) {
       name={props.name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{props.label}</FormLabel>
+          {props.label && <FormLabel>{props.label}</FormLabel>}
           <Select
             onValueChange={field.onChange}
             defaultValue={props.defaultValue}

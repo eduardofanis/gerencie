@@ -38,7 +38,7 @@ export default function BirthDateInput(props: InputProps) {
 
         return (
           <FormItem>
-            <FormLabel>{props.label}</FormLabel>
+            {props.label && <FormLabel>{props.label}</FormLabel>}
             <FormControl>
               <Input
                 placeholder={props.placeholder}

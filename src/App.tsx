@@ -2,7 +2,10 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Login from "./components/Login/Login";
 import Home from "./components/Home/Home";
 import AuthStorage from "./AuthContext";
-import ProtectedRoute from "./ProtectedRoute";
+import {
+  UserProtectedRoute,
+  SubscriptionProtectedRoute,
+} from "./ProtectedRoute";
 import Customers from "./components/Customers/Customers";
 import { Toaster } from "./components/ui/toaster";
 import Operations from "./components/Operations/Operations";
@@ -19,9 +22,11 @@ export default function App() {
             <Route
               path="/"
               element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
+                <UserProtectedRoute>
+                  <SubscriptionProtectedRoute>
+                    <Home />
+                  </SubscriptionProtectedRoute>
+                </UserProtectedRoute>
               }
             />
             <Route path="/login" element={<Login />} />
@@ -30,25 +35,39 @@ export default function App() {
             <Route
               path="/operacoes"
               element={
-                <ProtectedRoute>
-                  <Operations />
-                </ProtectedRoute>
+                <UserProtectedRoute>
+                  <SubscriptionProtectedRoute>
+                    <Operations />
+                  </SubscriptionProtectedRoute>
+                </UserProtectedRoute>
               }
             />
             <Route
               path="/clientes"
               element={
-                <ProtectedRoute>
-                  <Customers />
-                </ProtectedRoute>
+                <UserProtectedRoute>
+                  <SubscriptionProtectedRoute>
+                    <Customers />
+                  </SubscriptionProtectedRoute>
+                </UserProtectedRoute>
               }
             />
             <Route
               path="/conta"
               element={
-                <ProtectedRoute>
+                <UserProtectedRoute>
                   <Account />
-                </ProtectedRoute>
+                </UserProtectedRoute>
+              }
+            />
+            <Route
+              path="/funcionarios"
+              element={
+                <UserProtectedRoute>
+                  <SubscriptionProtectedRoute>
+                    <Account />
+                  </SubscriptionProtectedRoute>
+                </UserProtectedRoute>
               }
             />
           </Routes>

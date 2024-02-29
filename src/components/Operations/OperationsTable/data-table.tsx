@@ -100,7 +100,7 @@ export function DataTable<TData, TValue>({
             onChange={(event) =>
               table.getColumn("cliente")?.setFilterValue(event.target.value)
             }
-            className="max-w-sm w-64"
+            className="max-w-sm w-[300px]"
           />
           <Select
             value={
@@ -112,7 +112,7 @@ export function DataTable<TData, TValue>({
               table.getColumn("statusDaOperacao")?.setFilterValue(event)
             }
           >
-            <SelectTrigger className="w-[120px]">
+            <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -134,7 +134,7 @@ export function DataTable<TData, TValue>({
               table.getColumn("tipoDaOperacao")?.setFilterValue(event)
             }
           >
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Tipo" />
             </SelectTrigger>
             <SelectContent>

@@ -1,9 +1,9 @@
 export const firebaseConfig = {
-  apiKey: "AIzaSyCv8d8tUafUC8i9yeGlwYAElJ3DBCumUHE",
-  authDomain: "sistema-gestao-de-clientes.firebaseapp.com",
-  projectId: "sistema-gestao-de-clientes",
-  storageBucket: "sistema-gestao-de-clientes.appspot.com",
-  messagingSenderId: "521763056277",
-  appId: "1:521763056277:web:2c4c01d4d044d230c1c99c",
-  measurementId: "G-1EMDCESRRV",
+  apiKey: import.meta.env.VITE_API_KEY,
+  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGIN_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID,
+  measurementId: import.meta.env.VITE_MEASUREMENT_ID,
 };
