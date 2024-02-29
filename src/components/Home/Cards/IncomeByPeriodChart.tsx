@@ -149,7 +149,6 @@ export default function IncomeByPeriodChart() {
       const operations = querySnapshot.docs.map((doc) => ({
         ...(doc.data() as OperationProps),
       }));
-      console.log(operations);
       setThisMonthOperations(operations);
     });
 

@@ -2,6 +2,7 @@ import { useReducer } from "react";
 import { FormControl, FormField, FormItem, FormLabel } from "../../ui/form"; // Shadcn UI import
 import { Input } from "../../ui/input"; // Shandcn UI Input
 import { InputProps } from "@/types/InputProps";
+import React from "react";
 
 interface NumberInputProps extends InputProps {
   decimals?: number;
@@ -34,6 +35,12 @@ export default function NumberInput(props: NumberInputProps) {
     const formattedValue = calculatedValue.toFixed(props.decimals || 0);
     return formattedValue;
   }, initialValue);
+
+  React.useEffect(() => {
+    if (props.defaultValue) {
+      setValue(props.defaultValue);
+    }
+  }, [props.defaultValue]);
 
   return (
     <FormField

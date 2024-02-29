@@ -1,11 +1,9 @@
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import React from "react";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { firebaseApp } from "@/main";
 import { useNavigate } from "react-router-dom";
 import { toast } from "../ui/use-toast";
-import { FirebaseError } from "firebase/app";
+import { userSignIn } from "@/services/user";
 
 export default function SignInForm() {
   const [email, setEmail] = React.useState("");
@@ -15,33 +13,16 @@ export default function SignInForm() {
   const navigate = useNavigate();
 
   async function handleSignIn() {
-    const auth = getAuth(firebaseApp);
-    auth.useDeviceLanguage();
-
     try {
       setLoading(true);
-      await signInWithEmailAndPassword(auth, email, password);
-      toast({
-        title: "Login efetuado com sucesso.",
-        variant: "success",
-        duration: 5000,
-      });
-
+      await userSignIn(email, password);
       navigate("/");
     } catch (e) {
-      if (e instanceof FirebaseError && e.code == "auth/invalid-credential") {
-        toast({
-          title: "E-mail ou senha inválidos, tente novamente.",
-          variant: "destructive",
-          duration: 5000,
-        });
-      } else {
-        toast({
-          title: "Algo deu errado, tente novamente.",
-          variant: "destructive",
-          duration: 5000,
-        });
-      }
+      toast({
+        title: "Algo deu errado, tente novamente.",
+        variant: "destructive",
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }

@@ -30,7 +30,7 @@ import {
   ChevronDown,
   Plus,
 } from "lucide-react";
-import { GetCostumers, NewOperation } from "@/api";
+import { GetCostumers, NewOperation } from "@/services/api";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -177,7 +177,6 @@ export default function NewOperationForm() {
                                           "clienteId",
                                           cliente.id ? cliente.id : ""
                                         );
-                                        console.log(cliente.nome);
                                         setNomeDoCliente(cliente.nome);
                                       }}
                                     >

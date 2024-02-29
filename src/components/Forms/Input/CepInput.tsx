@@ -2,7 +2,8 @@ import { useReducer } from "react";
 import { FormControl, FormField, FormItem, FormLabel } from "../../ui/form"; // Shadcn UI import
 import { Input } from "../../ui/input"; // Shandcn UI Input
 import { InputProps } from "@/types/InputProps";
-import { fetchCep } from "@/api";
+import { fetchCep } from "@/services/api";
+import React from "react";
 
 export default function CepInput(props: InputProps) {
   const initialValue = "";
@@ -18,6 +19,12 @@ export default function CepInput(props: InputProps) {
     const formattedValue = formatCEP(next);
     return formattedValue;
   }, initialValue);
+
+  React.useEffect(() => {
+    if (props.defaultValue) {
+      setValue(props.defaultValue);
+    }
+  }, [props.defaultValue]);
 
   return (
     <FormField
@@ -37,7 +44,7 @@ export default function CepInput(props: InputProps) {
                 {...field}
                 onChange={(ev) => {
                   setValue(ev.target.value);
-                  field.onChange(value);
+                  field.onChange(ev.target.value);
                   if (ev.target.value.length == 8) {
                     fetchCep(ev.target.value.replace("-", ""), props.form);
                   }

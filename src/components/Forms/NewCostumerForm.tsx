@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { GetCostumer, NewCostumer } from "@/api";
+import { NewCostumer } from "@/services/api";
 import { Form } from "../ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -21,12 +21,9 @@ import PhoneNumberInput from "./Input/PhoneNumberInput";
 import CPFInput from "./Input/CPFInput";
 import BirthDateInput from "./Input/BirthDateInput";
 import ComboInput from "./Input/ComboInput";
-import React from "react";
-import { CostumerProps } from "../Customers/CostumersView";
 
 export default function NewCostumerForm() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [costumer, setCostumer] = React.useState<CostumerProps>();
+  const [, setSearchParams] = useSearchParams();
 
   const form = useForm<z.infer<typeof CostumerSchema>>({
     resolver: zodResolver(CostumerSchema),
@@ -49,37 +46,6 @@ export default function NewCostumerForm() {
     },
   });
 
-  React.useEffect(() => {
-    async function getCostumer() {
-      const id: string = searchParams.get("cliente")!;
-      if (searchParams.get("cliente")) {
-        const costumerData = await GetCostumer(id);
-        setCostumer(costumerData);
-      }
-    }
-    getCostumer();
-  }, [searchParams]);
-
-  React.useEffect(() => {
-    if (costumer) {
-      form.setValue("nome", costumer.nome);
-      form.setValue("bairro", costumer.bairro);
-      form.setValue("cep", costumer.cep);
-      form.setValue("cidade", costumer.cidade);
-      form.setValue("complemento", costumer.complemento);
-      form.setValue("cpf", costumer.cpf);
-      form.setValue("dataDeNascimento", costumer.dataDeNascimento.toString());
-      form.setValue("estado", costumer.estado);
-      form.setValue("estadoCivil", costumer.estadoCivil);
-      form.setValue("naturalidade", costumer.naturalidade);
-      form.setValue("numeroDaRua", costumer.numeroDaRua);
-      form.setValue("rua", costumer.rua);
-      form.setValue("sexo", costumer.sexo);
-      form.setValue("telefone", costumer.telefone);
-      form.setValue("tipoDoDocumento", costumer.tipoDoDocumento);
-    }
-  }, [costumer, form]);
-
   function onSubmit(values: z.infer<typeof CostumerSchema>) {
     NewCostumer(values);
     setSearchParams({});
@@ -87,49 +53,49 @@ export default function NewCostumerForm() {
 
   const SexoItems: SelectItems[] = [
     {
-      value: "masculino",
+      value: "Masculino",
       label: "Masculino",
     },
     {
-      value: "feminino",
+      value: "Feminino",
       label: "Feminino",
     },
     {
-      value: "outro",
+      value: "Outro",
       label: "Outro",
     },
   ];
 
   const EstadoCivilItems: SelectItems[] = [
     {
-      value: "casado",
-      label: "Casado",
+      value: "Casado(a)",
+      label: "Casado(a)",
     },
     {
-      value: "separado",
-      label: "Separado",
+      value: "Separado(a)",
+      label: "Separado(a)",
     },
     {
-      value: "divorciado",
-      label: "Divorciado",
+      value: "Divorciado(a)",
+      label: "Divorciado(a)",
     },
     {
-      value: "viuvu",
-      label: "Viúvo",
+      value: "Viúvo(a)",
+      label: "Viúvo(a)",
     },
   ];
 
   const DocumentoItems: SelectItems[] = [
     {
-      value: "rg",
+      value: "RG",
       label: "RG",
     },
     {
-      value: "cnh",
+      value: "CNH",
       label: "CNH",
     },
     {
-      value: "outro",
+      value: "Outro",
       label: "Outro",
     },
   ];
@@ -204,7 +170,6 @@ export default function NewCostumerForm() {
                 form={form}
                 name="sexo"
                 label="Sexo"
-                defaultValue={costumer?.sexo}
                 placeholder="Selecione"
                 selectItems={SexoItems}
               />
@@ -280,10 +245,6 @@ export default function NewCostumerForm() {
               }}
             >
               Cancelar
-            </Button>
-
-            <Button type="button" onClick={() => form.setValue("estado", "SP")}>
-              Teste
             </Button>
 
             <Button type="submit">Cadastrar</Button>

@@ -6,13 +6,13 @@ import ProtectedRoute from "./ProtectedRoute";
 import Customers from "./components/Customers/Customers";
 import { Toaster } from "./components/ui/toaster";
 import Operations from "./components/Operations/Operations";
-import Preferences from "./components/Preferences/Preferences";
 import SignUp from "./components/SignUp/SignUp";
 import ForgotPassword from "./components/ForgotPassword/ForgotPassword";
+import Account from "./components/Account/Account";
 
 export default function App() {
   return (
-    <main>
+    <main className="h-full">
       <BrowserRouter>
         <AuthStorage>
           <Routes>
@@ -44,10 +44,10 @@ export default function App() {
               }
             />
             <Route
-              path="/preferencias"
+              path="/conta"
               element={
                 <ProtectedRoute>
-                  <Preferences />
+                  <Account />
                 </ProtectedRoute>
               }
             />

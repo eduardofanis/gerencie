@@ -17,12 +17,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { DeleteCostumer } from "@/api";
+import { DeleteCostumer } from "@/services/api";
 import { Switch } from "@/components/ui/switch";
 
 import React from "react";
 import { useSearchParams } from "react-router-dom";
-import CostumersView from "../CostumersView";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function CostumerDropdown({ row }: any) {
@@ -50,7 +49,13 @@ export default function CostumerDropdown({ row }: any) {
             <Eye className="w-4 h-4 mr-2 " />
             Visualizar cliente
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() =>
+              setSearchParams({
+                editarCliente: clienteId,
+              })
+            }
+          >
             <Edit className="w-4 h-4 mr-2 " />
             Editar cliente
           </DropdownMenuItem>
@@ -63,7 +68,6 @@ export default function CostumerDropdown({ row }: any) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenuRoot>
-      <CostumersView />
       <AlertDialog open={dialog}>
         <AlertDialogContent>
           <AlertDialogHeader>

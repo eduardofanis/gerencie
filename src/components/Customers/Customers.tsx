@@ -13,6 +13,7 @@ import {
 import { getAuth } from "firebase/auth";
 import { firebaseApp } from "@/main";
 import Loading from "../ui/Loading";
+import CostumersView from "./CostumersView";
 
 export default function Customers() {
   const [data, setData] = React.useState<z.infer<typeof CostumerSchema>[]>();
@@ -41,6 +42,8 @@ export default function Customers() {
         <h1 className="text-3xl font-bold mb-8">Clientes</h1>
 
         {data ? <DataTable columns={columns} data={data} /> : <Loading />}
+
+        <CostumersView />
       </div>
     </div>
   );

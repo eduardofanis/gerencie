@@ -141,6 +141,7 @@ export function DataTable<TData, TValue>({
               <SelectGroup>
                 <SelectLabel>Tipo</SelectLabel>
                 {userData &&
+                  userData.tiposDeOperacoes &&
                   userData.tiposDeOperacoes.map((tipo) => (
                     <SelectItem
                       value={tipo.name + tipo.color}

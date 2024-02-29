@@ -14,25 +14,26 @@ import {
   getDoc,
   limit,
 } from "firebase/firestore";
-import { firebaseApp } from "./main";
+import { firebaseApp } from "../main";
 import { getAuth } from "firebase/auth";
-import { toast } from "./components/ui/use-toast";
-import { CostumerSchema } from "./schemas/CostumerSchema";
+import { toast } from "../components/ui/use-toast";
+import { CostumerSchema } from "../schemas/CostumerSchema";
 import { z } from "zod";
-import { OperationSchema } from "./schemas/OperationSchema";
-import { UserDataProps } from "./components/Forms/NewOperationTypeForm";
+import { OperationSchema } from "../schemas/OperationSchema";
+import { UserDataProps } from "../components/Forms/NewOperationTypeForm";
 import { UseFormReturn } from "react-hook-form";
 import {
   deleteObject,
   getDownloadURL,
   getStorage,
+  listAll,
   ref,
   uploadBytes,
 } from "firebase/storage";
 import {
   CostumerProps,
   OperationProps,
-} from "./components/Customers/CostumersView";
+} from "../components/Customers/CostumersView";
 
 export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
   const db = getFirestore(firebaseApp);
@@ -112,6 +113,86 @@ export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
           });
         }
       }
+    }
+  } catch (error) {
+    console.log(error);
+    toast({
+      title: "Algo deu errado, tente novamente!",
+      variant: "destructive",
+      duration: 5000,
+    });
+  }
+}
+
+export async function EditCostumer(
+  values: z.infer<typeof CostumerSchema>,
+  id: string
+) {
+  const db = getFirestore(firebaseApp);
+  const { currentUser } = getAuth(firebaseApp);
+  // const storage = getStorage();
+
+  try {
+    if (currentUser && currentUser.uid) {
+      const date = values.dataDeNascimento.replace(
+        /(\d{2})(\d{2})(\d{4})/,
+        "$1/$2/$3"
+      );
+      const [day, month, year] = date.split("/");
+      const dateObject = new Date(`${month}/${day}/${year}`);
+      await updateDoc(doc(db, currentUser.uid, "data", "clientes", id), {
+        ...values,
+        dataDeNascimento: dateObject,
+        frenteDoDocumento: "",
+        versoDoDocumento: "",
+      });
+      toast({
+        title: "Cliente editado com sucesso!",
+        variant: "success",
+        duration: 5000,
+      });
+      // if (values.frenteDoDocumento instanceof File) {
+      //   if (values.frenteDoDocumento.type.startsWith("image/")) {
+      //     const frenteRef = ref(
+      //       storage,
+      //       `documentos/${docRef.id}-frente-documento`
+      //     );
+      //     await uploadBytes(frenteRef, values.frenteDoDocumento);
+      //     const frenteURL = await getDownloadURL(frenteRef);
+      //     updateDoc(clienteRef, {
+      //       frenteDoDocumento: frenteURL,
+      //     });
+      //   } else {
+      //     toast({
+      //       title: "Somente imagens são permitidas!",
+      //       variant: "destructive",
+      //       duration: 5000,
+      //     });
+      //   }
+      // }
+
+      // if (values.versoDoDocumento instanceof File) {
+      //   if (values.versoDoDocumento.type.startsWith("image/")) {
+      //     const versoRef = ref(
+      //       storage,
+      //       `documentos/${docRef.id}-verso-documento`
+      //     );
+
+      //     await uploadBytes(versoRef, values.versoDoDocumento);
+
+      //     // Obtém o URL do arquivo enviado (verso)
+      //     const versoURL = await getDownloadURL(versoRef);
+      //     updateDoc(clienteRef, {
+      //       versoDoDocumento: versoURL,
+      //     });
+      //   } else {
+      //     toast({
+      //       title: "Somente imagens são permitidas!",
+      //       variant: "destructive",
+      //       duration: 5000,
+      //     });
+      //   }
+      // }
     }
   } catch (error) {
     console.log(error);
@@ -387,35 +468,66 @@ export async function DeleteCostumer(
   const storage = getStorage();
 
   const partes = clienteId.split("-");
-  const restante = partes.slice(1).join("-");
+  const id = partes.slice(1).join("-");
 
-  const frenteRef = ref(storage, `documentos/${restante}-frente-documento`);
-  const versoRef = ref(storage, `documentos/${restante}-verso-documento`);
+  const storageRef = ref(storage, `documentos`);
+  const frenteName = `${id}-frente-documento`;
+  const versoName = `${id}-verso-documento`;
 
   try {
     if (currentUser && currentUser.uid) {
-      const clienteRef = doc(db, currentUser.uid, "data", "clientes", restante);
+      const clienteRef = doc(db, currentUser.uid, "data", "clientes", id);
 
       await deleteDoc(clienteRef);
 
-      if (frenteRef) await deleteObject(frenteRef);
-      if (versoRef) await deleteObject(versoRef);
-
-      if (removerOperacoes) {
-        const operacoesQuery = query(
-          collection(db, currentUser.uid, "data", "operacoes"),
-          where("clienteId", "==", clienteId)
+      try {
+        const fileList = await listAll(storageRef);
+        const frenteExists = fileList.items.some(
+          (item) => item.name === frenteName
         );
-        const operacoesSnapshot = await getDocs(operacoesQuery);
-        operacoesSnapshot.forEach((doc) => {
-          deleteDoc(doc.ref);
-        });
+        const versoExists = fileList.items.some(
+          (item) => item.name === versoName
+        );
 
+        if (frenteExists) {
+          const fileRef = ref(storage, `documentos/${frenteName}`);
+          await deleteObject(fileRef);
+        }
+        if (versoExists) {
+          const fileRef = ref(storage, `documentos/${versoName}`);
+          await deleteObject(fileRef);
+        }
+      } catch (error) {
         toast({
-          title: "Cliente e operações excluídos com sucesso!",
-          variant: "success",
+          title: "Erro ao remover documentos!",
+          variant: "destructive",
           duration: 5000,
         });
+      }
+
+      if (removerOperacoes) {
+        try {
+          const operacoesQuery = query(
+            collection(db, currentUser.uid, "data", "operacoes"),
+            where("clienteId", "==", clienteId)
+          );
+          const operacoesSnapshot = await getDocs(operacoesQuery);
+          operacoesSnapshot.forEach((doc) => {
+            deleteDoc(doc.ref);
+          });
+
+          toast({
+            title: "Cliente e operações excluídos com sucesso!",
+            variant: "success",
+            duration: 5000,
+          });
+        } catch (error) {
+          toast({
+            title: "Erro ao remover as operações!",
+            variant: "destructive",
+            duration: 5000,
+          });
+        }
       } else {
         toast({
           title: "Cliente excluído com sucesso!",

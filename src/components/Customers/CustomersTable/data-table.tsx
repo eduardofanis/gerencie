@@ -30,6 +30,7 @@ import {
   ChevronsRight,
   X,
   PlusCircle,
+  ChevronsUpDown,
 } from "lucide-react";
 
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -37,6 +38,51 @@ import React from "react";
 import NewCostumerForm from "@/components/Forms/NewCostumerForm";
 import { useSearchParams } from "react-router-dom";
 import EditCostumerForm from "@/components/Forms/EditCostumerForm";
+
+import { SelectItems } from "@/components/Forms/Input/SelectInput";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+const estados: SelectItems[] = [
+  { value: "AC", label: "AC" },
+  { value: "AL", label: "AL" },
+  { value: "AP", label: "AP" },
+  { value: "AM", label: "AM" },
+  { value: "BA", label: "BA" },
+  { value: "CE", label: "CE" },
+  { value: "DF", label: "DF" },
+  { value: "ES", label: "ES" },
+  { value: "GO", label: "GO" },
+  { value: "MA", label: "MA" },
+  { value: "MT", label: "MT" },
+  { value: "MS", label: "MS" },
+  { value: "MG", label: "MG" },
+  { value: "PA", label: "PA" },
+  { value: "PB", label: "PB" },
+  { value: "PR", label: "PR" },
+  { value: "PE", label: "PE" },
+  { value: "PI", label: "PI" },
+  { value: "RJ", label: "RJ" },
+  { value: "RN", label: "RN" },
+  { value: "RS", label: "RS" },
+  { value: "RO", label: "RO" },
+  { value: "RR", label: "RR" },
+  { value: "SC", label: "SC" },
+  { value: "SP", label: "SP" },
+  { value: "SE", label: "SE" },
+  { value: "TO", label: "TO" },
+];
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -56,6 +102,7 @@ export function DataTable<TData, TValue>({
       id: false,
     });
   const [searchParams, setSearchParams] = useSearchParams();
+  const [openEstados, setOpenEstados] = React.useState(false);
 
   const table = useReactTable({
     data,
@@ -98,12 +145,55 @@ export function DataTable<TData, TValue>({
             className="max-w-sm w-40"
           />
 
+          <Popover open={openEstados} onOpenChange={setOpenEstados}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={openEstados}
+                className="w-[160px] justify-between"
+              >
+                {table.getColumn("estado")?.getFilterValue()
+                  ? (
+                      table.getColumn("estado")?.getFilterValue() as string
+                    ).toUpperCase()
+                  : "Estado"}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[160px] p-0">
+              <Command>
+                <CommandInput placeholder="Pesquisar" className="h-9" />
+                <CommandEmpty>Nenhum estado encontrado.</CommandEmpty>
+                <CommandGroup>
+                  <ScrollArea className="h-[180px]">
+                    {estados.map((estado) => (
+                      <CommandItem
+                        key={estado.value}
+                        value={estado.value}
+                        onSelect={(currentValue: string) => {
+                          table
+                            .getColumn("estado")
+                            ?.setFilterValue(currentValue);
+                          setOpenEstados(false);
+                        }}
+                      >
+                        {estado.label}
+                      </CommandItem>
+                    ))}
+                  </ScrollArea>
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
+
           <Button
             variant="link"
             className="p-1 text-red-600 hover:text-red-800"
             onClick={() => {
               table.getColumn("nome")?.setFilterValue("");
               table.getColumn("telefone")?.setFilterValue("");
+              table.getColumn("estado")?.setFilterValue("");
             }}
           >
             <X className="h-4 w-4 mr-2 " />
@@ -113,16 +203,13 @@ export function DataTable<TData, TValue>({
 
         <Dialog
           open={
-            searchParams.get("formularioCliente") ||
-            searchParams.get("editarCliente")
+            searchParams.get("novoCliente") || searchParams.get("editarCliente")
               ? true
               : false
           }
         >
           <DialogTrigger asChild>
-            <Button
-              onClick={() => setSearchParams({ formularioCliente: "true" })}
-            >
+            <Button onClick={() => setSearchParams({ novoCliente: "true" })}>
               <PlusCircle className="w-4 h-4 mr-2" />
               Novo cliente
             </Button>

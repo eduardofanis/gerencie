@@ -86,13 +86,19 @@ export default function LastOperationsCard() {
 
   if (!data) return <Skeleton className="sm:col-span-2 xl:col-span-1" />;
   return (
-    <Card className="sm:col-span-2 xl:col-span-1">
+    <Card className="sm:col-span-2 xl:col-span-1 relative">
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center justify-between font-normal">
           <div>
             <div className="font-medium">Operaçõoes Recentes</div>
-            <p className="text-sm mt-1 text-muted-foreground">
-              Últimas 6 operações adicionadas.
+            <p
+              className={`text-sm mt-1 ${
+                data.length <= 0 ? "text-red-500" : "text-muted-foreground"
+              }`}
+            >
+              {data.length > 0
+                ? `Últimas ${data.length} operações adicionadas.`
+                : "Nenhuma operação encontrada"}
             </p>
           </div>
           <Clock className="h-4 w-4" />

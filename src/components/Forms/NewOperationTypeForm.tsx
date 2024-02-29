@@ -14,7 +14,7 @@ import { Separator } from "../ui/separator";
 import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 import { firebaseApp } from "@/main";
 import { getAuth } from "firebase/auth";
-import { NewOperationType, RemoveOperationType } from "@/api";
+import { NewOperationType, RemoveOperationType } from "@/services/api";
 import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

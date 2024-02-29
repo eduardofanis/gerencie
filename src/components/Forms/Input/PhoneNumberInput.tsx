@@ -2,6 +2,7 @@ import { useReducer } from "react";
 import { FormControl, FormField, FormItem, FormLabel } from "../../ui/form"; // Shadcn UI import
 import { Input } from "../../ui/input"; // Shandcn UI Input
 import { InputProps } from "@/types/InputProps";
+import React from "react";
 
 export default function PhoneNumberInput(props: InputProps) {
   const initialValue = "";
@@ -21,6 +22,12 @@ export default function PhoneNumberInput(props: InputProps) {
     const formattedValue = formatPhoneNumber(next);
     return formattedValue;
   }, initialValue);
+
+  React.useEffect(() => {
+    if (props.defaultValue) {
+      setValue(props.defaultValue);
+    }
+  }, [props.defaultValue]);
 
   return (
     <FormField

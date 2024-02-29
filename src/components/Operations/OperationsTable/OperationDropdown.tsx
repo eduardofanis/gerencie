@@ -17,7 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { DeleteOperation } from "@/api";
+import { DeleteOperation } from "@/services/api";
 
 import React from "react";
 

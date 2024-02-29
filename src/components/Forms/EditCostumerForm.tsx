@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { GetCostumer, NewCostumer } from "@/api";
+import { EditCostumer, GetCostumer } from "@/services/api";
 import { Form } from "../ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -24,6 +24,7 @@ import ComboInput from "./Input/ComboInput";
 import React from "react";
 import { CostumerProps } from "../Customers/CostumersView";
 import Loading from "../ui/Loading";
+import { Timestamp } from "firebase/firestore";
 
 export default function EditCostumerForm() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -51,6 +52,29 @@ export default function EditCostumerForm() {
   });
 
   React.useEffect(() => {
+    if (costumer) {
+      form.setValue("nome", costumer.nome);
+      form.setValue("bairro", costumer.bairro);
+      form.setValue("cep", costumer.cep);
+      form.setValue("cidade", costumer.cidade);
+      form.setValue("complemento", costumer.complemento);
+      form.setValue("cpf", costumer.cpf);
+      form.setValue(
+        "dataDeNascimento",
+        transformTimestampToString(costumer.dataDeNascimento)
+      );
+      form.setValue("estado", costumer.estado);
+      form.setValue("estadoCivil", costumer.estadoCivil);
+      form.setValue("naturalidade", costumer.naturalidade);
+      form.setValue("numeroDaRua", costumer.numeroDaRua);
+      form.setValue("rua", costumer.rua);
+      form.setValue("sexo", costumer.sexo);
+      form.setValue("telefone", costumer.telefone);
+      form.setValue("tipoDoDocumento", costumer.tipoDoDocumento);
+    }
+  }, [costumer, form]);
+
+  React.useEffect(() => {
     async function getCostumer() {
       const id: string = searchParams.get("editarCliente")!;
       if (searchParams.get("editarCliente")) {
@@ -62,55 +86,56 @@ export default function EditCostumerForm() {
   }, [searchParams]);
 
   function onSubmit(values: z.infer<typeof CostumerSchema>) {
-    NewCostumer(values);
+    const id: string = searchParams.get("editarCliente")!;
+    EditCostumer(values, id);
     setSearchParams({});
   }
 
   const SexoItems: SelectItems[] = [
     {
-      value: "masculino",
+      value: "Masculino",
       label: "Masculino",
     },
     {
-      value: "feminino",
+      value: "Feminino",
       label: "Feminino",
     },
     {
-      value: "outro",
+      value: "Outro",
       label: "Outro",
     },
   ];
 
   const EstadoCivilItems: SelectItems[] = [
     {
-      value: "casado",
-      label: "Casado",
+      value: "Casado(a)",
+      label: "Casado(a)",
     },
     {
-      value: "separado",
-      label: "Separado",
+      value: "Separado(a)",
+      label: "Separado(a)",
     },
     {
-      value: "divorciado",
-      label: "Divorciado",
+      value: "Divorciado(a)",
+      label: "Divorciado(a)",
     },
     {
-      value: "viuvu",
-      label: "Viúvo",
+      value: "Viúvo(a)",
+      label: "Viúvo(a)",
     },
   ];
 
   const DocumentoItems: SelectItems[] = [
     {
-      value: "rg",
+      value: "RG",
       label: "RG",
     },
     {
-      value: "cnh",
+      value: "CNH",
       label: "CNH",
     },
     {
-      value: "outro",
+      value: "Outro",
       label: "Outro",
     },
   ];
@@ -145,13 +170,25 @@ export default function EditCostumerForm() {
     { value: "TO", label: "TO" },
   ];
 
+  function transformTimestampToString(timestamp: Timestamp) {
+    const date = new Date(
+      timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000
+    );
+
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear().toString();
+
+    return `${day}${month}${year}`;
+  }
+
   if (!costumer) return <Loading />;
   return (
     <>
       <DialogHeader>
         <DialogTitle>Editar cliente</DialogTitle>
         <DialogDescription>
-          Preencha os campos obrigatórios (*) e clique em cadastrar em seguida.
+          Mude os campos que deseja e em seguida clique em salvar.
         </DialogDescription>
       </DialogHeader>
 
@@ -161,25 +198,35 @@ export default function EditCostumerForm() {
             <h2 className="mb-2 font-medium">Dados pessoais</h2>
             <div className="grid grid-cols-4 gap-2">
               <div className="space-y-1 col-span-2">
-                <TextInput form={form} label="Nome completo *" name="nome" />
+                <TextInput
+                  form={form}
+                  label="Nome completo *"
+                  name="nome"
+                  defaultValue={costumer.nome}
+                />
               </div>
               <CPFInput
                 form={form}
                 name="cpf"
                 label="CPF"
                 placeholder="000.000.000-00"
+                defaultValue={costumer.cpf}
               />
               <PhoneNumberInput
                 form={form}
                 name="telefone"
                 label="Telefone *"
                 placeholder="(00) 00000-0000"
+                defaultValue={costumer.telefone}
               />
 
               <BirthDateInput
                 form={form}
                 name="dataDeNascimento"
                 label="Data de nascimento *"
+                defaultValue={transformTimestampToString(
+                  costumer.dataDeNascimento
+                )}
               />
 
               <SelectInput
@@ -200,7 +247,12 @@ export default function EditCostumerForm() {
                 selectItems={EstadoCivilItems}
               />
 
-              <TextInput form={form} label="Naturalidade" name="naturalidade" />
+              <TextInput
+                form={form}
+                label="Naturalidade"
+                name="naturalidade"
+                defaultValue={costumer.naturalidade}
+              />
             </div>
           </div>
 
@@ -212,21 +264,48 @@ export default function EditCostumerForm() {
                 name="cep"
                 label="CEP *"
                 placeholder="00000-000"
+                defaultValue={costumer.cep}
               />
               <div className="space-y-1 col-span-2">
-                <TextInput form={form} label="Rua" name="rua" />
+                <TextInput
+                  form={form}
+                  label="Rua"
+                  name="rua"
+                  defaultValue={costumer.rua}
+                />
               </div>
-              <NumberInput form={form} label="Número" name="numeroDaRua" />
-              <TextInput form={form} label="Complemento" name="complemento" />
+              <NumberInput
+                form={form}
+                label="Número"
+                name="numeroDaRua"
+                defaultValue={costumer.numeroDaRua}
+              />
+              <TextInput
+                form={form}
+                label="Complemento"
+                name="complemento"
+                defaultValue={costumer.complemento}
+              />
               <ComboInput
                 form={form}
                 label="Estado"
                 name="estado"
                 placeholder="Estado"
                 selectItems={estados}
+                defaultValue={costumer.estado}
               />
-              <TextInput form={form} label="Cidade" name="cidade" />
-              <TextInput form={form} label="Bairro" name="bairro" />
+              <TextInput
+                form={form}
+                label="Cidade"
+                name="cidade"
+                defaultValue={costumer.cidade}
+              />
+              <TextInput
+                form={form}
+                label="Bairro"
+                name="bairro"
+                defaultValue={costumer.bairro}
+              />
             </div>
           </div>
 
@@ -266,11 +345,7 @@ export default function EditCostumerForm() {
               Cancelar
             </Button>
 
-            <Button type="button" onClick={() => form.setValue("estado", "SP")}>
-              Teste
-            </Button>
-
-            <Button type="submit">Cadastrar</Button>
+            <Button type="submit">Salvar</Button>
           </DialogFooter>
         </form>
       </Form>

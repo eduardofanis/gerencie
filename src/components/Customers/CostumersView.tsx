@@ -2,10 +2,10 @@ import { useSearchParams } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogFooter } from "../ui/dialog";
 import { Skeleton } from "../ui/skeleton";
-import { GetCostumer, GetCostumerOperations } from "@/api";
+import { GetCostumer, GetCostumerOperations } from "@/services/api";
 import React from "react";
 import { Timestamp } from "firebase/firestore";
-import { ClipboardCopy, Edit, EditIcon } from "lucide-react";
+import { ClipboardCopy, Download, Edit } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -13,12 +13,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "../ui/use-toast";
-import {
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "../ui/input";
 
 export type CostumerProps = {
   estadoCivil: string;
@@ -69,8 +63,6 @@ function ClipboardText({
   clipboard = true,
   className,
 }: ClipboardTextProps) {
-  const [open, setOpen] = React.useState(false);
-
   function copyToClipboard() {
     navigator.clipboard.writeText(children);
     toast({
@@ -85,16 +77,6 @@ function ClipboardText({
       <h3 className="font-medium">{label}</h3>
       <div className="flex items-center gap-1">
         <p>{children}</p>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger onClick={() => setOpen(true)}>
-              <EditIcon className="h-4 w-4 ml-1" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Editar campo</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
         {clipboard && (
           <TooltipProvider>
             <Tooltip>
@@ -108,20 +90,6 @@ function ClipboardText({
           </TooltipProvider>
         )}
       </div>
-      <Dialog open={open}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar {label}</DialogTitle>
-          </DialogHeader>
-          <Input />
-          <DialogFooter>
-            <Button variant={"outline"} onClick={() => setOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={() => setOpen(false)}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
@@ -158,7 +126,11 @@ export default function CostumersView() {
     getOperations();
   }, [searchParams, costumer]);
 
-  if (!costumer || !operations)
+  async function downloadPhoto(imageUrl: string) {
+    console.log(imageUrl);
+  }
+
+  if (!costumer)
     return (
       <Dialog open={isOpen}>
         <DialogContent className="sm:max-w-[800px]">
@@ -174,21 +146,42 @@ export default function CostumersView() {
   return (
     <Dialog open={isOpen}>
       <DialogContent className="sm:max-w-[800px]">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-8">
           <div className="grid gap-3">
+            <ClipboardText label="Tipo de documento" clipboard={false}>
+              {costumer.tipoDoDocumento
+                ? costumer.tipoDoDocumento
+                : "Não definido"}
+            </ClipboardText>
             {costumer.frenteDoDocumento ? (
-              <img
-                src={costumer.frenteDoDocumento}
-                className="h-[320px] object-contain"
-              />
+              <div className="relative">
+                <img
+                  src={costumer.frenteDoDocumento}
+                  className="h-[320px] object-cover"
+                />
+                <Button className="absolute bottom-2 right-2 p-3">
+                  <Download
+                    onClick={() => downloadPhoto(costumer.frenteDoDocumento)}
+                    className="h-4 w-4"
+                  />
+                </Button>
+              </div>
             ) : (
               <Skeleton className="h-[320px]"></Skeleton>
             )}
             {costumer.versoDoDocumento ? (
-              <img
-                src={costumer.versoDoDocumento}
-                className="h-[320px] object-contain"
-              />
+              <div className="relative">
+                <img
+                  src={costumer.versoDoDocumento}
+                  className="h-[320px] object-cover"
+                />
+                <Button className="absolute bottom-2 right-2 p-3">
+                  <Download
+                    onClick={() => downloadPhoto(costumer.versoDoDocumento)}
+                    className="h-4 w-4"
+                  />
+                </Button>
+              </div>
             ) : (
               <Skeleton className="h-[320px]"></Skeleton>
             )}
@@ -198,9 +191,17 @@ export default function CostumersView() {
             <div>
               <h2 className="text-lg font-medium mb-4">Dados pessoais</h2>
               <div className="grid grid-cols-3 gap-2">
-                <ClipboardText label="CPF">{costumer.cpf}</ClipboardText>
+                <ClipboardText label="CPF">
+                  {costumer.cpf.replace(
+                    /(\d{3})(\d{3})(\d{3})(\d{2})/,
+                    "$1.$2.$3-$4"
+                  )}
+                </ClipboardText>
                 <ClipboardText label="Telefone">
-                  {costumer.telefone}
+                  {costumer.telefone.replace(
+                    /(\d{2})(\d{5})(\d{4})/,
+                    "($1) $2-$3"
+                  )}
                 </ClipboardText>
                 <ClipboardText label="Data de nascimento">
                   {new Date(
@@ -232,7 +233,9 @@ export default function CostumersView() {
             <div className="mt-8">
               <h2 className="text-lg font-medium mb-4">Endereço</h2>
               <div className="grid grid-cols-3 gap-2">
-                <ClipboardText label="CEP">{costumer.cep}</ClipboardText>
+                <ClipboardText label="CEP">
+                  {costumer.cep.replace(/(\d{5})(\d{3})/, "$1-$2")}
+                </ClipboardText>
                 <ClipboardText className="col-span-2" label="Rua">
                   {costumer.rua}
                 </ClipboardText>
@@ -262,28 +265,34 @@ export default function CostumersView() {
             <div className="mt-8">
               <h2 className="text-lg font-medium mb-4">Últimas operações</h2>
               <div className="divide-y">
-                {operations.map((operation) => {
-                  const date = new Date(
-                    operation.dataDaOperacao.seconds * 1000
-                  ).toLocaleDateString("pt-BR");
+                {operations && operations.length > 0 ? (
+                  operations.map((operation) => {
+                    const date = new Date(
+                      operation.dataDaOperacao.seconds * 1000
+                    ).toLocaleDateString("pt-BR");
 
-                  const formatted = new Intl.NumberFormat("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  }).format(parseFloat(operation.valorLiberado));
+                    const formatted = new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(parseFloat(operation.valorLiberado));
 
-                  return (
-                    <div
-                      key={operation.id}
-                      className="flex justify-between py-2"
-                    >
-                      <span>
-                        {operation.tipoDaOperacao} - {date}
-                      </span>
-                      <span>{formatted}</span>
-                    </div>
-                  );
-                })}
+                    return (
+                      <div
+                        key={operation.id}
+                        className="flex justify-between py-2"
+                      >
+                        <span>
+                          {operation.tipoDaOperacao} - {date}
+                        </span>
+                        <span>{formatted}</span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-red-500">
+                    Nenhuma operação encontrada.
+                  </div>
+                )}
               </div>
             </div>
           </div>

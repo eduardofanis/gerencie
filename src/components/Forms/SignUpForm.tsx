@@ -1,15 +1,9 @@
 import React from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import {
-  createUserWithEmailAndPassword,
-  getAuth,
-  updateProfile,
-} from "firebase/auth";
-import { firebaseApp } from "@/main";
 import { useNavigate } from "react-router-dom";
 import { toast } from "../ui/use-toast";
-import { FirebaseError } from "firebase/app";
+import { userSignUp } from "@/services/user";
 
 export default function SignUpForm() {
   const [name, setName] = React.useState("");
@@ -21,42 +15,17 @@ export default function SignUpForm() {
   const navigate = useNavigate();
 
   async function handleSignUp() {
-    const auth = getAuth(firebaseApp);
-
     try {
-      if (password == confirmPassword) {
-        setLoading(true);
-        const { user } = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-        await updateProfile(user, {
-          displayName: name,
-        });
-        toast({
-          title: "Conta criada com sucesso.",
-          variant: "success",
-          duration: 5000,
-        });
-        navigate("/");
-      } else {
-        toast({ title: "Teste" });
-      }
+      setLoading(true);
+      await userSignUp(email, password, confirmPassword, name);
+      navigate("/");
     } catch (e) {
-      if (e instanceof FirebaseError && e.code == "auth/email-already-in-use") {
-        toast({
-          title: "Este e-mail já está em uso.",
-          variant: "destructive",
-          duration: 5000,
-        });
-      } else {
-        toast({
-          title: "Algo deu errado, tente novamente.",
-          variant: "destructive",
-          duration: 5000,
-        });
-      }
+      console.log(e);
+      toast({
+        title: "Algo deu errado, tente novamente.",
+        variant: "destructive",
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }

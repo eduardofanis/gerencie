@@ -22,12 +22,19 @@ import { CheckIcon, ChevronsUpDown } from "lucide-react";
 import { SelectItems } from "./SelectInput";
 import { InputProps } from "@/types/InputProps";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import React from "react";
 
 interface ComboProps extends InputProps {
   selectItems: SelectItems[];
 }
 
 export default function ComboInput(props: ComboProps) {
+  React.useEffect(() => {
+    if (props.defaultValue) {
+      props.form.setValue(props.name, props.defaultValue);
+    }
+  }, [props]);
+
   return (
     <FormField
       control={props.form.control}

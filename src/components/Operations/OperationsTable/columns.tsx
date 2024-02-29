@@ -10,7 +10,7 @@ import { OperationSchema } from "@/schemas/OperationSchema";
 import { z } from "zod";
 import { Timestamp } from "firebase/firestore";
 import OperationDropdown from "./OperationDropdown";
-import { getUserData } from "@/api";
+import { getUserData } from "@/services/api";
 
 export const columns: ColumnDef<z.infer<typeof OperationSchema>>[] = [
   {

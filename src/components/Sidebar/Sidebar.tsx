@@ -1,4 +1,12 @@
-import { Users, LogOut, BarChart4, Factory, Phone, User } from "lucide-react";
+import {
+  Users,
+  LogOut,
+  BarChart4,
+  Factory,
+  Phone,
+  User,
+  Contact,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
@@ -8,24 +16,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getAuth, signOut } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { firebaseApp } from "@/main";
 import { useLocation, useNavigate } from "react-router-dom";
-import { toast } from "../ui/use-toast";
+import { userSignOut } from "@/services/user";
 
 export default function Sidebar() {
   const auth = getAuth(firebaseApp);
   const { pathname } = useLocation();
   const navigate = useNavigate();
-
-  function handleSignOut() {
-    signOut(auth);
-    toast({
-      title: "Logout efetuado com sucesso.",
-      variant: "destructive",
-      duration: 5000,
-    });
-  }
 
   return (
     <div className="h-screen border-slate-100 border-r p-4">
@@ -47,12 +46,15 @@ export default function Sidebar() {
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem className="font-medium cursor-pointer">
+          <DropdownMenuItem
+            className="font-medium cursor-pointer"
+            onClick={() => navigate("/conta")}
+          >
             <User className="w-4 h-4 mr-2 " />
             Gerenciar conta
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={handleSignOut}
+            onClick={userSignOut}
             className="text-red-700 hover:text-red-700 font-medium cursor-pointer"
           >
             <LogOut className="w-4 h-4 mr-2 " />
@@ -93,6 +95,17 @@ export default function Sidebar() {
         >
           <Users className="h-5 w-5 " />
           <span>Clientes</span>
+        </Button>
+        <Button
+          className={` space-x-4 justify-start ${
+            pathname == "/funcionarios" && "bg-slate-50"
+          }`}
+          variant={"ghost"}
+          onClick={() => navigate("/funcionarios")}
+          disabled
+        >
+          <Contact className="h-5 w-5 " />
+          <span>Funcionários</span>
         </Button>
         <Button asChild className=" space-x-4 justify-start" variant={"ghost"}>
           <a href="https://wa.me/5541997590249" target="_blank">
