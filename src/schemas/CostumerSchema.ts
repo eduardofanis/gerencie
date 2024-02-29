@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const CostumerSchema = z.object({
+  id: z.string().optional(),
   nome: z
     .string()
     .min(1)
