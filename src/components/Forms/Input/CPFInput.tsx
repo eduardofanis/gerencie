@@ -10,13 +10,13 @@ export default function CPFInput(props: InputProps) {
   function formatCPF(value: string) {
     const digits = value.replace(/\D/g, "");
     let formattedValue =
-      digits.length === 11
-        ? digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4")
-        : digits.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, "$1.$2.$3-$4");
+      digits.length === 9
+        ? digits.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, "$1.$2.$3-$4")
+        : digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
     formattedValue =
-      digits.length === 11
-        ? formattedValue.slice(0, 14)
-        : formattedValue.slice(0, 12);
+      digits.length === 9
+        ? formattedValue.slice(0, 12)
+        : formattedValue.slice(0, 14);
     return formattedValue;
   }
 
