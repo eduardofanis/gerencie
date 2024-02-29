@@ -21,6 +21,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import TextInput from "./Input/TextInput";
 import ColorInput from "./Input/ColorInput";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
 
 export type OperationType = {
   name: string;
@@ -117,14 +128,47 @@ export default function NewOperationTypeForm() {
                     ></div>
                     <div className="font-medium">{tipo.name}</div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    type="button"
-                    className="h-6 w-6 p-0 hover:bg-red-400"
-                    onClick={() => RemoveOperationType(tipo.name, tipo.color)}
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        type="button"
+                        className="h-6 w-6 p-0 hover:bg-red-400"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmação</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Ao remover um Tipo de Operação,{" "}
+                          <span className="font-semibold text-red-600">
+                            todas as operações que possuem esse tipo serão
+                            apagadas
+                          </span>
+                          . Deseja continuar?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => {}}>
+                          Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction asChild>
+                          <Button
+                            variant="destructive"
+                            className="bg-red-600 hover:bg-red-700"
+                            onClick={() =>
+                              RemoveOperationType(tipo.name, tipo.color)
+                            }
+                          >
+                            Remover
+                          </Button>
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               ))}
             </div>

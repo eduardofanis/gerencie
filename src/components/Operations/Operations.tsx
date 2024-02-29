@@ -1,7 +1,7 @@
 import React from "react";
 import Sidebar from "../Sidebar/Sidebar";
-import { DataTable } from "./OperationsTable/data-table";
-import { columns } from "./OperationsTable/columns";
+import { OperationsDataTable } from "./OperationsTable/OperationsDataTable";
+import { OperationsTableColumns } from "./OperationsTable/OperationsTableColumns";
 import { z } from "zod";
 import {
   collection,
@@ -63,7 +63,11 @@ export default function Operations() {
         <h1 className="text-3xl font-bold mb-8">Operações</h1>
 
         {data && userData ? (
-          <DataTable columns={columns} data={data} userData={userData} />
+          <OperationsDataTable
+            columns={OperationsTableColumns}
+            data={data}
+            userData={userData}
+          />
         ) : (
           <Loading />
         )}

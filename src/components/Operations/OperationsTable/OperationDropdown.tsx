@@ -1,4 +1,4 @@
-import { Edit, MoreHorizontal, Trash } from "lucide-react";
+import { MoreHorizontal, Trash } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -35,10 +35,6 @@ export default function OperationDropdown({ row }: any) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem>
-            <Edit className="w-4 h-4 mr-2 " />
-            Editar operação
-          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => setDialog(true)}
             className="text-red-700 hover:text-red-700 font-medium "

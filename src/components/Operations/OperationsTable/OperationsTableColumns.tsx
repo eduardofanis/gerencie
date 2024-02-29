@@ -12,7 +12,9 @@ import { Timestamp } from "firebase/firestore";
 import OperationDropdown from "./OperationDropdown";
 import { getUserData } from "@/services/api";
 
-export const columns: ColumnDef<z.infer<typeof OperationSchema>>[] = [
+export const OperationsTableColumns: ColumnDef<
+  z.infer<typeof OperationSchema>
+>[] = [
   {
     accessorKey: "id",
     header: "",

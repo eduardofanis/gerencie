@@ -10,7 +10,9 @@ import { CostumerSchema } from "@/schemas/CostumerSchema";
 import CostumerDropdown from "./CostumerDropdown";
 import { Timestamp } from "firebase/firestore";
 
-export const columns: ColumnDef<z.infer<typeof CostumerSchema>>[] = [
+export const CostumersTableColumns: ColumnDef<
+  z.infer<typeof CostumerSchema>
+>[] = [
   {
     accessorKey: "id",
   },

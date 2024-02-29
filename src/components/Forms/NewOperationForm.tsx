@@ -313,12 +313,6 @@ export default function NewOperationForm() {
 
             <NumberInput
               form={form}
-              name="parcelas"
-              label="Número de parcelas"
-            />
-
-            <NumberInput
-              form={form}
               name="comissao"
               label="Comissao %"
               decimals={2}

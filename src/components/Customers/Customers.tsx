@@ -1,6 +1,6 @@
 import Sidebar from "../Sidebar/Sidebar";
-import { DataTable } from "./CustomersTable/data-table";
-import { columns } from "./CustomersTable/columns";
+import { CostumersDataTable } from "./CustomersTable/CostumersDataTable";
+import { CostumersTableColumns } from "./CustomersTable/CostumersTableColumns";
 import React from "react";
 import { z } from "zod";
 import { CostumerSchema } from "@/schemas/CostumerSchema";
@@ -41,7 +41,11 @@ export default function Customers() {
       <div className="p-8 w-full h-screen">
         <h1 className="text-3xl font-bold mb-8">Clientes</h1>
 
-        {data ? <DataTable columns={columns} data={data} /> : <Loading />}
+        {data ? (
+          <CostumersDataTable columns={CostumersTableColumns} data={data} />
+        ) : (
+          <Loading />
+        )}
 
         <CostumersView />
       </div>

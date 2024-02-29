@@ -54,7 +54,7 @@ interface DataTableProps<TData, TValue> {
   userData: UserDataProps;
 }
 
-export function DataTable<TData, TValue>({
+export function OperationsDataTable<TData, TValue>({
   columns,
   data,
   userData,
