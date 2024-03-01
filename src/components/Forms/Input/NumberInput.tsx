@@ -23,7 +23,7 @@ export default function NumberInput(props: InputProps) {
 
   React.useEffect(() => {
     if (props.defaultValue) {
-      setValue(props.defaultValue);
+      setValue(props.defaultValue.toString());
     }
   }, [props.defaultValue]);
 
