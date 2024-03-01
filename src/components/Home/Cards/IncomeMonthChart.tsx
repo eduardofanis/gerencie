@@ -55,7 +55,10 @@ export default function IncomeMonthChart() {
     const lastDayOfMonth = new Date(
       new Date().getFullYear(),
       new Date().getMonth() + 1,
-      0
+      0,
+      23,
+      59,
+      59
     );
 
     const q = query(
@@ -83,7 +86,10 @@ export default function IncomeMonthChart() {
     const lastDayOfMonth = new Date(
       new Date().getFullYear(),
       new Date().getMonth(),
-      0
+      0,
+      23,
+      59,
+      59
     );
 
     const q = query(

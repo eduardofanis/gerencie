@@ -6,7 +6,7 @@ const OperationSchema = z.object({
   statusDaOperacao: z.string().min(1),
   dataDaOperacao: z.date(),
   valorLiberado: z.number().min(1),
-  comissao: z.string().min(1),
+  comissao: z.number().min(1),
 });
 
 export { OperationSchema };

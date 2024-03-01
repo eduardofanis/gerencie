@@ -37,7 +37,7 @@ export default function NewCostumerForm() {
       telefone: "",
       cep: "",
       rua: "",
-      numeroDaRua: "",
+      numeroDaRua: 0,
       complemento: "",
       estado: "",
       cidade: "",

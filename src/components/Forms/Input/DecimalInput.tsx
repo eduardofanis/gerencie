@@ -4,24 +4,35 @@ import { Input } from "../../ui/input"; // Shandcn UI Input
 import { InputProps } from "@/types/InputProps";
 import React from "react";
 
-// Brazilian currency config
-const moneyFormatter = Intl.NumberFormat("pt-BR", {
-  currency: "BRL",
-  currencyDisplay: "symbol",
-  currencySign: "standard",
-  style: "currency",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
+interface NumberInputProps extends InputProps {
+  decimals?: number;
+  maxLength?: number;
+  maxValue?: number;
+}
 
-export default function MoneyInput(props: InputProps) {
+export default function DecimalInput(props: NumberInputProps) {
+  const numberFormatter = Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: props.decimals,
+    maximumFractionDigits: props.decimals,
+  });
+
   const initialValue = props.form.getValues()[props.name]
-    ? moneyFormatter.format(Number(props.form.getValues()[props.name]))
+    ? numberFormatter.format(Number(props.form.getValues()[props.name]))
     : "";
+
+  function getDecimals(value: number) {
+    let string = "1";
+    for (let i = 0; i < value; i++) {
+      string += "0";
+    }
+    return parseFloat(string);
+  }
+
+  const multiply = props.decimals ? getDecimals(props.decimals) : 1;
 
   const [value, setValue] = useReducer((_: unknown, next: string) => {
     const digits = next.replace(/\D/g, "");
-    return moneyFormatter.format(Number(digits) / 100);
+    return numberFormatter.format(Number(digits) / multiply);
   }, initialValue);
 
   function handleChange(
@@ -29,18 +40,23 @@ export default function MoneyInput(props: InputProps) {
     formattedValue: string
   ) {
     const digits = formattedValue.replace(/\D/g, "");
-    const realValue = Number(digits) / 100;
+    const realValue = Number(digits) / multiply;
     realChangeFn(realValue);
   }
 
   React.useEffect(() => {
+    const numberFormatter = Intl.NumberFormat("pt-BR", {
+      minimumFractionDigits: props.decimals,
+      maximumFractionDigits: props.decimals,
+    });
+
     if (props.defaultValue) {
-      const formattedDefaultValue = moneyFormatter.format(
+      const formattedDefaultValue = numberFormatter.format(
         Number(props.defaultValue)
       );
       setValue(formattedDefaultValue);
     }
-  }, [props.defaultValue]);
+  }, [props.defaultValue, props.decimals]);
 
   return (
     <FormField
@@ -59,8 +75,15 @@ export default function MoneyInput(props: InputProps) {
                 type="text"
                 {...field}
                 onChange={(ev) => {
-                  setValue(ev.target.value);
-                  handleChange(_change, ev.target.value);
+                  if (props.maxLength) {
+                    if (ev.target.value.length < props.maxLength) {
+                      setValue(ev.target.value);
+                      handleChange(_change, ev.target.value);
+                    }
+                  } else {
+                    setValue(ev.target.value);
+                    handleChange(_change, ev.target.value);
+                  }
                 }}
                 value={value}
               />

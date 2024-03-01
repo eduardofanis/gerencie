@@ -47,6 +47,7 @@ import NewOperationForm from "@/components/Forms/NewOperationForm";
 
 import { useSearchParams } from "react-router-dom";
 import { UserDataProps } from "@/components/Forms/NewOperationTypeForm";
+import EditOperationForm from "@/components/Forms/EditOperationForm";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -171,20 +172,24 @@ export function OperationsDataTable<TData, TValue>({
 
         <Dialog
           open={
-            searchParams.get("operationModal") &&
-            searchParams.get("operationModal") == "true"
+            searchParams.get("novaOperacao") ||
+            searchParams.get("editarOperacao")
               ? true
               : false
           }
         >
           <DialogTrigger asChild>
-            <Button onClick={() => setSearchParams({ operationModal: "true" })}>
+            <Button onClick={() => setSearchParams({ novaOperacao: "true" })}>
               <PlusCircle className="w-4 h-4 mr-2" />
               Nova operação
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[800px]">
-            <NewOperationForm />
+            {!searchParams.get("editarOperacao") ? (
+              <NewOperationForm />
+            ) : (
+              <EditOperationForm />
+            )}
           </DialogContent>
         </Dialog>
       </div>

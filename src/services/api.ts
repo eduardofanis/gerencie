@@ -135,7 +135,6 @@ export async function EditCostumer(
 ) {
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
-  // const storage = getStorage();
 
   try {
     if (currentUser && currentUser.uid) {
@@ -145,8 +144,26 @@ export async function EditCostumer(
       );
       const [day, month, year] = date.split("/");
       const dateObject = new Date(`${month}/${day}/${year}`);
+      const docRef = getDoc(doc(db, currentUser.uid, "data", "clientes", id));
+      const docData = (await docRef).data() as CostumerProps;
+      const oldName = docData.nome;
+
+      const queryRef = query(
+        collection(db, currentUser!.uid, "data", "operacoes"),
+        where("clienteId", "==", `${oldName}-${id}`)
+      );
+
+      const querySnapshot = await getDocs(queryRef);
+      querySnapshot.docs.forEach((doc) => {
+        updateDoc(doc.ref, {
+          cliente: values.nome,
+          clienteId: `${values.nome}-${id}`,
+        });
+      });
+
       await updateDoc(doc(db, currentUser.uid, "data", "clientes", id), {
         ...values,
+        id: `${values.nome}-${id}`,
         dataDeNascimento: dateObject,
       });
       toast({
@@ -194,10 +211,41 @@ export async function NewOperation(
         "operacoes",
         docRef.id
       );
-      console.log(nomeDoCliente);
       updateDoc(operationRef, { id: docRef.id, cliente: nomeDoCliente });
       toast({
         title: "Operação cadastrada com sucesso!",
+        variant: "success",
+        duration: 5000,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    toast({
+      title: "Algo deu errado, tente novamente!",
+      variant: "destructive",
+      duration: 5000,
+    });
+  }
+}
+
+export async function EditOperation(
+  values: z.infer<typeof OperationSchema>,
+  nomeDoCliente: string,
+  id: string
+) {
+  const db = getFirestore(firebaseApp);
+  const { currentUser } = getAuth(firebaseApp);
+
+  try {
+    if (currentUser && currentUser.uid) {
+      console.log(values, id, nomeDoCliente);
+      await updateDoc(doc(db, currentUser.uid, "data", "operacoes", id), {
+        ...values,
+        cliente: nomeDoCliente,
+        valorRecebido: (values.valorLiberado * Number(values.comissao)) / 100,
+      });
+      toast({
+        title: "Operação editada com sucesso!",
         variant: "success",
         duration: 5000,
       });
@@ -372,6 +420,26 @@ export async function GetCostumerOperations(
       }));
 
       return operations;
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    console.log();
+  }
+}
+
+export async function GetOperation(id: string) {
+  const db = getFirestore(firebaseApp);
+  const { currentUser } = getAuth(firebaseApp);
+
+  try {
+    if (currentUser && currentUser.uid) {
+      const docRef = await getDoc(
+        doc(db, currentUser!.uid, "data", "operacoes", id)
+      );
+      const operation = docRef.data() as OperationProps;
+
+      return operation;
     }
   } catch (error) {
     console.log(error);

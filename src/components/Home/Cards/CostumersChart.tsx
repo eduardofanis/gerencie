@@ -69,7 +69,6 @@ export default function CostumersChart() {
       new Date().getMonth() - 1,
       1
     );
-    console.log(firstDayOfMonth);
     const lastDayOfMonth = new Date(
       new Date().getFullYear(),
       new Date().getMonth(),
@@ -78,7 +77,6 @@ export default function CostumersChart() {
       59,
       59
     );
-    console.log(lastDayOfMonth);
 
     const q = query(
       collection(db, currentUser!.uid, "data", "clientes"),
@@ -89,7 +87,6 @@ export default function CostumersChart() {
       const costumers = querySnapshot.docs.map((doc) => ({
         ...(doc.data() as CostumerProps),
       }));
-      console.log(costumers);
       setLastMonthCostumers(costumers);
     });
     return () => {

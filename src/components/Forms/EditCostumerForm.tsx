@@ -42,7 +42,7 @@ export default function EditCostumerForm() {
       telefone: "",
       cep: "",
       rua: "",
-      numeroDaRua: "",
+      numeroDaRua: 0,
       complemento: "",
       estado: "",
       cidade: "",
@@ -66,7 +66,7 @@ export default function EditCostumerForm() {
       form.setValue("estado", costumer.estado);
       form.setValue("estadoCivil", costumer.estadoCivil);
       form.setValue("naturalidade", costumer.naturalidade);
-      form.setValue("numeroDaRua", costumer.numeroDaRua);
+      form.setValue("numeroDaRua", parseFloat(costumer.numeroDaRua));
       form.setValue("rua", costumer.rua);
       form.setValue("sexo", costumer.sexo);
       form.setValue("telefone", costumer.telefone);

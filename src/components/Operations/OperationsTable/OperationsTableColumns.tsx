@@ -8,9 +8,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OperationSchema } from "@/schemas/OperationSchema";
 import { z } from "zod";
-import { Timestamp } from "firebase/firestore";
+import { Timestamp, doc, getFirestore, updateDoc } from "firebase/firestore";
 import OperationDropdown from "./OperationDropdown";
 import { getUserData } from "@/services/api";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { getAuth } from "firebase/auth";
+import { firebaseApp } from "@/main";
 
 export const OperationsTableColumns: ColumnDef<
   z.infer<typeof OperationSchema>
@@ -24,38 +35,80 @@ export const OperationsTableColumns: ColumnDef<
     accessorKey: "statusDaOperacao",
     header: () => <div className="ml-4">Status</div>,
     cell: ({ row }) => {
-      const status = row.getValue("statusDaOperacao");
+      const status = row.getValue("statusDaOperacao") as string;
+      const id = row.getValue("id") as string;
 
-      switch (status) {
-        case "concluido":
-          return (
-            <div className="text-green-600 font-medium flex items-center ml-4">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-              Concluido
-            </div>
-          );
-        case "processando":
-          return (
-            <div className="text-yellow-600 font-medium flex items-center ml-4">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
-              Processando
-            </div>
-          );
-        case "pendente":
-          return (
-            <div className="text-orange-600 font-medium flex items-center ml-4">
-              <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
-              Pendente
-            </div>
-          );
-        case "falha":
-          return (
-            <div className="text-red-600 font-medium flex items-center ml-4">
-              <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
-              Falha
-            </div>
-          );
+      function handleChange(value: string) {
+        const db = getFirestore(firebaseApp);
+        const { currentUser } = getAuth(firebaseApp);
+
+        const operationRef = doc(db, currentUser!.uid, "data", "operacoes", id);
+        updateDoc(operationRef, { statusDaOperacao: value });
       }
+
+      return (
+        <Select value={status ?? ""} onValueChange={handleChange}>
+          <SelectTrigger
+            className={cn(
+              "border-0 ml-1 w-fit justify-normal gap-2 bg-inherit"
+            )}
+          >
+            <div
+              className={`w-2 h-2 rounded-full mr-1 ${
+                status == "concluido"
+                  ? "bg-green-500"
+                  : status == "processando"
+                  ? "bg-yellow-500"
+                  : status == "pendente"
+                  ? "bg-orange-500"
+                  : status == "falha"
+                  ? "bg-red-500"
+                  : "bg-slate-500"
+              }`}
+            ></div>
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value="concluido">Concluído</SelectItem>
+              <SelectItem value="processando">Processando</SelectItem>
+              <SelectItem value="pendente">Pendente</SelectItem>
+              <SelectItem value="falha">Falha</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      );
+
+      // switch (status) {
+      //   case "concluido":
+      //     return (
+      //       <div className="text-green-600 font-medium flex items-center ml-4">
+      //         <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+      //         Concluido
+      //       </div>
+      //     );
+      //   case "processando":
+      //     return (
+      //       <div className="text-yellow-600 font-medium flex items-center ml-4">
+      //         <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+      //         Processando
+      //       </div>
+      //     );
+      //   case "pendente":
+      //     return (
+      //       <div className="text-orange-600 font-medium flex items-center ml-4">
+      //         <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
+      //         Pendente
+      //       </div>
+      //     );
+      //   case "falha":
+      //     return (
+      //       <div className="text-red-600 font-medium flex items-center ml-4">
+      //         <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+      //         Falha
+      //       </div>
+      //     );
+      // }
     },
   },
   {
@@ -142,7 +195,7 @@ export const OperationsTableColumns: ColumnDef<
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Criado em
+          Criado há
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
@@ -162,13 +215,13 @@ export const OperationsTableColumns: ColumnDef<
         const dias = Math.floor(horas / 24);
 
         if (dias > 0) {
-          return `Há ${dias} dia${dias > 1 ? "s" : ""} atrás`;
+          return `${dias} dia${dias > 1 ? "s" : ""} atrás`;
         } else if (horas > 0) {
-          return `Há ${horas} hora${horas > 1 ? "s" : ""} atrás`;
+          return `${horas} hora${horas > 1 ? "s" : ""} atrás`;
         } else if (minutos > 0) {
-          return `Há ${minutos} minuto${minutos > 1 ? "s" : ""} atrás`;
+          return `${minutos} minuto${minutos > 1 ? "s" : ""} atrás`;
         } else {
-          return `Há poucos segundos atrás`;
+          return `Poucos segundos atrás`;
         }
       }
 

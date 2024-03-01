@@ -1,4 +1,4 @@
-import { MoreHorizontal, Trash } from "lucide-react";
+import { Edit, MoreHorizontal, Trash } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,10 +20,13 @@ import {
 import { DeleteOperation } from "@/services/api";
 
 import React from "react";
+import { useSearchParams } from "react-router-dom";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function OperationDropdown({ row }: any) {
   const [dialog, setDialog] = React.useState(false);
+
+  const [, setSearchParams] = useSearchParams();
 
   return (
     <div className="flex justify-end items-center">
@@ -35,6 +38,14 @@ export default function OperationDropdown({ row }: any) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={() =>
+              setSearchParams({ editarOperacao: row.getValue("id") })
+            }
+          >
+            <Edit className="w-4 h-4 mr-2 " />
+            Editar operação
+          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => setDialog(true)}
             className="text-red-700 hover:text-red-700 font-medium "

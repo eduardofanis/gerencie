@@ -2,7 +2,6 @@ import React from "react";
 import { Button } from "../ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -30,7 +29,7 @@ import {
   ChevronDown,
   Plus,
 } from "lucide-react";
-import { GetCostumers, NewOperation } from "@/services/api";
+import { EditOperation, GetCostumers, GetOperation } from "@/services/api";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -53,6 +52,8 @@ import { getAuth } from "firebase/auth";
 import { getFirestore, onSnapshot, doc } from "firebase/firestore";
 import SelectInput, { SelectItems } from "./Input/SelectInput";
 import { CostumerSchema } from "@/schemas/CostumerSchema";
+import { OperationProps } from "../Customers/CostumersView";
+import Loading from "../ui/Loading";
 import DecimalInput from "./Input/DecimalInput";
 
 const StatusList: SelectItems[] = [
@@ -74,13 +75,14 @@ const StatusList: SelectItems[] = [
   },
 ];
 
-export default function NewOperationForm() {
+export default function EditOperationForm() {
   const [data, setData] = React.useState<z.infer<typeof CostumerSchema>[]>();
   const [nomeDoCliente, setNomeDoCliente] = React.useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, setSearchParams] = useSearchParams();
   const [operationTypes, setOperationTypes] =
     React.useState<UserDataProps | null>(null);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [operation, setOperation] = React.useState<OperationProps>();
 
   const form = useForm<z.infer<typeof OperationSchema>>({
     resolver: zodResolver(OperationSchema),
@@ -94,7 +96,8 @@ export default function NewOperationForm() {
     },
   });
   function onSubmit(values: z.infer<typeof OperationSchema>) {
-    NewOperation(values, nomeDoCliente);
+    const id: string = searchParams.get("editarOperacao")!;
+    EditOperation(values, nomeDoCliente, id);
     setSearchParams({});
   }
 
@@ -122,12 +125,38 @@ export default function NewOperationForm() {
     };
   }, []);
 
+  React.useEffect(() => {
+    if (operation) {
+      form.setValue("comissao", parseFloat(operation.comissao));
+      form.setValue("statusDaOperacao", operation.statusDaOperacao);
+      form.setValue("tipoDaOperacao", operation.tipoDaOperacao);
+      form.setValue("valorLiberado", parseFloat(operation.valorLiberado));
+      form.setValue("clienteId", operation.clienteId);
+      form.setValue("dataDaOperacao", operation.dataDaOperacao.toDate());
+
+      const name = operation.clienteId.split("-")[0];
+      setNomeDoCliente(name);
+    }
+  }, [operation, form]);
+
+  React.useEffect(() => {
+    async function getOperation() {
+      const id: string = searchParams.get("editarOperacao")!;
+      if (searchParams.get("editarOperacao")) {
+        const operationData = await GetOperation(id);
+        setOperation(operationData);
+      }
+    }
+    getOperation();
+  }, [searchParams]);
+
+  if (!operation) return <Loading />;
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Cadastrar nova operação</DialogTitle>
+        <DialogTitle>Editar operação</DialogTitle>
         <DialogDescription>
-          Preencha todos os campos e clique em cadastrar em seguida.
+          Altere os campos que deseja em seguida clique em salvar.
         </DialogDescription>
       </DialogHeader>
 
@@ -210,7 +239,8 @@ export default function NewOperationForm() {
                   <FormLabel>Tipo da operação</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    defaultValue={operation.tipoDaOperacao}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -261,6 +291,7 @@ export default function NewOperationForm() {
               label="Status da operação"
               selectItems={StatusList}
               placeholder="Selecione"
+              defaultValue={operation.statusDaOperacao}
             />
 
             <FormField
@@ -309,12 +340,14 @@ export default function NewOperationForm() {
               form={form}
               name="valorLiberado"
               label="Valor liberado"
+              defaultValue={operation.valorLiberado}
             />
 
             <DecimalInput
               form={form}
               name="comissao"
               label="Comissao %"
+              defaultValue={operation.comissao}
               decimals={2}
               maxLength={7}
               maxValue={100}
@@ -331,8 +364,7 @@ export default function NewOperationForm() {
               Cancelar
             </Button>
 
-            <DialogClose asChild></DialogClose>
-            <Button type="submit">Cadastrar</Button>
+            <Button type="submit">Salvar</Button>
           </DialogFooter>
         </form>
       </Form>

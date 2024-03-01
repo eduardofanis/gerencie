@@ -22,7 +22,7 @@ const CostumerSchema = z.object({
   telefone: z.string().min(1),
   cep: z.string().min(8),
   rua: z.string().min(1),
-  numeroDaRua: z.string().min(1),
+  numeroDaRua: z.number().min(1),
   complemento: z.string(),
   estado: z.string().min(1),
   cidade: z.string().min(1),
