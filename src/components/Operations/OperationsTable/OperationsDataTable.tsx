@@ -145,7 +145,7 @@ export function OperationsDataTable<TData, TValue>({
                   userData.tiposDeOperacoes &&
                   userData.tiposDeOperacoes.map((tipo) => (
                     <SelectItem
-                      value={tipo.name + tipo.color}
+                      value={tipo.name}
                       key={`${tipo.color}-${tipo.name}`}
                     >
                       {tipo.name}
