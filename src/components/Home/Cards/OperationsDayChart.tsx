@@ -54,7 +54,8 @@ export default function OperationsDayChart() {
     const q = query(
       collection(db, currentUser!.uid, "data", "operacoes"),
       where("dataDaOperacao", ">=", startOfToday),
-      where("dataDaOperacao", "<", endOfToday)
+      where("dataDaOperacao", "<", endOfToday),
+      where("statusDaOperacao", "==", "concluido")
     );
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const operations = querySnapshot.docs.map((doc) => ({
@@ -83,7 +84,8 @@ export default function OperationsDayChart() {
     const q = query(
       collection(db, currentUser!.uid, "data", "operacoes"),
       where("dataDaOperacao", ">=", startOfYesterday),
-      where("dataDaOperacao", "<", endOfYesterday)
+      where("dataDaOperacao", "<", endOfYesterday),
+      where("statusDaOperacao", "==", "concluido")
     );
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const operations = querySnapshot.docs.map((doc) => ({

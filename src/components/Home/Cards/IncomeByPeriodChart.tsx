@@ -143,7 +143,8 @@ export default function IncomeByPeriodChart() {
     const q = query(
       collection(db, currentUser!.uid, "data", "operacoes"),
       where("dataDaOperacao", ">=", date ? date.from : firstDayOfMonth),
-      where("dataDaOperacao", "<=", date && date.to ? date.to : lastDayOfMonth)
+      where("dataDaOperacao", "<=", date && date.to ? date.to : lastDayOfMonth),
+      where("statusDaOperacao", "==", "concluido")
     );
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const operations = querySnapshot.docs.map((doc) => ({

@@ -2,7 +2,7 @@ import { useSearchParams } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogFooter } from "../ui/dialog";
 import { Skeleton } from "../ui/skeleton";
-import { GetCostumer, GetCostumerOperations } from "@/services/api";
+import { GetCostumer } from "@/services/api";
 import React from "react";
 import { Timestamp } from "firebase/firestore";
 import { ClipboardCopy, Edit } from "lucide-react";
@@ -97,7 +97,6 @@ function ClipboardText({
 export default function CostumersView() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [costumer, setCostumer] = React.useState<CostumerProps>();
-  const [operations, setOperations] = React.useState<OperationProps[]>();
 
   const isOpen = searchParams.get("visualizarCliente") ? true : false;
 
@@ -112,28 +111,14 @@ export default function CostumersView() {
     getCostumer();
   }, [searchParams]);
 
-  React.useEffect(() => {
-    async function getOperations() {
-      const id: string = searchParams.get("visualizarCliente")!;
-      if (searchParams.get("visualizarCliente") && costumer) {
-        const operationsData = await GetCostumerOperations(
-          `${costumer.nome}-${id}`,
-          3
-        );
-        setOperations(operationsData);
-      }
-    }
-    getOperations();
-  }, [searchParams, costumer]);
-
   if (!costumer)
     return (
       <Dialog open={isOpen}>
         <DialogContent className="sm:max-w-[800px]">
           <div className="grid grid-cols-3">
             <div className="grid gap-3">
-              <Skeleton className="h-[320px]"></Skeleton>
-              <Skeleton className="h-[320px]"></Skeleton>
+              <Skeleton className="h-[280px]"></Skeleton>
+              <Skeleton className="h-[280px]"></Skeleton>
             </div>
           </div>
         </DialogContent>
@@ -142,37 +127,31 @@ export default function CostumersView() {
   return (
     <Dialog open={isOpen}>
       <DialogContent className="sm:max-w-[800px]">
-        <div className="grid grid-cols-3 gap-8">
+        <div className="grid grid-cols-[200px_1fr] gap-8">
           <div className="grid gap-3">
-            <ClipboardText label="Tipo de documento" clipboard={false}>
-              {costumer.tipoDoDocumento
-                ? costumer.tipoDoDocumento
-                : "Não definido"}
-            </ClipboardText>
-
             {costumer.frenteDoDocumento ? (
               <div className="">
                 <img
                   src={costumer.frenteDoDocumento}
-                  className="h-[320px] object-cover rounded"
+                  className="h-[260px] object-cover rounded"
                 />
               </div>
             ) : (
-              <Skeleton className="h-[320px]"></Skeleton>
+              <Skeleton className="h-[260px]"></Skeleton>
             )}
 
             {costumer.versoDoDocumento ? (
               <div className="">
                 <img
                   src={costumer.versoDoDocumento}
-                  className="h-[320px] object-cover rounded"
+                  className="h-[260px] object-cover rounded"
                 />
               </div>
             ) : (
-              <Skeleton className="h-[320px]"></Skeleton>
+              <Skeleton className="h-[260px]"></Skeleton>
             )}
           </div>
-          <div className="col-span-2">
+          <div className="">
             <h1 className="font-bold text-2xl mb-8">{costumer.nome}</h1>
             <div>
               <h2 className="text-lg font-medium mb-4">Dados pessoais</h2>
@@ -256,37 +235,11 @@ export default function CostumersView() {
               </div>
             </div>
             <div className="mt-8">
-              <h2 className="text-lg font-medium mb-4">Últimas operações</h2>
-              <div className="divide-y">
-                {operations && operations.length > 0 ? (
-                  operations.map((operation) => {
-                    const date = new Date(
-                      operation.dataDaOperacao.seconds * 1000
-                    ).toLocaleDateString("pt-BR");
-
-                    const formatted = new Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    }).format(parseFloat(operation.valorLiberado));
-
-                    return (
-                      <div
-                        key={operation.id}
-                        className="flex justify-between py-2"
-                      >
-                        <span>
-                          {operation.tipoDaOperacao} - {date}
-                        </span>
-                        <span>{formatted}</span>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="text-red-500">
-                    Nenhuma operação encontrada.
-                  </div>
-                )}
-              </div>
+              <ClipboardText label="Tipo de documento" clipboard={false}>
+                {costumer.tipoDoDocumento
+                  ? costumer.tipoDoDocumento
+                  : "Não definido"}
+              </ClipboardText>
             </div>
           </div>
         </div>

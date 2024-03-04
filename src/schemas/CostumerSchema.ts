@@ -14,7 +14,7 @@ const CostumerSchema = z.object({
         })
         .join(" ");
     }),
-  cpf: z.string(),
+  cpf: z.string().min(9),
   dataDeNascimento: z.string().min(1),
   sexo: z.string(),
   estadoCivil: z.string(),

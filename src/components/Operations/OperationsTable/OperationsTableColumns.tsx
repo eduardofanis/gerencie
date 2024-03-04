@@ -174,7 +174,7 @@ export const OperationsTableColumns: ColumnDef<
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Data da operação
+          Data
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
@@ -187,47 +187,47 @@ export const OperationsTableColumns: ColumnDef<
       return <div className="ml-4">{formatted}</div>;
     },
   },
-  {
-    accessorKey: "createdAt",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Criado há
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => {
-      const dateRow: Timestamp = row.getValue("createdAt");
+  // {
+  //   accessorKey: "createdAt",
+  //   header: ({ column }) => {
+  //     return (
+  //       <Button
+  //         variant="ghost"
+  //         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+  //       >
+  //         Criado há
+  //         <ArrowUpDown className="ml-2 h-4 w-4" />
+  //       </Button>
+  //     );
+  //   },
+  //   cell: ({ row }) => {
+  //     const dateRow: Timestamp = row.getValue("createdAt");
 
-      function formatTime(time: Timestamp) {
-        const agora = Timestamp.now().toMillis(); // Obtém o timestamp atual do Firebase em milissegundos
-        const timestamp = time.toMillis(); // Obtém o timestamp fornecido em milissegundos
+  //     function formatTime(time: Timestamp) {
+  //       const agora = Timestamp.now().toMillis(); // Obtém o timestamp atual do Firebase em milissegundos
+  //       const timestamp = time.toMillis(); // Obtém o timestamp fornecido em milissegundos
 
-        const diferenca = agora - timestamp;
+  //       const diferenca = agora - timestamp;
 
-        const segundos = Math.floor(diferenca / 1000);
-        const minutos = Math.floor(segundos / 60);
-        const horas = Math.floor(minutos / 60);
-        const dias = Math.floor(horas / 24);
+  //       const segundos = Math.floor(diferenca / 1000);
+  //       const minutos = Math.floor(segundos / 60);
+  //       const horas = Math.floor(minutos / 60);
+  //       const dias = Math.floor(horas / 24);
 
-        if (dias > 0) {
-          return `${dias} dia${dias > 1 ? "s" : ""} atrás`;
-        } else if (horas > 0) {
-          return `${horas} hora${horas > 1 ? "s" : ""} atrás`;
-        } else if (minutos > 0) {
-          return `${minutos} minuto${minutos > 1 ? "s" : ""} atrás`;
-        } else {
-          return `Poucos segundos atrás`;
-        }
-      }
+  //       if (dias > 0) {
+  //         return `${dias} dia${dias > 1 ? "s" : ""} atrás`;
+  //       } else if (horas > 0) {
+  //         return `${horas} hora${horas > 1 ? "s" : ""} atrás`;
+  //       } else if (minutos > 0) {
+  //         return `${minutos} minuto${minutos > 1 ? "s" : ""} atrás`;
+  //       } else {
+  //         return `Poucos segundos atrás`;
+  //       }
+  //     }
 
-      return <div className="ml-4">{formatTime(dateRow)}</div>;
-    },
-  },
+  //     return <div className="ml-4">{formatTime(dateRow)}</div>;
+  //   },
+  // },
   {
     accessorKey: "valorRecebido",
     header: ({ column }) => {
@@ -237,7 +237,7 @@ export const OperationsTableColumns: ColumnDef<
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Valor recebido
+            Comissão
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         </div>
@@ -266,7 +266,7 @@ export const OperationsTableColumns: ColumnDef<
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Valor liberado
+            Valor
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         </div>
@@ -279,7 +279,18 @@ export const OperationsTableColumns: ColumnDef<
         currency: "BRL",
       }).format(amount);
 
-      return <div className="text-right font-medium mr-4">{formatted}</div>;
+      const amount2 = parseFloat(row.getValue("valorRecebido"));
+      const formatted2 = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(amount2);
+
+      return (
+        <div className="text-right font-medium mr-4 flex flex-col">
+          <span>{formatted}</span>
+          <span className="text-green-600">{formatted2}</span>
+        </div>
+      );
     },
   },
   {

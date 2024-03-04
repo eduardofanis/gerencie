@@ -14,7 +14,7 @@ export default function Dashboard() {
         <OperationsDayChart />
         <CostumersChart />
       </div>
-      <div className="grid sm:grid-cols-2 xl:grid-cols-3 mt-4 gap-4">
+      <div className="grid grid-cols-2 2xl:grid-cols-3 mt-4 gap-4">
         <IncomeByPeriodChart />
         <LastOperationsCard />
       </div>

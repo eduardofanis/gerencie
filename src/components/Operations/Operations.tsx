@@ -1,5 +1,4 @@
 import React from "react";
-import Sidebar from "../Sidebar/Sidebar";
 import { OperationsDataTable } from "./OperationsTable/OperationsDataTable";
 import { OperationsTableColumns } from "./OperationsTable/OperationsTableColumns";
 import { z } from "zod";
@@ -58,7 +57,6 @@ export default function Operations() {
 
   return (
     <div className="flex">
-      <Sidebar />
       <div className="p-8 w-full h-screen">
         <h1 className="text-3xl font-bold mb-8">Operações</h1>
 

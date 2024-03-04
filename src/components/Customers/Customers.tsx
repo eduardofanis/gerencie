@@ -1,4 +1,3 @@
-import Sidebar from "../Sidebar/Sidebar";
 import { CostumersDataTable } from "./CustomersTable/CostumersDataTable";
 import { CostumersTableColumns } from "./CustomersTable/CostumersTableColumns";
 import React from "react";
@@ -37,7 +36,6 @@ export default function Customers() {
 
   return (
     <div className="flex">
-      <Sidebar />
       <div className="p-8 w-full h-screen">
         <h1 className="text-3xl font-bold mb-8">Clientes</h1>
 

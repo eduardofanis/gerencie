@@ -26,17 +26,24 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Plus,
   PlusCircle,
   X,
 } from "lucide-react";
@@ -46,8 +53,11 @@ import React from "react";
 import NewOperationForm from "@/components/Forms/NewOperationForm";
 
 import { useSearchParams } from "react-router-dom";
-import { UserDataProps } from "@/components/Forms/NewOperationTypeForm";
+import NewOperationTypeForm, {
+  UserDataProps,
+} from "@/components/Forms/NewOperationTypeForm";
 import EditOperationForm from "@/components/Forms/EditOperationForm";
+import { Separator } from "@/components/ui/separator";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -67,6 +77,7 @@ export function OperationsDataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({
       id: false,
+      valorRecebido: false,
     });
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -92,7 +103,115 @@ export function OperationsDataTable<TData, TValue>({
   return (
     <div>
       <div className="flex items-center justify-between py-2">
-        <div className="flex gap-2 items-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="flex gap-2 lg:hidden" variant="outline">
+              Filtros <ChevronDown className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="p-4 grid grid-cols-2 gap-2"
+            align="start"
+          >
+            <Input
+              placeholder="Nome do cliente"
+              value={
+                (table.getColumn("cliente")?.getFilterValue() as string) ?? ""
+              }
+              onChange={(event) =>
+                table.getColumn("cliente")?.setFilterValue(event.target.value)
+              }
+              className="max-w-sm w-[300px] col-span-2"
+            />
+            <Select
+              value={
+                (table
+                  .getColumn("statusDaOperacao")
+                  ?.getFilterValue() as string) ?? ""
+              }
+              onValueChange={(event) =>
+                table.getColumn("statusDaOperacao")?.setFilterValue(event)
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="concluido">Concluído</SelectItem>
+                  <SelectItem value="processando">Processando</SelectItem>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                  <SelectItem value="falha">Falha</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <Select
+              value={
+                (table
+                  .getColumn("tipoDaOperacao")
+                  ?.getFilterValue() as string) ?? ""
+              }
+              onValueChange={(event) =>
+                table.getColumn("tipoDaOperacao")?.setFilterValue(event)
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Tipo" />
+              </SelectTrigger>
+              <SelectContent className="w-[200px]">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="w-full flex gap-2 justify-between"
+                    >
+                      Adicionar/remover
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <NewOperationTypeForm />
+                </Dialog>
+
+                <Separator className="mb-2" />
+
+                <SelectGroup>
+                  {userData &&
+                  userData.tiposDeOperacoes &&
+                  userData.tiposDeOperacoes.length > 0 ? (
+                    userData.tiposDeOperacoes.map((tipo) => (
+                      <SelectItem
+                        value={tipo.name}
+                        key={`${tipo.color}-${tipo.name}`}
+                      >
+                        {tipo.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="text-sm text-center my-2">
+                      Nenhum tipo encontrado
+                    </div>
+                  )}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            <Button
+              variant="link"
+              className="p-1 text-red-600 hover:text-red-800"
+              onClick={() => {
+                table.getColumn("statusDaOperacao")?.setFilterValue("");
+                table.getColumn("tipoDaOperacao")?.setFilterValue("");
+                table.getColumn("cliente")?.setFilterValue("");
+                // setDate(undefined);
+              }}
+            >
+              <X className="h-4 w-4 mr-2 " />
+              Limpar filtros
+            </Button>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <div className="gap-2 items-center hidden lg:flex">
           <Input
             placeholder="Nome do cliente"
             value={
@@ -118,7 +237,6 @@ export function OperationsDataTable<TData, TValue>({
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>Status</SelectLabel>
                 <SelectItem value="concluido">Concluído</SelectItem>
                 <SelectItem value="processando">Processando</SelectItem>
                 <SelectItem value="pendente">Pendente</SelectItem>
@@ -138,11 +256,26 @@ export function OperationsDataTable<TData, TValue>({
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Tipo" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-[200px]">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full flex gap-2 justify-between"
+                  >
+                    Adicionar/remover
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </DialogTrigger>
+                <NewOperationTypeForm />
+              </Dialog>
+
+              <Separator className="mb-2" />
+
               <SelectGroup>
-                <SelectLabel>Tipo</SelectLabel>
                 {userData &&
-                  userData.tiposDeOperacoes &&
+                userData.tiposDeOperacoes &&
+                userData.tiposDeOperacoes.length > 0 ? (
                   userData.tiposDeOperacoes.map((tipo) => (
                     <SelectItem
                       value={tipo.name}
@@ -150,7 +283,12 @@ export function OperationsDataTable<TData, TValue>({
                     >
                       {tipo.name}
                     </SelectItem>
-                  ))}
+                  ))
+                ) : (
+                  <div className="text-sm text-center my-2">
+                    Nenhum tipo encontrado
+                  </div>
+                )}
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -184,7 +322,7 @@ export function OperationsDataTable<TData, TValue>({
               Nova operação
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[800px]">
+          <DialogContent className="sm:max-w-[640px]">
             {!searchParams.get("editarOperacao") ? (
               <NewOperationForm />
             ) : (

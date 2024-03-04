@@ -84,9 +84,9 @@ export default function LastOperationsCard() {
     }
   }
 
-  if (!data) return <Skeleton className="sm:col-span-2 xl:col-span-1" />;
+  if (!data) return <Skeleton className="col-span-2 2xl:col-span-1" />;
   return (
-    <Card className="sm:col-span-2 xl:col-span-1 relative">
+    <Card className="col-span-2 2xl:col-span-1 relative">
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center justify-between font-normal">
           <div>
@@ -120,15 +120,29 @@ export default function LastOperationsCard() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="ml-2 flex flex-col">
-                    <span>{operations.cliente}</span>
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm">{operations.cliente}</span>
+
+                    <div className="text-xs flex items-center gap-1 text-muted-foreground">
+                      <div
+                        className={`size-2 rounded-full ${
+                          operations.statusDaOperacao == "concluido"
+                            ? "bg-green-500"
+                            : operations.statusDaOperacao == "processando"
+                            ? "bg-yellow-500"
+                            : operations.statusDaOperacao == "pendente"
+                            ? "bg-orange-500"
+                            : operations.statusDaOperacao == "falha"
+                            ? "bg-red-500"
+                            : "bg-slate-500"
+                        }`}
+                      ></div>
                       {formatTime(operations.createdAt)} -{" "}
                       {operations.tipoDaOperacao.toUpperCase()}
-                    </span>
+                    </div>
                   </div>
                 </div>
                 <div className="ml-2 flex flex-col text-right">
-                  <span className="font-medium">
+                  <span className="text-sm font-medium">
                     {formatValue(operations.valorLiberado)}
                   </span>
                   <span className="text-sm text-slate-500">

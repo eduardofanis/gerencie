@@ -31,6 +31,7 @@ import {
   X,
   PlusCircle,
   ChevronsUpDown,
+  ChevronDown,
 } from "lucide-react";
 
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -53,6 +54,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const estados: SelectItems[] = [
   { value: "AC", label: "AC" },
@@ -125,7 +131,94 @@ export function CostumersDataTable<TData, TValue>({
   return (
     <div>
       <div className="flex items-center justify-between py-2">
-        <div className="flex gap-2 items-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="flex gap-2 lg:hidden" variant="outline">
+              Filtros <ChevronDown className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="p-4 grid grid-cols-2 gap-2 w-[320px]"
+            align="start"
+          >
+            <Input
+              placeholder="Nome do cliente"
+              value={
+                (table.getColumn("nome")?.getFilterValue() as string) ?? ""
+              }
+              onChange={(event) => {
+                table.getColumn("nome")?.setFilterValue(event.target.value);
+              }}
+              className="col-span-2"
+            />
+            <Input
+              placeholder="Telefone"
+              value={
+                (table.getColumn("telefone")?.getFilterValue() as string) ?? ""
+              }
+              onChange={(event) => {
+                table.getColumn("telefone")?.setFilterValue(event.target.value);
+              }}
+            />
+
+            <Popover open={openEstados} onOpenChange={setOpenEstados}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={openEstados}
+                  className="justify-between"
+                >
+                  {table.getColumn("estado")?.getFilterValue()
+                    ? (
+                        table.getColumn("estado")?.getFilterValue() as string
+                      ).toUpperCase()
+                    : "Estado"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0">
+                <Command>
+                  <CommandInput placeholder="Pesquisar" className="h-9" />
+                  <CommandEmpty>Nenhum estado encontrado.</CommandEmpty>
+                  <CommandGroup>
+                    <ScrollArea className="h-[180px]">
+                      {estados.map((estado) => (
+                        <CommandItem
+                          key={estado.value}
+                          value={estado.value}
+                          onSelect={(currentValue: string) => {
+                            table
+                              .getColumn("estado")
+                              ?.setFilterValue(currentValue);
+                            setOpenEstados(false);
+                          }}
+                        >
+                          {estado.label}
+                        </CommandItem>
+                      ))}
+                    </ScrollArea>
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
+
+            <Button
+              variant="link"
+              className="p-1 text-red-600 hover:text-red-800"
+              onClick={() => {
+                table.getColumn("nome")?.setFilterValue("");
+                table.getColumn("telefone")?.setFilterValue("");
+                table.getColumn("estado")?.setFilterValue("");
+              }}
+            >
+              <X className="h-4 w-4 mr-2 " />
+              Limpar filtros
+            </Button>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <div className="hidden lg:flex gap-2 items-center">
           <Input
             placeholder="Nome do cliente"
             value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
@@ -214,7 +307,7 @@ export function CostumersDataTable<TData, TValue>({
               Novo cliente
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[1000px]">
+          <DialogContent className="sm:max-w-[600px]">
             {!searchParams.get("editarCliente") ? (
               <NewCostumerForm />
             ) : (

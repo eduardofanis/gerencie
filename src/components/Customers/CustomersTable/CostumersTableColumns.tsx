@@ -77,7 +77,7 @@ export const CostumersTableColumns: ColumnDef<
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Valor total liberado
+            Total liberado
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         </div>

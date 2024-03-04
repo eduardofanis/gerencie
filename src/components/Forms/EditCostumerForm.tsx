@@ -25,10 +25,14 @@ import React from "react";
 import { CostumerProps } from "../Customers/CostumersView";
 import Loading from "../ui/Loading";
 import { Timestamp } from "firebase/firestore";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 
 export default function EditCostumerForm() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [costumer, setCostumer] = React.useState<CostumerProps>();
+  const [stepOne, setStepOne] = React.useState(true);
+  const [stepTwo, setStepTwo] = React.useState(false);
+  const [stepThree, setStepThree] = React.useState(false);
 
   const form = useForm<z.infer<typeof CostumerSchema>>({
     resolver: zodResolver(CostumerSchema),
@@ -193,160 +197,225 @@ export default function EditCostumerForm() {
       </DialogHeader>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div className="mt-4">
-            <h2 className="mb-2 font-medium">Dados pessoais</h2>
-            <div className="grid grid-cols-4 gap-2">
-              <div className="space-y-1 col-span-2">
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className={stepOne ? "" : "hidden"}>
+            <div className="mt-4">
+              <h2 className="mb-2 font-medium">Dados pessoais</h2>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1 col-span-2">
+                  <TextInput
+                    form={form}
+                    label="Nome completo *"
+                    name="nome"
+                    defaultValue={costumer.nome}
+                  />
+                </div>
+                <CPFInput
+                  form={form}
+                  name="cpf"
+                  label="CPF/RG *"
+                  placeholder="000.000.000-00/00.000.000-0"
+                  defaultValue={costumer.cpf}
+                />
+                <PhoneNumberInput
+                  form={form}
+                  name="telefone"
+                  label="Telefone *"
+                  placeholder="(00) 00000-0000"
+                  defaultValue={costumer.telefone}
+                />
+
+                <BirthDateInput
+                  form={form}
+                  name="dataDeNascimento"
+                  label="Data de nascimento *"
+                  defaultValue={transformTimestampToString(
+                    costumer.dataDeNascimento
+                  )}
+                />
+
+                <SelectInput
+                  form={form}
+                  name="sexo"
+                  label="Sexo"
+                  defaultValue={costumer.sexo}
+                  placeholder="Selecione"
+                  selectItems={SexoItems}
+                />
+
+                <SelectInput
+                  form={form}
+                  name="estadoCivil"
+                  label="Estado civil"
+                  placeholder="Selecione"
+                  defaultValue={costumer.estadoCivil}
+                  selectItems={EstadoCivilItems}
+                />
+
                 <TextInput
                   form={form}
-                  label="Nome completo *"
-                  name="nome"
-                  defaultValue={costumer.nome}
+                  label="Naturalidade"
+                  name="naturalidade"
+                  defaultValue={costumer.naturalidade}
                 />
               </div>
-              <CPFInput
-                form={form}
-                name="cpf"
-                label="CPF/RG"
-                placeholder="000.000.000-00/00.000.000-0"
-                defaultValue={costumer.cpf}
-              />
-              <PhoneNumberInput
-                form={form}
-                name="telefone"
-                label="Telefone *"
-                placeholder="(00) 00000-0000"
-                defaultValue={costumer.telefone}
-              />
-
-              <BirthDateInput
-                form={form}
-                name="dataDeNascimento"
-                label="Data de nascimento *"
-                defaultValue={transformTimestampToString(
-                  costumer.dataDeNascimento
-                )}
-              />
-
-              <SelectInput
-                form={form}
-                name="sexo"
-                label="Sexo"
-                defaultValue={costumer.sexo}
-                placeholder="Selecione"
-                selectItems={SexoItems}
-              />
-
-              <SelectInput
-                form={form}
-                name="estadoCivil"
-                label="Estado civil"
-                placeholder="Selecione"
-                defaultValue={costumer.estadoCivil}
-                selectItems={EstadoCivilItems}
-              />
-
-              <TextInput
-                form={form}
-                label="Naturalidade"
-                name="naturalidade"
-                defaultValue={costumer.naturalidade}
-              />
             </div>
+            <DialogFooter className="mt-8 col-span-2">
+              <Button
+                type="button"
+                variant={"outline"}
+                onClick={() => {
+                  setSearchParams({});
+                }}
+              >
+                Cancelar
+              </Button>
+
+              <Button
+                type="button"
+                onClick={() => {
+                  setStepOne(false);
+                  setStepTwo(true);
+                  setStepThree(false);
+                }}
+              >
+                Próximo
+                <ArrowRight className="ml-2 size-4" />
+              </Button>
+            </DialogFooter>
           </div>
 
-          <div>
-            <h2 className="mb-2 font-medium">Endereço</h2>
-            <div className="grid grid-cols-4 gap-2">
-              <CepInput
-                form={form}
-                name="cep"
-                label="CEP *"
-                placeholder="00000-000"
-                defaultValue={costumer.cep}
-              />
-              <div className="space-y-1 col-span-2">
+          <div className={stepTwo ? "" : "hidden"}>
+            <div className="mt-4">
+              <h2 className="mb-2 font-medium">Endereço</h2>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="col-span-3 w-[160px]">
+                  <CepInput
+                    form={form}
+                    name="cep"
+                    label="CEP *"
+                    placeholder="00000-000"
+                    defaultValue={costumer.cep}
+                  />
+                </div>
+                <div className="space-y-1 col-span-2">
+                  <TextInput
+                    form={form}
+                    label="Rua *"
+                    name="rua"
+                    defaultValue={costumer.rua}
+                  />
+                </div>
+                <NumberInput
+                  form={form}
+                  label="Número *"
+                  name="numeroDaRua"
+                  defaultValue={costumer.numeroDaRua}
+                />
                 <TextInput
                   form={form}
-                  label="Rua"
-                  name="rua"
-                  defaultValue={costumer.rua}
+                  label="Complemento"
+                  name="complemento"
+                  defaultValue={costumer.complemento}
+                />
+                <ComboInput
+                  form={form}
+                  label="Estado *"
+                  name="estado"
+                  placeholder="Estado"
+                  selectItems={estados}
+                  defaultValue={costumer.estado}
+                />
+                <TextInput
+                  form={form}
+                  label="Cidade *"
+                  name="cidade"
+                  defaultValue={costumer.cidade}
+                />
+                <TextInput
+                  form={form}
+                  label="Bairro *"
+                  name="bairro"
+                  defaultValue={costumer.bairro}
                 />
               </div>
-              <NumberInput
-                form={form}
-                label="Número"
-                name="numeroDaRua"
-                defaultValue={costumer.numeroDaRua}
-              />
-              <TextInput
-                form={form}
-                label="Complemento"
-                name="complemento"
-                defaultValue={costumer.complemento}
-              />
-              <ComboInput
-                form={form}
-                label="Estado"
-                name="estado"
-                placeholder="Estado"
-                selectItems={estados}
-                defaultValue={costumer.estado}
-              />
-              <TextInput
-                form={form}
-                label="Cidade"
-                name="cidade"
-                defaultValue={costumer.cidade}
-              />
-              <TextInput
-                form={form}
-                label="Bairro"
-                name="bairro"
-                defaultValue={costumer.bairro}
-              />
             </div>
+            <DialogFooter className="mt-8 col-span-2">
+              <Button
+                type="button"
+                variant={"outline"}
+                onClick={() => {
+                  setStepOne(true);
+                  setStepTwo(false);
+                  setStepThree(false);
+                }}
+              >
+                <ArrowLeft className="mr-2 size-4" />
+                Voltar
+              </Button>
+
+              <Button
+                type="button"
+                onClick={() => {
+                  setStepOne(false);
+                  setStepTwo(false);
+                  setStepThree(true);
+                }}
+              >
+                Próximo
+                <ArrowRight className="ml-2 size-4" />
+              </Button>
+            </DialogFooter>
           </div>
 
-          <div>
-            <h2 className="mb-2 font-medium">Documentos</h2>
-            <div className="grid grid-cols-3 gap-2">
-              <SelectInput
-                form={form}
-                name="tipoDoDocumento"
-                label="Tipo do documento"
-                placeholder="Selecione"
-                defaultValue={costumer.tipoDoDocumento}
-                selectItems={DocumentoItems}
-              />
-              <FileInput
-                form={form}
-                label="Frente do documento"
-                name="frenteDoDocumento"
-              />
+          <div className={stepThree ? "" : "hidden"}>
+            <div className="mt-4">
+              <h2 className="mb-2 font-medium">Documentos</h2>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="col-span-2">
+                  <SelectInput
+                    form={form}
+                    name="tipoDoDocumento"
+                    label="Tipo do documento"
+                    placeholder="Selecione"
+                    defaultValue={costumer.tipoDoDocumento}
+                    selectItems={DocumentoItems}
+                  />
+                </div>
+                <FileInput
+                  form={form}
+                  label="Frente do documento"
+                  name="frenteDoDocumento"
+                />
 
-              <FileInput
-                form={form}
-                label="Verso do documento"
-                name="versoDoDocumento"
-              />
+                <FileInput
+                  form={form}
+                  label="Verso do documento"
+                  name="versoDoDocumento"
+                />
+              </div>
             </div>
+
+            <DialogFooter className="mt-8 col-span-2">
+              <Button
+                type="button"
+                variant={"outline"}
+                onClick={() => {
+                  setStepOne(false);
+                  setStepTwo(true);
+                  setStepThree(false);
+                }}
+              >
+                <ArrowLeft className="mr-2 size-4" />
+                Voltar
+              </Button>
+
+              <Button type="submit">
+                Salvar
+                <Check className="ml-2 size-4" />
+              </Button>
+            </DialogFooter>
           </div>
-
-          <DialogFooter className="mt-8 col-span-2">
-            <Button
-              type="button"
-              variant={"outline"}
-              onClick={() => {
-                setSearchParams({});
-              }}
-            >
-              Cancelar
-            </Button>
-
-            <Button type="submit">Salvar</Button>
-          </DialogFooter>
         </form>
       </Form>
     </>

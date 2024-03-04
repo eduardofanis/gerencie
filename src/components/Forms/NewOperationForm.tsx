@@ -224,7 +224,7 @@ export default function NewOperationForm() {
                             variant="ghost"
                             className="w-full flex justify-between"
                           >
-                            Adicionar novo tipo
+                            Adicionar/remover
                             <Plus className="w-4 h-4" />
                           </Button>
                         </DialogTrigger>

@@ -63,7 +63,8 @@ export default function OperationsMonthChart() {
     const q = query(
       collection(db, currentUser!.uid, "data", "operacoes"),
       where("dataDaOperacao", ">=", firstDayOfMonth),
-      where("dataDaOperacao", "<=", lastDayOfMonth)
+      where("dataDaOperacao", "<=", lastDayOfMonth),
+      where("statusDaOperacao", "==", "concluido")
     );
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const operations = querySnapshot.docs.map((doc) => ({
@@ -94,7 +95,8 @@ export default function OperationsMonthChart() {
     const q = query(
       collection(db, currentUser!.uid, "data", "operacoes"),
       where("dataDaOperacao", ">=", firstDayOfMonth),
-      where("dataDaOperacao", "<=", lastDayOfMonth)
+      where("dataDaOperacao", "<=", lastDayOfMonth),
+      where("statusDaOperacao", "==", "concluido")
     );
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const operations = querySnapshot.docs.map((doc) => ({

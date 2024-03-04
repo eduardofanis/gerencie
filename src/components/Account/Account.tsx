@@ -1,5 +1,4 @@
 import { getAuth, updateEmail, updatePassword } from "firebase/auth";
-import Sidebar from "../Sidebar/Sidebar";
 import { firebaseApp } from "@/main";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
@@ -139,7 +138,6 @@ export default function Account() {
   if (!data)
     return (
       <div className="flex">
-        <Sidebar />{" "}
         <div className="p-8 w-full">
           <Loading />
         </div>
@@ -147,7 +145,6 @@ export default function Account() {
     );
   return (
     <div className="flex">
-      <Sidebar />
       <div className="p-8 w-full">
         <h1 className="text-3xl font-bold mb-8">Minha conta</h1>
         <div className="grid w-full gap-12">
