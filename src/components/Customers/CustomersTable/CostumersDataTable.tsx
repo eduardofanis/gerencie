@@ -30,7 +30,6 @@ import {
   ChevronsRight,
   X,
   PlusCircle,
-  ChevronsUpDown,
   ChevronDown,
 } from "lucide-react";
 
@@ -167,14 +166,17 @@ export function CostumersDataTable<TData, TValue>({
                   variant="outline"
                   role="combobox"
                   aria-expanded={openEstados}
-                  className="justify-between"
+                  className={`justify-between  ${
+                    !table.getColumn("estado")?.getFilterValue() &&
+                    "text-slate-500"
+                  } font-normal`}
                 >
                   {table.getColumn("estado")?.getFilterValue()
                     ? (
                         table.getColumn("estado")?.getFilterValue() as string
                       ).toUpperCase()
                     : "Estado"}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="p-0">
@@ -204,8 +206,8 @@ export function CostumersDataTable<TData, TValue>({
             </Popover>
 
             <Button
-              variant="link"
-              className="p-1 text-red-600 hover:text-red-800"
+              variant="outline"
+              className="border-red-200 text-red-600 hover:text-red-800 hover:bg-red-50 col-span-2"
               onClick={() => {
                 table.getColumn("nome")?.setFilterValue("");
                 table.getColumn("telefone")?.setFilterValue("");
@@ -244,14 +246,18 @@ export function CostumersDataTable<TData, TValue>({
                 variant="outline"
                 role="combobox"
                 aria-expanded={openEstados}
-                className="w-[160px] justify-between"
+                className={`w-[160px] justify-between  ${
+                  !table.getColumn("estado")?.getFilterValue() &&
+                  "text-slate-500"
+                } font-normal`}
               >
                 {table.getColumn("estado")?.getFilterValue()
                   ? (
                       table.getColumn("estado")?.getFilterValue() as string
                     ).toUpperCase()
                   : "Estado"}
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+
+                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[160px] p-0">
@@ -281,8 +287,8 @@ export function CostumersDataTable<TData, TValue>({
           </Popover>
 
           <Button
-            variant="link"
-            className="p-1 text-red-600 hover:text-red-800"
+            variant="outline"
+            className="border-red-200 text-red-600 hover:text-red-800 hover:bg-red-50"
             onClick={() => {
               table.getColumn("nome")?.setFilterValue("");
               table.getColumn("telefone")?.setFilterValue("");

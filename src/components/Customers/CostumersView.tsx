@@ -117,8 +117,8 @@ export default function CostumersView() {
         <DialogContent className="sm:max-w-[800px]">
           <div className="grid grid-cols-3">
             <div className="grid gap-3">
-              <Skeleton className="h-[280px]"></Skeleton>
-              <Skeleton className="h-[280px]"></Skeleton>
+              <Skeleton className="h-[260px]"></Skeleton>
+              <Skeleton className="h-[260px]"></Skeleton>
             </div>
           </div>
         </DialogContent>

@@ -133,7 +133,12 @@ export function OperationsDataTable<TData, TValue>({
                 table.getColumn("statusDaOperacao")?.setFilterValue(event)
               }
             >
-              <SelectTrigger>
+              <SelectTrigger
+                className={`${
+                  !table.getColumn("tipoDaOperacao")?.getFilterValue() &&
+                  "text-slate-500"
+                } font-normal`}
+              >
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -155,7 +160,12 @@ export function OperationsDataTable<TData, TValue>({
                 table.getColumn("tipoDaOperacao")?.setFilterValue(event)
               }
             >
-              <SelectTrigger>
+              <SelectTrigger
+                className={`${
+                  !table.getColumn("tipoDaOperacao")?.getFilterValue() &&
+                  "text-slate-500"
+                } font-normal`}
+              >
                 <SelectValue placeholder="Tipo" />
               </SelectTrigger>
               <SelectContent className="w-[200px]">
@@ -196,8 +206,8 @@ export function OperationsDataTable<TData, TValue>({
             </Select>
 
             <Button
-              variant="link"
-              className="p-1 text-red-600 hover:text-red-800"
+              variant="outline"
+              className="border-red-200 text-red-600 hover:text-red-800 hover:bg-red-50 col-span-2"
               onClick={() => {
                 table.getColumn("statusDaOperacao")?.setFilterValue("");
                 table.getColumn("tipoDaOperacao")?.setFilterValue("");
@@ -232,7 +242,12 @@ export function OperationsDataTable<TData, TValue>({
               table.getColumn("statusDaOperacao")?.setFilterValue(event)
             }
           >
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger
+              className={`w-[160px] ${
+                !table.getColumn("tipoDaOperacao")?.getFilterValue() &&
+                "text-slate-500"
+              } font-normal`}
+            >
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -253,8 +268,13 @@ export function OperationsDataTable<TData, TValue>({
               table.getColumn("tipoDaOperacao")?.setFilterValue(event)
             }
           >
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Tipo" />
+            <SelectTrigger
+              className={`w-[160px] ${
+                !table.getColumn("tipoDaOperacao")?.getFilterValue() &&
+                "text-slate-500"
+              } font-normal`}
+            >
+              <SelectValue placeholder="Tipo"></SelectValue>
             </SelectTrigger>
             <SelectContent className="w-[200px]">
               <Dialog>
@@ -294,8 +314,8 @@ export function OperationsDataTable<TData, TValue>({
           </Select>
 
           <Button
-            variant="link"
-            className="p-1 text-red-600 hover:text-red-800"
+            variant="outline"
+            className="border-red-200 text-red-600 hover:text-red-800 hover:bg-red-50"
             onClick={() => {
               table.getColumn("statusDaOperacao")?.setFilterValue("");
               table.getColumn("tipoDaOperacao")?.setFilterValue("");

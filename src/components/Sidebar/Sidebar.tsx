@@ -13,87 +13,56 @@ export default function Sidebar() {
   const { user } = React.useContext(AuthContext);
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const componentRef = React.useRef<HTMLDivElement>(null);
 
-  const [largeScreen, setLargeScreen] = React.useState(false);
   const [isHovered, setIsHovered] = React.useState(false);
-  const [showTitle, setShowTitle] = React.useState(false);
-  const [componentSize, setComponentSize] = React.useState(278);
+  const [showSidebar, setShowSidebar] = React.useState(false);
 
   React.useEffect(() => {
-    function handleResize() {
-      const screenSize = window.innerWidth;
-      if (screenSize >= 1280) {
-        setLargeScreen(true);
-        if (componentRef.current) {
-          const width = componentRef.current.offsetWidth;
-          if (!isHovered || !showTitle) setComponentSize(width);
-          console.log(width);
-        }
-      } else {
-        setLargeScreen(false);
-        if (componentRef.current) {
-          const width = componentRef.current.offsetWidth;
-          if (!isHovered || !showTitle) setComponentSize(width);
-          console.log(width);
-        }
-      }
-    }
-
-    window.addEventListener("resize", handleResize);
-    handleResize();
-
-    return () => window.removeEventListener("resize", handleResize);
-  }, [isHovered, largeScreen, showTitle]);
-
-  React.useEffect(() => {
-    if (!largeScreen) {
-      if (!largeScreen && isHovered) setShowTitle(true);
-      else if (largeScreen && !isHovered) setShowTitle(true);
-      else setShowTitle(false);
-    } else {
-      setShowTitle(true);
-    }
-  }, [isHovered, largeScreen]);
+    if (
+      pathname == "/" ||
+      pathname == "/operacoes" ||
+      pathname == "/clientes" ||
+      pathname == "/conta"
+    )
+      setShowSidebar(true);
+    else setShowSidebar(false);
+  }, [pathname]);
 
   if (!user) return null;
+  if (!showSidebar) return null;
   return (
     <>
-      <div
-        style={{
-          width: `${componentSize}px`,
-        }}
-      ></div>
+      <div className="w-[86px]"></div>
       <div
         className="h-screen border-slate-100 border-r p-4 fixed bg-white z-50"
-        ref={componentRef}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div
-          className={`flex items-center space-x-2 hover:bg-slate-100 ${
+        <Button
+          variant="ghost"
+          className={`flex items-center h-[54px] w-full justify-start font-normal overflow-hidden truncate text-left space-x-2 ${
             pathname == "/conta" && "bg-slate-50"
           } rounded-md p-2 cursor-pointer`}
           onClick={() => navigate("/conta")}
         >
-          <Avatar className="h-12 w-12">
+          <Avatar className="h-9 w-9">
             <AvatarImage src={auth.currentUser?.photoURL || ""} />
             <AvatarFallback>
               {auth.currentUser?.displayName?.charAt(0)}
             </AvatarFallback>
           </Avatar>
 
-          {showTitle && (
-            <div>
-              <h2 className="font-medium whitespace-nowrap">
+          {isHovered && (
+            <div className="truncate">
+              <h2 className="font-medium whitespace-nowrap truncate">
                 {auth.currentUser?.displayName}
               </h2>
-              <span className="text-sm text-ellipsis break-words opacity-85">
+              <span className="text-sm text-ellipsis truncate break-words opacity-85">
                 {auth.currentUser?.email}
               </span>
             </div>
           )}
-        </div>
+        </Button>
 
         <Separator className="my-4" />
 
@@ -106,7 +75,7 @@ export default function Sidebar() {
             onClick={() => navigate("/")}
           >
             <BarChart4 className="h-5 w-5" />
-            {showTitle && <span>Dashboard</span>}
+            {isHovered && <span>Dashboard</span>}
           </Button>
           <Button
             className={`space-x-4 justify-start ${
@@ -116,7 +85,7 @@ export default function Sidebar() {
             onClick={() => navigate("/operacoes")}
           >
             <HandCoins className="h-5 w-5 " />
-            {showTitle && <span>Operações</span>}
+            {isHovered && <span>Operações</span>}
           </Button>
           <Button
             className={`space-x-4 justify-start ${
@@ -126,7 +95,7 @@ export default function Sidebar() {
             onClick={() => navigate("/clientes")}
           >
             <Users className="h-5 w-5 " />
-            {showTitle && <span>Clientes</span>}
+            {isHovered && <span>Clientes</span>}
           </Button>
           <Button
             className={`space-x-4 justify-start ${
@@ -137,12 +106,12 @@ export default function Sidebar() {
             disabled
           >
             <Contact className="h-5 w-5 " />
-            {showTitle && <span>Funcionários</span>}
+            {isHovered && <span>Funcionários</span>}
           </Button>
           <Button asChild className="space-x-4 justify-start" variant={"ghost"}>
             <a href="https://wa.me/5541997590249" target="_blank">
               <Phone className="h-5 w-5 " />
-              {showTitle && <span>Suporte</span>}
+              {isHovered && <span>Suporte</span>}
             </a>
           </Button>
         </div>
