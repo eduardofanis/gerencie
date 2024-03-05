@@ -61,7 +61,7 @@ type InitialValues = {
   [key: string]: number;
 };
 
-export default function IncomeByPeriodChart() {
+export default function IncomeByPeriodCard() {
   const [thisMonthOperations, setThisMonthOperations] =
     React.useState<OperationProps[]>();
   const [data, setData] = React.useState<DataProps[] | null>(null);

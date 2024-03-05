@@ -33,7 +33,7 @@ type ThisMonthOperationsProps = {
   comissao: string;
 };
 
-export default function IncomeMonthChart() {
+export default function IncomeMonthCard() {
   const [thisMonthOperations, setThisMonthOperations] =
     React.useState<ThisMonthOperationsProps[]>();
   const [lastMonthOperations, setLastMonthOperations] =

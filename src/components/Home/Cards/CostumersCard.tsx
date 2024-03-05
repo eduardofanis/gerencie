@@ -3,7 +3,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { firebaseApp } from "@/main";
 import { getAuth } from "firebase/auth";
 import {
-  Timestamp,
   collection,
   getFirestore,
   onSnapshot,
@@ -18,29 +17,17 @@ type DataProps = {
   diferencaPercentual: number;
 };
 
-type ThisMonthDataProps = {
-  [key: string]: number;
+type CostumerProps = {
+  id: string;
+  nome: string;
 };
 
-type ThisMonthOperationsProps = {
-  clienteId: string;
-  tipoDaOperacao: string;
-  statusDaOperacao: string;
-  dataDaOperacao: Timestamp;
-  promotora: string;
-  valorLiberado: number;
-  comissao: string;
-};
-
-export default function OperationsMonthChart() {
-  const [thisMonthOperations, setThisMonthOperations] =
-    React.useState<ThisMonthOperationsProps[]>();
-  const [lastMonthOperations, setLastMonthOperations] =
-    React.useState<ThisMonthOperationsProps[]>();
+export default function CostumersCard() {
+  const [thisMonthCostumers, setThisMonthCostumers] =
+    React.useState<CostumerProps[]>();
+  const [lastMonthCostumers, setLastMonthCostumers] =
+    React.useState<CostumerProps[]>();
   const [data, setData] = React.useState<DataProps | null>(null);
-  const [thisMonthData, setThisMonthData] = React.useState<
-    ThisMonthDataProps[] | null
-  >(null);
 
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
@@ -61,16 +48,15 @@ export default function OperationsMonthChart() {
     );
 
     const q = query(
-      collection(db, currentUser!.uid, "data", "operacoes"),
-      where("dataDaOperacao", ">=", firstDayOfMonth),
-      where("dataDaOperacao", "<=", lastDayOfMonth),
-      where("statusDaOperacao", "==", "concluido")
+      collection(db, currentUser!.uid, "data", "clientes"),
+      where("createdAt", ">=", firstDayOfMonth),
+      where("createdAt", "<=", lastDayOfMonth)
     );
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const operations = querySnapshot.docs.map((doc) => ({
-        ...(doc.data() as ThisMonthOperationsProps),
+      const costumers = querySnapshot.docs.map((doc) => ({
+        ...(doc.data() as CostumerProps),
       }));
-      setThisMonthOperations(operations);
+      setThisMonthCostumers(costumers);
     });
     return () => {
       if (unsubscribe) unsubscribe();
@@ -93,16 +79,15 @@ export default function OperationsMonthChart() {
     );
 
     const q = query(
-      collection(db, currentUser!.uid, "data", "operacoes"),
-      where("dataDaOperacao", ">=", firstDayOfMonth),
-      where("dataDaOperacao", "<=", lastDayOfMonth),
-      where("statusDaOperacao", "==", "concluido")
+      collection(db, currentUser!.uid, "data", "clientes"),
+      where("createdAt", ">=", firstDayOfMonth),
+      where("createdAt", "<=", lastDayOfMonth)
     );
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const operations = querySnapshot.docs.map((doc) => ({
-        ...(doc.data() as ThisMonthOperationsProps),
+      const costumers = querySnapshot.docs.map((doc) => ({
+        ...(doc.data() as CostumerProps),
       }));
-      setLastMonthOperations(operations);
+      setLastMonthCostumers(costumers);
     });
     return () => {
       if (unsubscribe) unsubscribe();
@@ -112,38 +97,28 @@ export default function OperationsMonthChart() {
   React.useEffect(() => {
     function compareMonths() {
       let diferencaPercentual = 0;
-      if (thisMonthOperations && lastMonthOperations) {
+      if (thisMonthCostumers && lastMonthCostumers) {
         diferencaPercentual =
-          ((thisMonthOperations.length - lastMonthOperations.length) /
-            lastMonthOperations.length) *
+          ((thisMonthCostumers.length - lastMonthCostumers.length) /
+            lastMonthCostumers.length) *
           100;
         setData({
-          somaThisMonth: thisMonthOperations.length,
-          diferencaPercentual: Math.round(diferencaPercentual),
+          somaThisMonth: thisMonthCostumers.length,
+          diferencaPercentual: Math.round(
+            diferencaPercentual == Infinity ? 0 : diferencaPercentual
+          ),
         });
       }
     }
     compareMonths();
-  }, [lastMonthOperations, thisMonthOperations]);
+  }, [lastMonthCostumers, thisMonthCostumers]);
 
-  React.useEffect(() => {
-    function getDataToCreateChart() {
-      if (thisMonthOperations) {
-        const thisMonthValues = thisMonthOperations.map((operation) => ({
-          value: operation.valorLiberado,
-        }));
-        setThisMonthData(thisMonthValues);
-      }
-    }
-    getDataToCreateChart();
-  }, [thisMonthOperations]);
-
-  if (!data || !thisMonthData) return <Skeleton />;
+  if (!data) return <Skeleton />;
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center justify-between font-normal">
-          <div className="font-medium">Operações (mês)</div>
+          <div className="font-medium">Clientes (mês)</div>
           <DollarSign className="h-4 w-4" />
         </CardTitle>
       </CardHeader>
@@ -151,20 +126,20 @@ export default function OperationsMonthChart() {
         <div className="text-2xl font-bold">{data.somaThisMonth}</div>
         <p
           className={`text-xs ${
-            lastMonthOperations!.length > 0 && data.diferencaPercentual > 0
+            data.diferencaPercentual > 0
               ? "text-green-500"
               : data.diferencaPercentual < 0
               ? "text-red-600"
               : "text-muted-foreground"
           }`}
         >
-          {lastMonthOperations!.length <= 0
+          {lastMonthCostumers!.length <= 0
             ? "Sem dados relacionados ao mês anterior"
             : data.diferencaPercentual > 0
-            ? "+" + data.diferencaPercentual + "% em relação ao mês anterior"
+            ? "+" + data.diferencaPercentual + "% em relação ao mês passado"
             : data.diferencaPercentual < 0
-            ? data.diferencaPercentual + "% em relação ao mês anterior"
-            : "0% em relação ao mês anterior"}
+            ? data.diferencaPercentual + "% em relação ao mês passado"
+            : "Nenhuma diferença em relação ao mês passado"}
         </p>
         {/* <div className="h-[60px] mt-8">
           <ResponsiveContainer width="100%" height="100%">

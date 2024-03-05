@@ -28,7 +28,7 @@ type OperationsProps = {
   comissao: string;
 };
 
-export default function OperationsDayChart() {
+export default function OperationsDayCard() {
   const [todayOperations, setTodayOperations] =
     React.useState<OperationsProps[]>();
   const [yesterdayOperations, setYesterdayOperations] =
