@@ -14,6 +14,27 @@ import { firebaseApp } from "@/main";
 import Loading from "../ui/Loading";
 import CostumersView from "./CostumersView";
 
+export type CostumerProps = {
+  id: string;
+  nome: string;
+  cpf: string;
+  dataDeNascimento: string;
+  sexo: string;
+  estadoCivil: string;
+  naturalidade: string;
+  telefone: string;
+  cep: string;
+  rua: string;
+  numeroDaRua: string;
+  complemento: string;
+  estado: string;
+  cidade: string;
+  bairro: string;
+  tipoDoDocumento: string;
+  frenteDoDocumento: string;
+  versoDoDocumento: string;
+};
+
 export default function Customers() {
   const [data, setData] = React.useState<z.infer<typeof CostumerSchema>[]>();
 

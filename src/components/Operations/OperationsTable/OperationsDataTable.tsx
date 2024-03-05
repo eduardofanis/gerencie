@@ -43,6 +43,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Download,
   Plus,
   PlusCircle,
   X,
@@ -58,6 +59,9 @@ import NewOperationTypeForm, {
 } from "@/components/Forms/NewOperationTypeForm";
 import EditOperationForm from "@/components/Forms/EditOperationForm";
 import { Separator } from "@/components/ui/separator";
+import { OperationProps } from "@/components/Customers/CostumersView";
+
+import * as XLSX from "xlsx";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -99,6 +103,30 @@ export function OperationsDataTable<TData, TValue>({
     onColumnVisibilityChange: setColumnVisibility,
     columnResizeMode: "onChange",
   });
+
+  function handleExport() {
+    const data2 = data as OperationProps[];
+    const operationData = data2.map((item) => {
+      return {
+        Cliente: item.cliente,
+        "Tipo da operação": item.tipoDaOperacao,
+        "Data da operação": item.dataDaOperacao
+          .toDate()
+          .toLocaleDateString("pt-BR"),
+        "Status da operação": item.statusDaOperacao,
+        "Valor liberado": item.valorLiberado,
+        Comissão: item.comissao,
+        "Valor recebido": item.valorRecebido,
+      };
+    });
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(operationData);
+
+    XLSX.utils.book_append_sheet(wb, ws, "Tabela de Operações");
+
+    XLSX.writeFile(wb, "Tabela de Operações.xlsx");
+  }
 
   return (
     <div>
@@ -402,49 +430,55 @@ export function OperationsDataTable<TData, TValue>({
         </Table>
       </div>
       <div>
-        <div className="flex items-center justify-end space-x-2 py-2">
-          <span className="text-sm  ml-2 p-0 text-slate-700">
-            Página{" "}
-            <span className="font-bold">
-              {table.getState().pagination.pageIndex + 1} de{" "}
-              {table.getPageCount()}
+        <div className="flex items-center justify-between py-2">
+          <Button variant="secondary" onClick={() => handleExport()}>
+            <Download className="size-4 mr-2" />
+            Exportar dados
+          </Button>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm  ml-2 p-0 text-slate-700">
+              Página{" "}
+              <span className="font-bold">
+                {table.getState().pagination.pageIndex + 1} de{" "}
+                {table.getPageCount()}
+              </span>
             </span>
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <ChevronsLeft className="w-4 h-4" />
-          </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <ChevronsLeft className="w-4 h-4" />
+            </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            <ChevronRight className="w-4 h-4" />
-          </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
-          >
-            <ChevronsRight className="w-4 h-4" />
-          </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            >
+              <ChevronsRight className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
