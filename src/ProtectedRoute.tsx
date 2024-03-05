@@ -17,3 +17,9 @@ export function SubscriptionProtectedRoute({ children }: Props) {
 
   return subscription ? children : <Navigate to="/conta" replace />;
 }
+
+export function MidOrHighTierPlanProtectedRoute({ children }: Props) {
+  const { isMidOrHighTierPlan } = useContext(AuthContext);
+
+  return isMidOrHighTierPlan ? children : <Navigate to="/conta" replace />;
+}

@@ -1,4 +1,10 @@
-import { Users, BarChart4, HandCoins, Phone, Contact } from "lucide-react";
+import {
+  Users,
+  BarChart4,
+  HandCoins,
+  Phone,
+  HeartHandshake,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
@@ -10,7 +16,7 @@ import { AuthContext } from "@/AuthContext";
 
 export default function Sidebar() {
   const auth = getAuth(firebaseApp);
-  const { user } = React.useContext(AuthContext);
+  const { user, isMidOrHighTierPlan } = React.useContext(AuthContext);
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -22,6 +28,7 @@ export default function Sidebar() {
       pathname == "/" ||
       pathname == "/operacoes" ||
       pathname == "/clientes" ||
+      pathname == "/colaboradores" ||
       pathname == "/conta"
     )
       setShowSidebar(true);
@@ -84,7 +91,7 @@ export default function Sidebar() {
             variant={"ghost"}
             onClick={() => navigate("/operacoes")}
           >
-            <HandCoins className="h-5 w-5 " />
+            <HandCoins className="h-5 w-5" />
             {isHovered && <span>Operações</span>}
           </Button>
           <Button
@@ -94,23 +101,23 @@ export default function Sidebar() {
             variant={"ghost"}
             onClick={() => navigate("/clientes")}
           >
-            <Users className="h-5 w-5 " />
+            <Users className="h-5 w-5" />
             {isHovered && <span>Clientes</span>}
           </Button>
           <Button
             className={`space-x-4 justify-start ${
-              pathname == "/funcionarios" && "bg-slate-50"
+              pathname == "/colaboradores" && "bg-slate-50"
             }`}
             variant={"ghost"}
-            onClick={() => navigate("/funcionarios")}
-            disabled
+            onClick={() => navigate("/colaboradores")}
+            disabled={!isMidOrHighTierPlan}
           >
-            <Contact className="h-5 w-5 " />
-            {isHovered && <span>Funcionários</span>}
+            <HeartHandshake className="h-5 w-5" />
+            {isHovered && <span>Colaboradores</span>}
           </Button>
           <Button asChild className="space-x-4 justify-start" variant={"ghost"}>
             <a href="https://wa.me/5541997590249" target="_blank">
-              <Phone className="h-5 w-5 " />
+              <Phone className="h-5 w-5" />
               {isHovered && <span>Suporte</span>}
             </a>
           </Button>

@@ -250,16 +250,6 @@ export function OperationsDataTable<TData, TValue>({
         </DropdownMenu>
 
         <div className="gap-2 items-center hidden lg:flex">
-          <Input
-            placeholder="Nome do cliente"
-            value={
-              (table.getColumn("cliente")?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event) =>
-              table.getColumn("cliente")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm w-[300px]"
-          />
           <Select
             value={
               (table
@@ -287,6 +277,17 @@ export function OperationsDataTable<TData, TValue>({
               </SelectGroup>
             </SelectContent>
           </Select>
+          <Input
+            placeholder="Nome do cliente"
+            value={
+              (table.getColumn("cliente")?.getFilterValue() as string) ?? ""
+            }
+            onChange={(event) =>
+              table.getColumn("cliente")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm w-[300px]"
+          />
+
           <Select
             value={
               (table.getColumn("tipoDaOperacao")?.getFilterValue() as string) ??

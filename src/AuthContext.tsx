@@ -8,6 +8,7 @@ type ContextProps = {
   user: User | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>> | null;
   subscription: boolean;
+  isMidOrHighTierPlan: boolean;
   loading: boolean;
 };
 
@@ -21,6 +22,7 @@ export const AuthContext = React.createContext<ContextProps>({
   user: null,
   setUser: null,
   subscription: false,
+  isMidOrHighTierPlan: false,
   loading: true,
 });
 
@@ -35,6 +37,7 @@ export default function AuthStorage({
   const [user, setUser] = React.useState<User | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [subscription, setSubscription] = React.useState(true);
+  const [isMidOrHighTierPlan, setIsMidOrHighTierPlan] = React.useState(true);
 
   React.useEffect(() => {
     const authState = onAuthStateChanged(auth, (currentUser) => {
@@ -54,6 +57,16 @@ export default function AuthStorage({
                 duration: 99999999999999,
               });
             } else setSubscription(true);
+
+            if (
+              (docRef && docRef.plano === "Empresarial") ||
+              (docRef && docRef.plano === "Time")
+            ) {
+              setIsMidOrHighTierPlan(true);
+            } else {
+              setIsMidOrHighTierPlan(false);
+              console.log("teste");
+            }
           }
         );
         return () => {
@@ -70,7 +83,9 @@ export default function AuthStorage({
   }, [auth, db]);
 
   return (
-    <AuthContext.Provider value={{ user, setUser, subscription, loading }}>
+    <AuthContext.Provider
+      value={{ user, setUser, subscription, loading, isMidOrHighTierPlan }}
+    >
       {!loading && children}
     </AuthContext.Provider>
   );

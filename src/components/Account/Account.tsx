@@ -144,193 +144,190 @@ export default function Account() {
       </div>
     );
   return (
-    <div className="flex">
-      <div className="p-8 w-full">
-        <h1 className="text-3xl font-bold mb-8">Minha conta</h1>
-        <div className="grid w-full gap-12">
-          <div className="flex items-center space-x-4">
-            <Avatar
-              className="h-20 w-20 relative cursor-pointer"
-              onClick={handleProfilePhotoClick}
+    <div className="p-8 w-full">
+      <h1 className="text-3xl font-bold mb-8">Minha conta</h1>
+      <div className="grid w-full gap-12">
+        <div className="flex items-center space-x-4">
+          <Avatar
+            className="h-20 w-20 relative cursor-pointer"
+            onClick={handleProfilePhotoClick}
+          >
+            <AvatarImage src={auth.currentUser?.photoURL || ""} />
+            <AvatarFallback className="text-xl">
+              <Camera className="h-6 w-6 text-black" />
+            </AvatarFallback>
+            <Input
+              ref={fileInputRef}
+              className="hidden"
+              type="file"
+              onChange={(e) => handleProfilePhotoSelect(e)}
+            />
+          </Avatar>
+          <div>
+            <h2 className="font-medium text-lg">
+              {auth.currentUser?.displayName}
+            </h2>
+            <span className="text-base text-ellipsis break-words opacity-85">
+              {auth.currentUser?.email}
+            </span>
+            <Button
+              variant={"link"}
+              className="text-sm flex gap-2 p-0 h-6 text-red-500"
+              onClick={userSignOut}
             >
-              <AvatarImage src={auth.currentUser?.photoURL || ""} />
-              <AvatarFallback className="text-xl">
-                <Camera className="h-6 w-6 text-black" />
-              </AvatarFallback>
-              <Input
-                ref={fileInputRef}
-                className="hidden"
-                type="file"
-                onChange={(e) => handleProfilePhotoSelect(e)}
-              />
-            </Avatar>
-            <div>
-              <h2 className="font-medium text-lg">
-                {auth.currentUser?.displayName}
-              </h2>
-              <span className="text-base text-ellipsis break-words opacity-85">
-                {auth.currentUser?.email}
-              </span>
-              <Button
-                variant={"link"}
-                className="text-sm flex gap-2 p-0 h-6 text-red-500"
-                onClick={userSignOut}
-              >
-                <LogOut className="h-4 w-4" />
-                Sair da conta
-              </Button>
-            </div>
+              <LogOut className="h-4 w-4" />
+              Sair da conta
+            </Button>
           </div>
-          <div className="grid">
-            <h2 className="font-medium text-xl mb-2">Assinatura</h2>
-            <div className="space-y-1">
-              <p>
-                Plano:{" "}
-                <span
-                  className={`font-medium ${
-                    data.plano == "Individual"
-                      ? "text-green-800"
-                      : data.plano == "Time"
-                      ? "text-yellow-700"
-                      : "text-blue-700"
-                  }`}
-                >
-                  {data.plano}
-                </span>
-              </p>
-              <p>
-                Data de Vencimento:{" "}
-                <span className="font-medium">
-                  {toDate(data.dataDeVencimento)}
-                </span>
-              </p>
-              <p
-                className={`pb-1 ${
-                  formatValidityMessage(data.dataDeVencimento) < 7 &&
-                  "text-red-600"
+        </div>
+        <div className="grid">
+          <h2 className="font-medium text-xl mb-2">Assinatura</h2>
+          <div className="space-y-1">
+            <p>
+              Plano:{" "}
+              <span
+                className={`font-medium ${
+                  data.plano == "Individual"
+                    ? "text-green-800"
+                    : data.plano == "Time"
+                    ? "text-yellow-700"
+                    : "text-blue-700"
                 }`}
               >
-                {formatValidityMessage(data.dataDeVencimento) <= 0
-                  ? "Sua assinatura venceu, renove para continuar utilizando nosso sistema."
-                  : `Sua assinatura vence em ${
-                      formatValidityMessage(data.dataDeVencimento) <= 1
-                        ? formatValidityMessage(data.dataDeVencimento) + " dia."
-                        : formatValidityMessage(data.dataDeVencimento) +
-                          " dias."
-                    }`}
-              </p>
+                {data.plano}
+              </span>
+            </p>
+            <p>
+              Data de Vencimento:{" "}
+              <span className="font-medium">
+                {toDate(data.dataDeVencimento)}
+              </span>
+            </p>
+            <p
+              className={`pb-1 ${
+                formatValidityMessage(data.dataDeVencimento) < 7 &&
+                "text-red-600"
+              }`}
+            >
+              {formatValidityMessage(data.dataDeVencimento) <= 0
+                ? "Sua assinatura venceu, renove para continuar utilizando nosso sistema."
+                : `Sua assinatura vence em ${
+                    formatValidityMessage(data.dataDeVencimento) <= 1
+                      ? formatValidityMessage(data.dataDeVencimento) + " dia."
+                      : formatValidityMessage(data.dataDeVencimento) + " dias."
+                  }`}
+            </p>
 
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button>Alterar Plano</Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[800px]">
-                  <DialogHeader>
-                    <DialogTitle>Planos</DialogTitle>
-                    <DialogDescription>
-                      Selecione o plano que mais se enquadra nas suas
-                      necessidades.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid grid-cols-3 h-[320px] gap-4 pt-4">
-                    <div className="text-center rounded-lg p-4 flex bg-slate-50 flex-col justify-between">
-                      <h2>Individual</h2>
-                      <span className="text-lg font-medium">R$ 89,90/mês</span>
-                      <ul className="list-disc list-inside text-sm mt-4 mb-8 text-slate-600">
-                        <li>Função de funcionários desativada.</li>
-                      </ul>
-                      <Button
-                        variant={"outline"}
-                        className="w-full mt-auto border-0"
-                      >
-                        Selecionar plano
-                      </Button>
-                    </div>
-                    <div className="text-center rounded-lg p-4 flex bg-slate-950 flex-col justify-between">
-                      <h2 className="text-white">Empresarial</h2>
-                      <span className="text-lg font-medium text-white">
-                        R$ 349,90/mês
-                      </span>
-                      <ul className="list-disc list-inside text-sm mt-4 mb-8 text-slate-300">
-                        <li>Função de funcionários ativada.</li>
-                        <li>Número de funcionários ilimitado.</li>
-                      </ul>
-                      <Button className="w-full mt-auto bg-slate-900">
-                        Selecionar plano
-                      </Button>
-                    </div>
-                    <div className="text-center rounded-lg p-4 flex flex-col bg-slate-50 justify-between">
-                      <h2>Time</h2>
-                      <span className="text-lg font-medium">R$ 149,90/mês</span>
-                      <ul className="list-disc list-inside text-sm mt-4 mb-8 text-slate-600">
-                        <li>Função de funcionários ativada.</li>
-                        <li>Limite de 3 funcionários.</li>
-                      </ul>
-                      <Button
-                        variant={"outline"}
-                        className="w-full mt-auto border-0"
-                      >
-                        Selecionar plano
-                      </Button>
-                    </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>Alterar Plano</Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[800px]">
+                <DialogHeader>
+                  <DialogTitle>Planos</DialogTitle>
+                  <DialogDescription>
+                    Selecione o plano que mais se enquadra nas suas
+                    necessidades.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid grid-cols-3 h-[320px] gap-4 pt-4">
+                  <div className="text-center rounded-lg p-4 flex bg-slate-50 flex-col justify-between">
+                    <h2>Individual</h2>
+                    <span className="text-lg font-medium">R$ 89,90/mês</span>
+                    <ul className="list-disc list-inside text-sm mt-4 mb-8 text-slate-600">
+                      <li>Função de funcionários desativada.</li>
+                    </ul>
+                    <Button
+                      variant={"outline"}
+                      className="w-full mt-auto border-0"
+                    >
+                      Selecionar plano
+                    </Button>
                   </div>
-                  <DialogClose className="absolute top-4 right-4">
-                    <X className="h-4 w-4" />
-                  </DialogClose>
-                </DialogContent>
-              </Dialog>
+                  <div className="text-center rounded-lg p-4 flex bg-slate-950 flex-col justify-between">
+                    <h2 className="text-white">Empresarial</h2>
+                    <span className="text-lg font-medium text-white">
+                      R$ 349,90/mês
+                    </span>
+                    <ul className="list-disc list-inside text-sm mt-4 mb-8 text-slate-300">
+                      <li>Função de funcionários ativada.</li>
+                      <li>Número de funcionários ilimitado.</li>
+                    </ul>
+                    <Button className="w-full mt-auto bg-slate-900">
+                      Selecionar plano
+                    </Button>
+                  </div>
+                  <div className="text-center rounded-lg p-4 flex flex-col bg-slate-50 justify-between">
+                    <h2>Time</h2>
+                    <span className="text-lg font-medium">R$ 149,90/mês</span>
+                    <ul className="list-disc list-inside text-sm mt-4 mb-8 text-slate-600">
+                      <li>Função de funcionários ativada.</li>
+                      <li>Limite de 3 funcionários.</li>
+                    </ul>
+                    <Button
+                      variant={"outline"}
+                      className="w-full mt-auto border-0"
+                    >
+                      Selecionar plano
+                    </Button>
+                  </div>
+                </div>
+                <DialogClose className="absolute top-4 right-4">
+                  <X className="h-4 w-4" />
+                </DialogClose>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+        <div className="flex gap-12">
+          <div className="grid">
+            <h2 className="font-medium text-xl mb-2">Alterar Senha</h2>
+            <div className="space-y-2">
+              <div className="space-y-1">
+                <Label>Senha atual</Label>
+                <Input
+                  className="w-[300px]"
+                  value={password}
+                  type="password"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Nova senha</Label>
+                <Input
+                  className="w-[300px]"
+                  value={newPassword}
+                  type="password"
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+              </div>
+
+              <Button onClick={handleNewPassword}>Alterar Senha</Button>
             </div>
           </div>
-          <div className="flex gap-12">
-            <div className="grid">
-              <h2 className="font-medium text-xl mb-2">Alterar Senha</h2>
-              <div className="space-y-2">
-                <div className="space-y-1">
-                  <Label>Senha atual</Label>
-                  <Input
-                    className="w-[300px]"
-                    value={password}
-                    type="password"
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label>Nova senha</Label>
-                  <Input
-                    className="w-[300px]"
-                    value={newPassword}
-                    type="password"
-                    onChange={(e) => setNewPassword(e.target.value)}
-                  />
-                </div>
-
-                <Button onClick={handleNewPassword}>Alterar Senha</Button>
+          <Separator orientation="vertical" />
+          <div className="grid">
+            <h2 className="font-medium text-xl mb-2">Alterar E-mail</h2>
+            <div className="space-y-2">
+              <div className="space-y-1">
+                <Label>Senha atual</Label>
+                <Input
+                  className="w-[300px]"
+                  value={password2}
+                  type="password"
+                  onChange={(e) => setPassword2(e.target.value)}
+                />
               </div>
-            </div>
-            <Separator orientation="vertical" />
-            <div className="grid">
-              <h2 className="font-medium text-xl mb-2">Alterar E-mail</h2>
-              <div className="space-y-2">
-                <div className="space-y-1">
-                  <Label>Senha atual</Label>
-                  <Input
-                    className="w-[300px]"
-                    value={password2}
-                    type="password"
-                    onChange={(e) => setPassword2(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label>Novo e-mail</Label>
-                  <Input
-                    className="w-[300px]"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-
-                <Button onClick={handleNewEmail}>Alterar E-mail</Button>
+              <div className="space-y-1">
+                <Label>Novo e-mail</Label>
+                <Input
+                  className="w-[300px]"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
+
+              <Button onClick={handleNewEmail}>Alterar E-mail</Button>
             </div>
           </div>
         </div>

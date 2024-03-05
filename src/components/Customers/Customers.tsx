@@ -56,18 +56,16 @@ export default function Customers() {
   }, [db, currentUser]);
 
   return (
-    <div className="flex">
-      <div className="p-8 w-full h-screen">
-        <h1 className="text-3xl font-bold mb-8">Clientes</h1>
+    <div className="p-8 w-full h-screen">
+      <h1 className="text-3xl font-bold mb-8">Clientes</h1>
 
-        {data ? (
-          <CostumersDataTable columns={CostumersTableColumns} data={data} />
-        ) : (
-          <Loading />
-        )}
+      {data ? (
+        <CostumersDataTable columns={CostumersTableColumns} data={data} />
+      ) : (
+        <Loading />
+      )}
 
-        <CostumersView />
-      </div>
+      <CostumersView />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import AuthStorage from "./AuthContext";
 import {
   UserProtectedRoute,
   SubscriptionProtectedRoute,
+  MidOrHighTierPlanProtectedRoute,
 } from "./ProtectedRoute";
 import Customers from "./components/Customers/Customers";
 import { Toaster } from "./components/ui/toaster";
@@ -13,6 +14,7 @@ import SignUp from "./components/SignUp/SignUp";
 import ForgotPassword from "./components/ForgotPassword/ForgotPassword";
 import Account from "./components/Account/Account";
 import Sidebar from "./components/Sidebar/Sidebar";
+import Collaborators from "./components/Collaborators/Collaborators";
 
 export default function App() {
   return (
@@ -64,12 +66,14 @@ export default function App() {
                 }
               />
               <Route
-                path="/funcionarios"
+                path="/colaboradores"
                 element={
                   <UserProtectedRoute>
-                    <SubscriptionProtectedRoute>
-                      <Account />
-                    </SubscriptionProtectedRoute>
+                    <MidOrHighTierPlanProtectedRoute>
+                      <SubscriptionProtectedRoute>
+                        <Collaborators />
+                      </SubscriptionProtectedRoute>
+                    </MidOrHighTierPlanProtectedRoute>
                   </UserProtectedRoute>
                 }
               />

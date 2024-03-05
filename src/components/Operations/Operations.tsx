@@ -56,20 +56,18 @@ export default function Operations() {
   }, []);
 
   return (
-    <div className="flex">
-      <div className="p-8 w-full h-screen">
-        <h1 className="text-3xl font-bold mb-8">Operações</h1>
+    <div className="p-8 w-full h-screen">
+      <h1 className="text-3xl font-bold mb-8">Operações</h1>
 
-        {data && userData ? (
-          <OperationsDataTable
-            columns={OperationsTableColumns}
-            data={data}
-            userData={userData}
-          />
-        ) : (
-          <Loading />
-        )}
-      </div>
+      {data && userData ? (
+        <OperationsDataTable
+          columns={OperationsTableColumns}
+          data={data}
+          userData={userData}
+        />
+      ) : (
+        <Loading />
+      )}
     </div>
   );
 }
