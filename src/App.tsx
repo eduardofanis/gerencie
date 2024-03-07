@@ -2,14 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Login from "./components/Login/Login";
 import Home from "./components/Home/Home";
 import AuthStorage from "./contexts/AuthContext";
-import {
-  UserProtectedRoute,
-  SubscriptionProtectedRoute,
-  HighProtectedRoute,
-  MidProtectedRoute,
-  PermissaoGerenciarColaboradoresProtectedRoute,
-  PermissaoGerenciarAutomacoesProtectedRoute,
-} from "./ProtectedRoute";
+import { UserProtectedRoute } from "./routes/UserProtectedRoute";
 import Customers from "./components/Customers/Customers";
 import { Toaster } from "./components/ui/toaster";
 import Operations from "./components/Operations/Operations";
@@ -21,6 +14,15 @@ import Collaborators from "./components/Collaborators/Collaborators";
 import Automations from "./components/Automations/Automations";
 import SubscriberStorage from "./contexts/SubscriberContext";
 import CollaboratorStorage from "./contexts/CollaboratorContext";
+import {
+  HighSubscriberProtectedRoute,
+  MidSubscriberProtectedRoute,
+  SubscriberProtectedRoute,
+} from "./routes/SubscriberProtectedRoute";
+import {
+  ManageAutomationsProtectedRoute,
+  ManageOthersCollaboratorsProtectedRoute,
+} from "./routes/CollaboratorProtectedRoute";
 
 export default function App() {
   return (
@@ -36,9 +38,9 @@ export default function App() {
                     path="/"
                     element={
                       <UserProtectedRoute>
-                        <SubscriptionProtectedRoute>
+                        <SubscriberProtectedRoute>
                           <Home />
-                        </SubscriptionProtectedRoute>
+                        </SubscriberProtectedRoute>
                       </UserProtectedRoute>
                     }
                   />
@@ -49,9 +51,9 @@ export default function App() {
                     path="/operacoes"
                     element={
                       <UserProtectedRoute>
-                        <SubscriptionProtectedRoute>
+                        <SubscriberProtectedRoute>
                           <Operations />
-                        </SubscriptionProtectedRoute>
+                        </SubscriberProtectedRoute>
                       </UserProtectedRoute>
                     }
                   />
@@ -59,9 +61,9 @@ export default function App() {
                     path="/clientes"
                     element={
                       <UserProtectedRoute>
-                        <SubscriptionProtectedRoute>
+                        <SubscriberProtectedRoute>
                           <Customers />
-                        </SubscriptionProtectedRoute>
+                        </SubscriberProtectedRoute>
                       </UserProtectedRoute>
                     }
                   />
@@ -77,13 +79,13 @@ export default function App() {
                     path="/colaboradores"
                     element={
                       <UserProtectedRoute>
-                        <SubscriptionProtectedRoute>
-                          <MidProtectedRoute>
-                            <PermissaoGerenciarColaboradoresProtectedRoute>
+                        <SubscriberProtectedRoute>
+                          <MidSubscriberProtectedRoute>
+                            <ManageOthersCollaboratorsProtectedRoute>
                               <Collaborators />
-                            </PermissaoGerenciarColaboradoresProtectedRoute>
-                          </MidProtectedRoute>
-                        </SubscriptionProtectedRoute>
+                            </ManageOthersCollaboratorsProtectedRoute>
+                          </MidSubscriberProtectedRoute>
+                        </SubscriberProtectedRoute>
                       </UserProtectedRoute>
                     }
                   />
@@ -91,13 +93,13 @@ export default function App() {
                     path="/automacoes"
                     element={
                       <UserProtectedRoute>
-                        <SubscriptionProtectedRoute>
-                          <HighProtectedRoute>
-                            <PermissaoGerenciarAutomacoesProtectedRoute>
+                        <SubscriberProtectedRoute>
+                          <HighSubscriberProtectedRoute>
+                            <ManageAutomationsProtectedRoute>
                               <Automations />
-                            </PermissaoGerenciarAutomacoesProtectedRoute>
-                          </HighProtectedRoute>
-                        </SubscriptionProtectedRoute>
+                            </ManageAutomationsProtectedRoute>
+                          </HighSubscriberProtectedRoute>
+                        </SubscriberProtectedRoute>
                       </UserProtectedRoute>
                     }
                   />
