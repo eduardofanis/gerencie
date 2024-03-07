@@ -10,6 +10,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { firebaseApp } from "@/main";
+import { getUserData } from "@/services/user";
 import { format } from "date-fns";
 import { getAuth } from "firebase/auth";
 import {
@@ -75,87 +76,106 @@ export default function IncomeByPeriodCard() {
   const { currentUser } = getAuth(firebaseApp);
 
   React.useEffect(() => {
-    const unsubscribe = onSnapshot(
-      doc(db, currentUser!.uid, "data"),
-      (docSnapshot) => {
-        setOperationTypes(docSnapshot.data() as UserDataProps);
-      }
-    );
+    getUserData().then((userData) => {
+      const gerenteUid = userData?.gerenteUid;
 
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
+      const unsubscribe = onSnapshot(
+        doc(db, gerenteUid ? gerenteUid : currentUser!.uid, "data"),
+        (docSnapshot) => {
+          setOperationTypes(docSnapshot.data() as UserDataProps);
+        }
+      );
+
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
+    });
   }, [db, currentUser]);
 
   React.useEffect(() => {
-    const firstDayOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth(),
-      new Date().getDate() - 6
-    );
-    const lastDayOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth(),
-      new Date().getDate(),
-      23,
-      59,
-      59
-    );
+    getUserData().then((data) => {
+      const gerenteUid = data?.gerenteUid;
 
-    if (date && date.to) {
-      date.to.setHours(23);
-      date.to.setMinutes(59);
-      date.to.setSeconds(59);
-    }
+      const firstDayOfMonth = new Date(
+        new Date().getFullYear(),
+        new Date().getMonth(),
+        new Date().getDate() - 6
+      );
+      const lastDayOfMonth = new Date(
+        new Date().getFullYear(),
+        new Date().getMonth(),
+        new Date().getDate(),
+        23,
+        59,
+        59
+      );
 
-    const allDaysArray = [];
-    const firstDate = new Date(date && date.from ? date.from : firstDayOfMonth); // Iniciar a partir da data inicial
-    const lastDate = new Date(date && date.to ? date.to : lastDayOfMonth);
+      if (date && date.to) {
+        date.to.setHours(23);
+        date.to.setMinutes(59);
+        date.to.setSeconds(59);
+      }
 
-    // Enquanto a data atual for menor ou igual à data final
-    if (
-      operationTypes &&
-      operationTypes.tiposDeOperacoes &&
-      operationTypes.tiposDeOperacoes.length > 0
-    ) {
-      const initialValues: InitialValues = {};
-      operationTypes.tiposDeOperacoes.forEach((operation) => {
-        initialValues[operation.name] = 0;
+      const allDaysArray = [];
+      const firstDate = new Date(
+        date && date.from ? date.from : firstDayOfMonth
+      ); // Iniciar a partir da data inicial
+      const lastDate = new Date(date && date.to ? date.to : lastDayOfMonth);
+
+      // Enquanto a data atual for menor ou igual à data final
+      if (
+        operationTypes &&
+        operationTypes.tiposDeOperacoes &&
+        operationTypes.tiposDeOperacoes.length > 0
+      ) {
+        const initialValues: InitialValues = {};
+        operationTypes.tiposDeOperacoes.forEach((operation) => {
+          initialValues[operation.name] = 0;
+        });
+        while (firstDate <= lastDate) {
+          allDaysArray.push({
+            ...initialValues,
+            day: firstDate.getTime(),
+          }); // Adicionar o dia atual à array
+          firstDate.setDate(firstDate.getDate() + 1); // Avançar para o próximo dia
+        }
+      } else {
+        while (firstDate <= lastDate) {
+          allDaysArray.push({
+            day: firstDate.getTime(),
+          }); // Adicionar o dia atual à array
+          firstDate.setDate(firstDate.getDate() + 1); // Avançar para o próximo dia
+        }
+      }
+
+      setData2(allDaysArray);
+
+      const q = query(
+        collection(
+          db,
+          gerenteUid ? gerenteUid : currentUser!.uid,
+          "data",
+          "operacoes"
+        ),
+        where("dataDaOperacao", ">=", date ? date.from : firstDayOfMonth),
+        where(
+          "dataDaOperacao",
+          "<=",
+          date && date.to ? date.to : lastDayOfMonth
+        ),
+        where("statusDaOperacao", "==", "concluido")
+      );
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const operations = querySnapshot.docs.map((doc) => ({
+          ...(doc.data() as OperationProps),
+        }));
+        setThisMonthOperations(operations);
       });
-      while (firstDate <= lastDate) {
-        allDaysArray.push({
-          ...initialValues,
-          day: firstDate.getTime(),
-        }); // Adicionar o dia atual à array
-        firstDate.setDate(firstDate.getDate() + 1); // Avançar para o próximo dia
-      }
-    } else {
-      while (firstDate <= lastDate) {
-        allDaysArray.push({
-          day: firstDate.getTime(),
-        }); // Adicionar o dia atual à array
-        firstDate.setDate(firstDate.getDate() + 1); // Avançar para o próximo dia
-      }
-    }
 
-    setData2(allDaysArray);
-
-    const q = query(
-      collection(db, currentUser!.uid, "data", "operacoes"),
-      where("dataDaOperacao", ">=", date ? date.from : firstDayOfMonth),
-      where("dataDaOperacao", "<=", date && date.to ? date.to : lastDayOfMonth),
-      where("statusDaOperacao", "==", "concluido")
-    );
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const operations = querySnapshot.docs.map((doc) => ({
-        ...(doc.data() as OperationProps),
-      }));
-      setThisMonthOperations(operations);
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
     });
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
   }, [db, currentUser, date, operationTypes]);
 
   React.useEffect(() => {

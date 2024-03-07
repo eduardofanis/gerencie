@@ -28,8 +28,7 @@ export default function CostumerDropdown({ row }: any) {
   const [dialog, setDialog] = React.useState(false);
   const [remove, setRemove] = React.useState(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, setSearchParams] = useSearchParams();
+  const [, setSearchParams] = useSearchParams();
 
   const clienteId = row.getValue("id").split("-").slice(1).join("-");
 

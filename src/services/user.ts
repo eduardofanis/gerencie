@@ -1,5 +1,6 @@
 import { toast } from "@/components/ui/use-toast";
 import { firebaseApp } from "@/main";
+import { UserDataProps } from "@/types/UserDataProps";
 import { addDays } from "date-fns";
 import { FirebaseError } from "firebase/app";
 import {
@@ -9,7 +10,13 @@ import {
   signOut,
   updateProfile,
 } from "firebase/auth";
-import { doc, getFirestore, setDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  getFirestore,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 
 export async function userSignIn(email: string, password: string) {
@@ -70,9 +77,12 @@ export async function userSignUp(
           displayName: name,
         });
 
-        await setDoc(doc(db, auth.currentUser!.uid, "data"), {
+        await setDoc(doc(db, user.uid, "data"), {
           plano: plan,
           dataDeVencimento: date,
+          id: user.uid,
+          nome: name,
+          email: email,
           tiposDeOperacoes: [],
         });
 
@@ -109,11 +119,13 @@ export async function userSignUp(
 export async function updateProfilePicture(photo: File) {
   const auth = getAuth(firebaseApp);
   const storage = getStorage();
+  const db = getFirestore(firebaseApp);
 
   try {
     if (photo instanceof File && auth.currentUser) {
       if (photo.type.startsWith("image/")) {
         const photoRef = ref(storage, `fotosDePerfil/${auth.currentUser.uid}`);
+        const docRef = doc(db, auth.currentUser.uid, "data");
 
         await uploadBytes(photoRef, photo);
 
@@ -121,6 +133,10 @@ export async function updateProfilePicture(photo: File) {
         const photoURL = await getDownloadURL(photoRef);
         updateProfile(auth.currentUser, {
           photoURL: photoURL,
+        });
+
+        updateDoc(docRef, {
+          avatar: photoURL,
         });
 
         toast({
@@ -142,6 +158,39 @@ export async function updateProfilePicture(photo: File) {
       variant: "destructive",
       duration: 5000,
     });
+  }
+}
+
+export async function getUserData() {
+  const db = getFirestore(firebaseApp);
+  const { currentUser } = getAuth(firebaseApp);
+
+  try {
+    if (currentUser && currentUser.uid) {
+      const querySnapshot = await getDoc(doc(db, currentUser!.uid, "data"));
+      const userData = querySnapshot.data() as UserDataProps;
+
+      return userData;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function getGerenteData() {
+  const db = getFirestore(firebaseApp);
+  const userData = await getUserData();
+  const gerenteUid = userData?.gerenteUid;
+
+  try {
+    if (gerenteUid) {
+      const querySnapshot = await getDoc(doc(db, gerenteUid, "data"));
+      const gerenteData = querySnapshot.data() as UserDataProps;
+
+      return gerenteData;
+    }
+  } catch (error) {
+    console.error(error);
   }
 }
 

@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { firebaseApp } from "@/main";
+import { getUserData } from "@/services/user";
 import { getAuth } from "firebase/auth";
 import {
   collection,
@@ -33,65 +34,83 @@ export default function CostumersCard() {
   const { currentUser } = getAuth(firebaseApp);
 
   React.useEffect(() => {
-    const firstDayOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth(),
-      1
-    );
-    const lastDayOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth() + 1,
-      0,
-      23,
-      59,
-      59
-    );
+    getUserData().then((userData) => {
+      const gerenteUid = userData?.gerenteUid;
 
-    const q = query(
-      collection(db, currentUser!.uid, "data", "clientes"),
-      where("createdAt", ">=", firstDayOfMonth),
-      where("createdAt", "<=", lastDayOfMonth)
-    );
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const costumers = querySnapshot.docs.map((doc) => ({
-        ...(doc.data() as CostumerProps),
-      }));
-      setThisMonthCostumers(costumers);
+      const firstDayOfMonth = new Date(
+        new Date().getFullYear(),
+        new Date().getMonth(),
+        1
+      );
+      const lastDayOfMonth = new Date(
+        new Date().getFullYear(),
+        new Date().getMonth() + 1,
+        0,
+        23,
+        59,
+        59
+      );
+
+      const q = query(
+        collection(
+          db,
+          gerenteUid ? gerenteUid : currentUser!.uid,
+          "data",
+          "clientes"
+        ),
+        where("createdAt", ">=", firstDayOfMonth),
+        where("createdAt", "<=", lastDayOfMonth)
+      );
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const costumers = querySnapshot.docs.map((doc) => ({
+          ...(doc.data() as CostumerProps),
+        }));
+        setThisMonthCostumers(costumers);
+      });
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
     });
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
   }, [db, currentUser]);
 
   React.useEffect(() => {
-    const firstDayOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth() - 1,
-      1
-    );
-    const lastDayOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth(),
-      0,
-      23,
-      59,
-      59
-    );
+    getUserData().then((userData) => {
+      const gerenteUid = userData?.gerenteUid;
 
-    const q = query(
-      collection(db, currentUser!.uid, "data", "clientes"),
-      where("createdAt", ">=", firstDayOfMonth),
-      where("createdAt", "<=", lastDayOfMonth)
-    );
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const costumers = querySnapshot.docs.map((doc) => ({
-        ...(doc.data() as CostumerProps),
-      }));
-      setLastMonthCostumers(costumers);
+      const firstDayOfMonth = new Date(
+        new Date().getFullYear(),
+        new Date().getMonth() - 1,
+        1
+      );
+      const lastDayOfMonth = new Date(
+        new Date().getFullYear(),
+        new Date().getMonth(),
+        0,
+        23,
+        59,
+        59
+      );
+
+      const q = query(
+        collection(
+          db,
+          gerenteUid ? gerenteUid : currentUser!.uid,
+          "data",
+          "clientes"
+        ),
+        where("createdAt", ">=", firstDayOfMonth),
+        where("createdAt", "<=", lastDayOfMonth)
+      );
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const costumers = querySnapshot.docs.map((doc) => ({
+          ...(doc.data() as CostumerProps),
+        }));
+        setLastMonthCostumers(costumers);
+      });
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
     });
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
   }, [db, currentUser]);
 
   React.useEffect(() => {
@@ -141,26 +160,6 @@ export default function CostumersCard() {
             ? data.diferencaPercentual + "% em relação ao mês passado"
             : "Nenhuma diferença em relação ao mês passado"}
         </p>
-        {/* <div className="h-[60px] mt-8">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={thisMonthData}
-              margin={{
-                top: 0,
-                right: 0,
-                left: 0,
-                bottom: 0,
-              }}
-            >
-              <Area
-                type="monotone"
-                dataKey="value"
-                stroke="#334155"
-                fill="#334155"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div> */}
       </CardContent>
     </Card>
   );

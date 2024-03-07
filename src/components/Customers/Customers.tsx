@@ -13,6 +13,7 @@ import { getAuth } from "firebase/auth";
 import { firebaseApp } from "@/main";
 import Loading from "../ui/Loading";
 import CostumersView from "./CostumersView";
+import { getUserData } from "@/services/user";
 
 export type CostumerProps = {
   id: string;
@@ -42,17 +43,27 @@ export default function Customers() {
   const { currentUser } = getAuth(firebaseApp);
 
   React.useEffect(() => {
-    const q = query(collection(db, currentUser!.uid, "data", "clientes"));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const costumers = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as z.infer<typeof CostumerSchema>),
-      }));
-      setData(costumers);
+    getUserData().then((data) => {
+      const gerenteUid = data!.gerenteUid;
+      const q = query(
+        collection(
+          db,
+          gerenteUid ? gerenteUid : currentUser!.uid,
+          "data",
+          "clientes"
+        )
+      );
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const costumers = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as z.infer<typeof CostumerSchema>),
+        }));
+        setData(costumers);
+      });
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
     });
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
   }, [db, currentUser]);
 
   return (

@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { firebaseApp } from "@/main";
+import { getUserData } from "@/services/user";
 import { getAuth } from "firebase/auth";
 import {
   Timestamp,
@@ -39,63 +40,81 @@ export default function OperationsDayCard() {
   const { currentUser } = getAuth(firebaseApp);
 
   React.useEffect(() => {
-    const today = new Date();
-    const startOfToday = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate()
-    );
-    const endOfToday = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() + 1
-    );
+    getUserData().then((userData) => {
+      const gerenteUid = userData?.gerenteUid;
 
-    const q = query(
-      collection(db, currentUser!.uid, "data", "operacoes"),
-      where("dataDaOperacao", ">=", startOfToday),
-      where("dataDaOperacao", "<", endOfToday),
-      where("statusDaOperacao", "==", "concluido")
-    );
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const operations = querySnapshot.docs.map((doc) => ({
-        ...(doc.data() as OperationsProps),
-      }));
-      setTodayOperations(operations);
+      const today = new Date();
+      const startOfToday = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      );
+      const endOfToday = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate() + 1
+      );
+
+      const q = query(
+        collection(
+          db,
+          gerenteUid ? gerenteUid : currentUser!.uid,
+          "data",
+          "operacoes"
+        ),
+        where("dataDaOperacao", ">=", startOfToday),
+        where("dataDaOperacao", "<", endOfToday),
+        where("statusDaOperacao", "==", "concluido")
+      );
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const operations = querySnapshot.docs.map((doc) => ({
+          ...(doc.data() as OperationsProps),
+        }));
+        setTodayOperations(operations);
+      });
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
     });
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
   }, [db, currentUser]);
 
   React.useEffect(() => {
-    const yesterday = new Date();
-    const startOfYesterday = new Date(
-      yesterday.getFullYear(),
-      yesterday.getMonth(),
-      yesterday.getDate() - 1
-    );
-    const endOfYesterday = new Date(
-      yesterday.getFullYear(),
-      yesterday.getMonth(),
-      yesterday.getDate()
-    );
+    getUserData().then((userData) => {
+      const gerenteUid = userData?.gerenteUid;
 
-    const q = query(
-      collection(db, currentUser!.uid, "data", "operacoes"),
-      where("dataDaOperacao", ">=", startOfYesterday),
-      where("dataDaOperacao", "<", endOfYesterday),
-      where("statusDaOperacao", "==", "concluido")
-    );
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const operations = querySnapshot.docs.map((doc) => ({
-        ...(doc.data() as OperationsProps),
-      }));
-      setYesterdayOperations(operations);
+      const yesterday = new Date();
+      const startOfYesterday = new Date(
+        yesterday.getFullYear(),
+        yesterday.getMonth(),
+        yesterday.getDate() - 1
+      );
+      const endOfYesterday = new Date(
+        yesterday.getFullYear(),
+        yesterday.getMonth(),
+        yesterday.getDate()
+      );
+
+      const q = query(
+        collection(
+          db,
+          gerenteUid ? gerenteUid : currentUser!.uid,
+          "data",
+          "operacoes"
+        ),
+        where("dataDaOperacao", ">=", startOfYesterday),
+        where("dataDaOperacao", "<", endOfYesterday),
+        where("statusDaOperacao", "==", "concluido")
+      );
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const operations = querySnapshot.docs.map((doc) => ({
+          ...(doc.data() as OperationsProps),
+        }));
+        setYesterdayOperations(operations);
+      });
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
     });
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
   }, [db, currentUser]);
 
   React.useEffect(() => {

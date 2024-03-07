@@ -55,6 +55,7 @@ import { CostumerSchema } from "@/schemas/CostumerSchema";
 import { OperationProps } from "../Customers/CostumersView";
 import Loading from "../ui/Loading";
 import DecimalInput from "./Input/DecimalInput";
+import { CollaboratorContext } from "@/contexts/CollaboratorContext";
 
 const StatusList: SelectItems[] = [
   {
@@ -83,6 +84,7 @@ export default function EditOperationForm() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [operation, setOperation] = React.useState<OperationProps>();
+  const { collaborator } = React.useContext(CollaboratorContext);
 
   const form = useForm<z.infer<typeof OperationSchema>>({
     resolver: zodResolver(OperationSchema),
@@ -124,6 +126,12 @@ export default function EditOperationForm() {
       if (unsubscribe) unsubscribe();
     };
   }, []);
+
+  const manageOperationTypePermission = !collaborator
+    ? true
+    : collaborator && collaborator.permissions.gerenciarTipoDeOperacoes === true
+    ? true
+    : false;
 
   React.useEffect(() => {
     if (operation) {
@@ -248,20 +256,24 @@ export default function EditOperationForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="w-full flex justify-between"
-                          >
-                            Adicionar novo tipo
-                            <Plus className="w-4 h-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <NewOperationTypeForm />
-                      </Dialog>
+                      {manageOperationTypePermission && (
+                        <>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                className="w-full flex justify-between"
+                              >
+                                Adicionar novo tipo
+                                <Plus className="w-4 h-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <NewOperationTypeForm />
+                          </Dialog>
 
-                      <Separator className="mb-2" />
+                          <Separator className="mb-2" />
+                        </>
+                      )}
 
                       {operationTypes &&
                       operationTypes.tiposDeOperacoes &&
@@ -357,6 +369,7 @@ export default function EditOperationForm() {
             <Button
               type="button"
               variant={"outline"}
+              className="border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800"
               onClick={() => {
                 setSearchParams({});
               }}

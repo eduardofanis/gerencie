@@ -13,14 +13,21 @@ import {
   arrayRemove,
   getDoc,
   limit,
+  setDoc,
 } from "firebase/firestore";
 import { firebaseApp } from "../main";
-import { getAuth } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  deleteUser,
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile,
+} from "firebase/auth";
 import { toast } from "../components/ui/use-toast";
 import { CostumerSchema } from "../schemas/CostumerSchema";
 import { z } from "zod";
 import { OperationSchema } from "../schemas/OperationSchema";
-import { UserDataProps } from "../components/Forms/NewOperationTypeForm";
 import { UseFormReturn } from "react-hook-form";
 import {
   deleteObject,
@@ -34,6 +41,11 @@ import {
   CostumerProps,
   OperationProps,
 } from "../components/Customers/CostumersView";
+import { CollaboratorSchema } from "@/schemas/CollaboratorSchema";
+import { firebaseConfig } from "@/FirebaseSettings";
+import { FirebaseError, initializeApp } from "firebase/app";
+import { getUserData } from "./user";
+import { UserDataProps } from "@/types/UserDataProps";
 
 export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
   const db = getFirestore(firebaseApp);
@@ -42,6 +54,8 @@ export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
 
   try {
     if (currentUser && currentUser.uid) {
+      const data = await getUserData();
+      const gerenteUid = data?.gerenteUid;
       const date = values.dataDeNascimento.replace(
         /(\d{2})(\d{2})(\d{4})/,
         "$1/$2/$3"
@@ -49,7 +63,12 @@ export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
       const [day, month, year] = date.split("/");
       const dateObject = new Date(`${month}/${day}/${year}`);
       const docRef = await addDoc(
-        collection(db, currentUser.uid, "data", "clientes"),
+        collection(
+          db,
+          gerenteUid ? gerenteUid : currentUser.uid,
+          "data",
+          "clientes"
+        ),
         {
           ...values,
           createdAt: Timestamp.now(),
@@ -60,7 +79,7 @@ export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
       );
       const clienteRef = doc(
         db,
-        currentUser!.uid,
+        gerenteUid ? gerenteUid : currentUser!.uid,
         "data",
         "clientes",
         docRef.id
@@ -138,18 +157,33 @@ export async function EditCostumer(
 
   try {
     if (currentUser && currentUser.uid) {
+      const data = await getUserData();
+      const gerenteUid = data?.gerenteUid;
       const date = values.dataDeNascimento.replace(
         /(\d{2})(\d{2})(\d{4})/,
         "$1/$2/$3"
       );
       const [day, month, year] = date.split("/");
       const dateObject = new Date(`${month}/${day}/${year}`);
-      const docRef = getDoc(doc(db, currentUser.uid, "data", "clientes", id));
+      const docRef = getDoc(
+        doc(
+          db,
+          gerenteUid ? gerenteUid : currentUser.uid,
+          "data",
+          "clientes",
+          id
+        )
+      );
       const docData = (await docRef).data() as CostumerProps;
       const oldName = docData.nome;
 
       const queryRef = query(
-        collection(db, currentUser!.uid, "data", "operacoes"),
+        collection(
+          db,
+          gerenteUid ? gerenteUid : currentUser!.uid,
+          "data",
+          "operacoes"
+        ),
         where("clienteId", "==", `${oldName}-${id}`)
       );
 
@@ -161,11 +195,20 @@ export async function EditCostumer(
         });
       });
 
-      await updateDoc(doc(db, currentUser.uid, "data", "clientes", id), {
-        ...values,
-        id: `${values.nome}-${id}`,
-        dataDeNascimento: dateObject,
-      });
+      await updateDoc(
+        doc(
+          db,
+          gerenteUid ? gerenteUid : currentUser.uid,
+          "data",
+          "clientes",
+          id
+        ),
+        {
+          ...values,
+          id: `${values.nome}-${id}`,
+          dataDeNascimento: dateObject,
+        }
+      );
       toast({
         title: "Cliente editado com sucesso!",
         variant: "success",
@@ -194,10 +237,18 @@ export async function NewOperation(
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
 
+  const data = await getUserData();
+  const gerenteUid = data?.gerenteUid;
+
   try {
     if (currentUser && currentUser.uid) {
       const docRef = await addDoc(
-        collection(db, currentUser.uid, "data", "operacoes"),
+        collection(
+          db,
+          gerenteUid ? gerenteUid : currentUser.uid,
+          "data",
+          "operacoes"
+        ),
         {
           ...values,
           createdAt: Timestamp.now(),
@@ -206,7 +257,7 @@ export async function NewOperation(
       );
       const operationRef = doc(
         db,
-        currentUser!.uid,
+        gerenteUid ? gerenteUid : currentUser!.uid,
         "data",
         "operacoes",
         docRef.id
@@ -236,14 +287,26 @@ export async function EditOperation(
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
 
+  const data = await getUserData();
+  const gerenteUid = data?.gerenteUid;
+
   try {
     if (currentUser && currentUser.uid) {
       console.log(values, id, nomeDoCliente);
-      await updateDoc(doc(db, currentUser.uid, "data", "operacoes", id), {
-        ...values,
-        cliente: nomeDoCliente,
-        valorRecebido: (values.valorLiberado * Number(values.comissao)) / 100,
-      });
+      await updateDoc(
+        doc(
+          db,
+          gerenteUid ? gerenteUid : currentUser.uid,
+          "data",
+          "operacoes",
+          id
+        ),
+        {
+          ...values,
+          cliente: nomeDoCliente,
+          valorRecebido: (values.valorLiberado * Number(values.comissao)) / 100,
+        }
+      );
       toast({
         title: "Operação editada com sucesso!",
         variant: "success",
@@ -264,9 +327,12 @@ export async function NewOperationType(name: string, color: string) {
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
 
+  const data = await getUserData();
+  const gerenteUid = data?.gerenteUid;
+
   try {
     if (currentUser && currentUser.uid) {
-      const docRef = doc(db, currentUser.uid, "data");
+      const docRef = doc(db, gerenteUid ? gerenteUid : currentUser.uid, "data");
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
@@ -317,9 +383,12 @@ export async function RemoveOperationType(name: string, color: string) {
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
 
+  const data = await getUserData();
+  const gerenteUid = data?.gerenteUid;
+
   try {
     if (currentUser && currentUser.uid) {
-      const docRef = doc(db, currentUser.uid, "data");
+      const docRef = doc(db, gerenteUid ? gerenteUid : currentUser.uid, "data");
       await updateDoc(docRef, {
         tiposDeOperacoes: arrayRemove({
           name: name,
@@ -329,7 +398,12 @@ export async function RemoveOperationType(name: string, color: string) {
 
       const operacoesSnapshot = await getDocs(
         query(
-          collection(db, currentUser.uid, "data", "operacoes"),
+          collection(
+            db,
+            gerenteUid ? gerenteUid : currentUser.uid,
+            "data",
+            "operacoes"
+          ),
           where("tipoDaOperacao", "==", name)
         )
       );
@@ -357,10 +431,18 @@ export async function GetCostumers() {
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
 
+  const data = await getUserData();
+  const gerenteUid = data?.gerenteUid;
+
   try {
     if (currentUser && currentUser.uid) {
       const querySnapshot = await getDocs(
-        collection(db, currentUser!.uid, "data", "clientes")
+        collection(
+          db,
+          gerenteUid ? gerenteUid : currentUser!.uid,
+          "data",
+          "clientes"
+        )
       );
       const costumers = querySnapshot.docs.map((doc) => ({
         ...(doc.data() as z.infer<typeof CostumerSchema>),
@@ -379,10 +461,19 @@ export async function GetCostumer(clienteId: string) {
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
 
+  const data = await getUserData();
+  const gerenteUid = data?.gerenteUid;
+
   try {
     if (currentUser && currentUser.uid) {
       const docRef = await getDoc(
-        doc(db, currentUser!.uid, "data", "clientes", clienteId)
+        doc(
+          db,
+          gerenteUid ? gerenteUid : currentUser!.uid,
+          "data",
+          "clientes",
+          clienteId
+        )
       );
       const costumer = docRef.data() as CostumerProps;
 
@@ -402,16 +493,29 @@ export async function GetCostumerOperations(
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
 
+  const data = await getUserData();
+  const gerenteUid = data?.gerenteUid;
+
   try {
     if (currentUser && currentUser.uid) {
       const queryRef = operationLimit
         ? query(
-            collection(db, currentUser!.uid, "data", "operacoes"),
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "operacoes"
+            ),
             where("clienteId", "==", clienteId),
             limit(operationLimit)
           )
         : query(
-            collection(db, currentUser!.uid, "data", "operacoes"),
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "operacoes"
+            ),
             where("clienteId", "==", clienteId)
           );
       const querySnapshot = await getDocs(queryRef);
@@ -432,10 +536,19 @@ export async function GetOperation(id: string) {
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
 
+  const data = await getUserData();
+  const gerenteUid = data?.gerenteUid;
+
   try {
     if (currentUser && currentUser.uid) {
       const docRef = await getDoc(
-        doc(db, currentUser!.uid, "data", "operacoes", id)
+        doc(
+          db,
+          gerenteUid ? gerenteUid : currentUser!.uid,
+          "data",
+          "operacoes",
+          id
+        )
       );
       const operation = docRef.data() as OperationProps;
 
@@ -448,31 +561,22 @@ export async function GetOperation(id: string) {
   }
 }
 
-export async function getUserData() {
-  const db = getFirestore(firebaseApp);
-  const { currentUser } = getAuth(firebaseApp);
-
-  try {
-    if (currentUser && currentUser.uid) {
-      const querySnapshot = await getDoc(doc(db, currentUser!.uid, "data"));
-      const consumers = querySnapshot.data() as UserDataProps;
-
-      return consumers;
-    }
-  } catch (error) {
-    console.log(error);
-  } finally {
-    console.log();
-  }
-}
-
 export async function DeleteOperation(operationId: string) {
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
 
+  const data = await getUserData();
+  const gerenteUid = data?.gerenteUid;
+
   try {
     if (currentUser && currentUser.uid) {
-      const docRef = doc(db, currentUser.uid, "data", "operacoes", operationId);
+      const docRef = doc(
+        db,
+        gerenteUid ? gerenteUid : currentUser.uid,
+        "data",
+        "operacoes",
+        operationId
+      );
 
       await deleteDoc(docRef);
 
@@ -510,7 +614,15 @@ export async function DeleteCostumer(
 
   try {
     if (currentUser && currentUser.uid) {
-      const clienteRef = doc(db, currentUser.uid, "data", "clientes", id);
+      const data = await getUserData();
+      const gerenteUid = data?.gerenteUid;
+      const clienteRef = doc(
+        db,
+        gerenteUid ? gerenteUid : currentUser.uid,
+        "data",
+        "clientes",
+        id
+      );
 
       await deleteDoc(clienteRef);
 
@@ -542,7 +654,12 @@ export async function DeleteCostumer(
       if (removerOperacoes) {
         try {
           const operacoesQuery = query(
-            collection(db, currentUser.uid, "data", "operacoes"),
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser.uid,
+              "data",
+              "operacoes"
+            ),
             where("clienteId", "==", clienteId)
           );
           const operacoesSnapshot = await getDocs(operacoesQuery);
@@ -590,8 +707,17 @@ export async function updateCostumerDocuments(
   const { currentUser } = getAuth(firebaseApp);
   const storage = getStorage();
 
+  const data = await getUserData();
+  const gerenteUid = data?.gerenteUid;
+
   try {
-    const clienteRef = doc(db, currentUser!.uid, "data", "clientes", id);
+    const clienteRef = doc(
+      db,
+      gerenteUid ? gerenteUid : currentUser!.uid,
+      "data",
+      "clientes",
+      id
+    );
     if (file instanceof File) {
       if (file.type.startsWith("image/")) {
         const frenteRef = ref(storage, `documentos/${id}-${fileName}`);
@@ -615,6 +741,182 @@ export async function updateCostumerDocuments(
       variant: "destructive",
       duration: 5000,
     });
+  }
+}
+
+export async function NewCollaborator(
+  values: z.infer<typeof CollaboratorSchema>
+) {
+  const db = getFirestore(firebaseApp);
+  const { currentUser } = getAuth(firebaseApp);
+
+  const secondaryApp = initializeApp(firebaseConfig, "Secondary");
+  const auth = getAuth(secondaryApp);
+
+  const data = await getUserData();
+  const gerenteUid = data?.gerenteUid;
+
+  try {
+    if (currentUser && currentUser.uid) {
+      if (values.password !== values.confirmPassword) {
+        toast({
+          title: "As senhas precisam ser iguais.",
+          variant: "destructive",
+          duration: 5000,
+        });
+      } else {
+        if (values.password.length < 6 || values.confirmPassword.length < 6) {
+          toast({
+            title: "A senha precisa ter mais de 6 dígitos.",
+            variant: "destructive",
+            duration: 5000,
+          });
+        } else {
+          const { user } = await createUserWithEmailAndPassword(
+            auth,
+            values.email,
+            values.password
+          );
+          await signOut(auth);
+          await updateProfile(user, {
+            displayName: values.nome,
+          });
+
+          const docSnapshot = await getDoc(
+            doc(db, gerenteUid ? gerenteUid : currentUser.uid, "data")
+          );
+          const userPlan = docSnapshot.data()?.plano;
+
+          if (userPlan)
+            await setDoc(doc(db, user.uid, "data"), {
+              avatar: "",
+              id: user.uid,
+              gerenteUid: currentUser.uid,
+              nome: values.nome,
+              telefone: values.telefone,
+              email: user.email,
+              permissoes: {
+                visaoEstatisticasDeTodos: false,
+                gerenciarOperacoesClientesDeOutros: false,
+                gerenciarTipoDeOperacoes: false,
+                gerenciarColaboradores: false,
+                gerenciarAutomacoes: false,
+              },
+            });
+
+          const docRef = doc(db, currentUser.uid, "data");
+
+          await updateDoc(docRef, {
+            colaboradores: arrayUnion({
+              uid: user.uid,
+            }),
+          });
+          toast({
+            title: "Colaborador criado com sucesso!",
+            variant: "success",
+            duration: 5000,
+          });
+        }
+      }
+    }
+  } catch (e) {
+    if (e instanceof FirebaseError && e.code == "auth/email-already-in-use") {
+      toast({
+        title: "Este e-mail já está em uso.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } else {
+      toast({
+        title: "Algo deu errado, tente novamente.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    }
+  }
+}
+
+export async function GetCollaborators() {
+  const db = getFirestore(firebaseApp);
+  const { currentUser } = getAuth(firebaseApp);
+
+  const data = await getUserData();
+  const gerenteUid = data?.gerenteUid;
+
+  try {
+    if (currentUser && currentUser.uid) {
+      const querySnapshot = await getDoc(
+        doc(db, gerenteUid ? gerenteUid : currentUser.uid, "data")
+      );
+      const userData = querySnapshot.data() as UserDataProps;
+      const colaboradores = userData?.colaboradores;
+
+      if (colaboradores && colaboradores.length > 0) {
+        const promises = colaboradores.map(async (colaborador) => {
+          const docRef = doc(db, colaborador.uid, "data");
+          const docSnap = await getDoc(docRef);
+          return docSnap.data();
+        });
+
+        const list = await Promise.all(promises);
+        return list;
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function DeleteCollaborator(
+  colaboradorId: string,
+  email: string,
+  password: string
+) {
+  const db = getFirestore(firebaseApp);
+  const { currentUser } = getAuth(firebaseApp);
+
+  const data = await getUserData();
+  const gerenteUid = data?.gerenteUid;
+
+  const secondaryApp = initializeApp(firebaseConfig, "Secondary");
+  const secondaryAuth = getAuth(secondaryApp);
+
+  try {
+    if (currentUser && currentUser.uid) {
+      const docRef = doc(db, gerenteUid ? gerenteUid : currentUser.uid, "data");
+
+      await signInWithEmailAndPassword(secondaryAuth, email, password);
+      if (secondaryAuth.currentUser)
+        await deleteUser(secondaryAuth.currentUser);
+      await signOut(secondaryAuth);
+
+      await updateDoc(docRef, {
+        colaboradores: arrayRemove({ uid: colaboradorId }),
+      });
+
+      toast({
+        title: "Colaborador deletado com sucesso!",
+        variant: "success",
+        duration: 5000,
+      });
+    }
+  } catch (error) {
+    if (
+      error instanceof FirebaseError &&
+      error.code == "auth/invalid-credential"
+    ) {
+      toast({
+        title: "Senha incorreta!",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } else {
+      toast({
+        title: "Algo deu errado, tente novamente.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    }
   }
 }
 

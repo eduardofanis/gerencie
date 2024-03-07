@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { firebaseApp } from "@/main";
+import { getUserData } from "@/services/user";
 import { getAuth } from "firebase/auth";
 import {
   getFirestore,
@@ -33,23 +34,32 @@ export default function LastOperationsCard() {
   const [data, setData] = React.useState<OperationProps[] | null>(null);
 
   React.useEffect(() => {
-    const db = getFirestore(firebaseApp);
-    const { currentUser } = getAuth(firebaseApp);
+    getUserData().then((userData) => {
+      const gerenteUid = userData?.gerenteUid;
 
-    const q = query(
-      collection(db, currentUser!.uid, "data", "operacoes"),
-      orderBy("createdAt", "desc"),
-      limit(6)
-    );
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const operations = querySnapshot.docs.map((doc) => ({
-        ...(doc.data() as OperationProps),
-      }));
-      setData(operations);
+      const db = getFirestore(firebaseApp);
+      const { currentUser } = getAuth(firebaseApp);
+
+      const q = query(
+        collection(
+          db,
+          gerenteUid ? gerenteUid : currentUser!.uid,
+          "data",
+          "operacoes"
+        ),
+        orderBy("createdAt", "desc"),
+        limit(6)
+      );
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const operations = querySnapshot.docs.map((doc) => ({
+          ...(doc.data() as OperationProps),
+        }));
+        setData(operations);
+      });
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
     });
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
   }, []);
 
   function formatValue(value: string) {

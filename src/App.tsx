@@ -1,11 +1,14 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Login from "./components/Login/Login";
 import Home from "./components/Home/Home";
-import AuthStorage from "./AuthContext";
+import AuthStorage from "./contexts/AuthContext";
 import {
   UserProtectedRoute,
   SubscriptionProtectedRoute,
-  MidOrHighTierPlanProtectedRoute,
+  HighProtectedRoute,
+  MidProtectedRoute,
+  PermissaoGerenciarColaboradoresProtectedRoute,
+  PermissaoGerenciarAutomacoesProtectedRoute,
 } from "./ProtectedRoute";
 import Customers from "./components/Customers/Customers";
 import { Toaster } from "./components/ui/toaster";
@@ -15,71 +18,94 @@ import ForgotPassword from "./components/ForgotPassword/ForgotPassword";
 import Account from "./components/Account/Account";
 import Sidebar from "./components/Sidebar/Sidebar";
 import Collaborators from "./components/Collaborators/Collaborators";
+import Automations from "./components/Automations/Automations";
+import SubscriberStorage from "./contexts/SubscriberContext";
+import CollaboratorStorage from "./contexts/CollaboratorContext";
 
 export default function App() {
   return (
     <main className="h-full">
       <BrowserRouter>
         <AuthStorage>
-          <div className="grid grid-cols-[auto_1fr]">
-            <Sidebar />
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <UserProtectedRoute>
-                    <SubscriptionProtectedRoute>
-                      <Home />
-                    </SubscriptionProtectedRoute>
-                  </UserProtectedRoute>
-                }
-              />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/password_reset" element={<ForgotPassword />} />
-              <Route
-                path="/operacoes"
-                element={
-                  <UserProtectedRoute>
-                    <SubscriptionProtectedRoute>
-                      <Operations />
-                    </SubscriptionProtectedRoute>
-                  </UserProtectedRoute>
-                }
-              />
-              <Route
-                path="/clientes"
-                element={
-                  <UserProtectedRoute>
-                    <SubscriptionProtectedRoute>
-                      <Customers />
-                    </SubscriptionProtectedRoute>
-                  </UserProtectedRoute>
-                }
-              />
-              <Route
-                path="/conta"
-                element={
-                  <UserProtectedRoute>
-                    <Account />
-                  </UserProtectedRoute>
-                }
-              />
-              <Route
-                path="/colaboradores"
-                element={
-                  <UserProtectedRoute>
-                    <MidOrHighTierPlanProtectedRoute>
-                      <SubscriptionProtectedRoute>
-                        <Collaborators />
-                      </SubscriptionProtectedRoute>
-                    </MidOrHighTierPlanProtectedRoute>
-                  </UserProtectedRoute>
-                }
-              />
-            </Routes>
-          </div>
-          <Toaster />
+          <SubscriberStorage>
+            <CollaboratorStorage>
+              <div className="grid grid-cols-[auto_1fr]">
+                <Sidebar />
+                <Routes>
+                  <Route
+                    path="/"
+                    element={
+                      <UserProtectedRoute>
+                        <SubscriptionProtectedRoute>
+                          <Home />
+                        </SubscriptionProtectedRoute>
+                      </UserProtectedRoute>
+                    }
+                  />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<SignUp />} />
+                  <Route path="/password_reset" element={<ForgotPassword />} />
+                  <Route
+                    path="/operacoes"
+                    element={
+                      <UserProtectedRoute>
+                        <SubscriptionProtectedRoute>
+                          <Operations />
+                        </SubscriptionProtectedRoute>
+                      </UserProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/clientes"
+                    element={
+                      <UserProtectedRoute>
+                        <SubscriptionProtectedRoute>
+                          <Customers />
+                        </SubscriptionProtectedRoute>
+                      </UserProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/conta"
+                    element={
+                      <UserProtectedRoute>
+                        <Account />
+                      </UserProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/colaboradores"
+                    element={
+                      <UserProtectedRoute>
+                        <SubscriptionProtectedRoute>
+                          <MidProtectedRoute>
+                            <PermissaoGerenciarColaboradoresProtectedRoute>
+                              <Collaborators />
+                            </PermissaoGerenciarColaboradoresProtectedRoute>
+                          </MidProtectedRoute>
+                        </SubscriptionProtectedRoute>
+                      </UserProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/automacoes"
+                    element={
+                      <UserProtectedRoute>
+                        <SubscriptionProtectedRoute>
+                          <HighProtectedRoute>
+                            <PermissaoGerenciarAutomacoesProtectedRoute>
+                              <Automations />
+                            </PermissaoGerenciarAutomacoesProtectedRoute>
+                          </HighProtectedRoute>
+                        </SubscriptionProtectedRoute>
+                      </UserProtectedRoute>
+                    }
+                  />
+                </Routes>
+              </div>
+              <Toaster />
+            </CollaboratorStorage>
+          </SubscriberStorage>
         </AuthStorage>
       </BrowserRouter>
     </main>

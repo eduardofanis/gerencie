@@ -15,44 +15,58 @@ import { firebaseApp } from "@/main";
 import { OperationSchema } from "@/schemas/OperationSchema";
 import Loading from "../ui/Loading";
 import { UserDataProps } from "../Forms/NewOperationTypeForm";
+import { getUserData } from "@/services/user";
 
 export default function Operations() {
   const [data, setData] = React.useState<z.infer<typeof OperationSchema>[]>();
   const [userData, setUserData] = React.useState<UserDataProps>();
 
   React.useEffect(() => {
-    const db = getFirestore(firebaseApp);
-    const { currentUser } = getAuth(firebaseApp);
+    getUserData().then((data) => {
+      const db = getFirestore(firebaseApp);
+      const { currentUser } = getAuth(firebaseApp);
 
-    const q = query(
-      collection(db, currentUser!.uid, "data", "operacoes"),
-      orderBy("createdAt", "desc")
-    );
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const operations = querySnapshot.docs.map((doc) => ({
-        ...(doc.data() as z.infer<typeof OperationSchema>),
-      }));
-      setData(operations);
+      const gerenteUid = data!.gerenteUid;
+
+      const q = query(
+        collection(
+          db,
+          gerenteUid ? gerenteUid : currentUser!.uid,
+          "data",
+          "operacoes"
+        ),
+        orderBy("createdAt", "desc")
+      );
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const operations = querySnapshot.docs.map((doc) => ({
+          ...(doc.data() as z.infer<typeof OperationSchema>),
+        }));
+        setData(operations);
+      });
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
     });
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
   }, []);
 
   React.useEffect(() => {
-    const db = getFirestore(firebaseApp);
-    const { currentUser } = getAuth(firebaseApp);
+    getUserData().then((data) => {
+      const gerenteUid = data?.gerenteUid;
 
-    const unsubscribe = onSnapshot(
-      doc(db, currentUser!.uid, "data"),
-      (docSnapshot) => {
-        setUserData(docSnapshot.data() as UserDataProps);
-      }
-    );
+      const db = getFirestore(firebaseApp);
+      const { currentUser } = getAuth(firebaseApp);
 
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
+      const unsubscribe = onSnapshot(
+        doc(db, gerenteUid ? gerenteUid : currentUser!.uid, "data"),
+        (docSnapshot) => {
+          setUserData(docSnapshot.data() as UserDataProps);
+        }
+      );
+
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
+    });
   }, []);
 
   return (

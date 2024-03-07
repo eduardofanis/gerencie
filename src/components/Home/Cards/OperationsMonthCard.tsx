@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { firebaseApp } from "@/main";
+import { getUserData } from "@/services/user";
 import { getAuth } from "firebase/auth";
 import {
   Timestamp,
@@ -46,67 +47,85 @@ export default function OperationsMonthCard() {
   const { currentUser } = getAuth(firebaseApp);
 
   React.useEffect(() => {
-    const firstDayOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth(),
-      1
-    );
-    const lastDayOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth() + 1,
-      0,
-      23,
-      59,
-      59
-    );
+    getUserData().then((userData) => {
+      const gerenteUid = userData?.gerenteUid;
 
-    const q = query(
-      collection(db, currentUser!.uid, "data", "operacoes"),
-      where("dataDaOperacao", ">=", firstDayOfMonth),
-      where("dataDaOperacao", "<=", lastDayOfMonth),
-      where("statusDaOperacao", "==", "concluido")
-    );
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const operations = querySnapshot.docs.map((doc) => ({
-        ...(doc.data() as ThisMonthOperationsProps),
-      }));
-      setThisMonthOperations(operations);
+      const firstDayOfMonth = new Date(
+        new Date().getFullYear(),
+        new Date().getMonth(),
+        1
+      );
+      const lastDayOfMonth = new Date(
+        new Date().getFullYear(),
+        new Date().getMonth() + 1,
+        0,
+        23,
+        59,
+        59
+      );
+
+      const q = query(
+        collection(
+          db,
+          gerenteUid ? gerenteUid : currentUser!.uid,
+          "data",
+          "operacoes"
+        ),
+        where("dataDaOperacao", ">=", firstDayOfMonth),
+        where("dataDaOperacao", "<=", lastDayOfMonth),
+        where("statusDaOperacao", "==", "concluido")
+      );
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const operations = querySnapshot.docs.map((doc) => ({
+          ...(doc.data() as ThisMonthOperationsProps),
+        }));
+        setThisMonthOperations(operations);
+      });
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
     });
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
   }, [db, currentUser]);
 
   React.useEffect(() => {
-    const firstDayOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth() - 1,
-      1
-    );
-    const lastDayOfMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth(),
-      0,
-      23,
-      59,
-      59
-    );
+    getUserData().then((userData) => {
+      const gerenteUid = userData?.gerenteUid;
 
-    const q = query(
-      collection(db, currentUser!.uid, "data", "operacoes"),
-      where("dataDaOperacao", ">=", firstDayOfMonth),
-      where("dataDaOperacao", "<=", lastDayOfMonth),
-      where("statusDaOperacao", "==", "concluido")
-    );
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const operations = querySnapshot.docs.map((doc) => ({
-        ...(doc.data() as ThisMonthOperationsProps),
-      }));
-      setLastMonthOperations(operations);
+      const firstDayOfMonth = new Date(
+        new Date().getFullYear(),
+        new Date().getMonth() - 1,
+        1
+      );
+      const lastDayOfMonth = new Date(
+        new Date().getFullYear(),
+        new Date().getMonth(),
+        0,
+        23,
+        59,
+        59
+      );
+
+      const q = query(
+        collection(
+          db,
+          gerenteUid ? gerenteUid : currentUser!.uid,
+          "data",
+          "operacoes"
+        ),
+        where("dataDaOperacao", ">=", firstDayOfMonth),
+        where("dataDaOperacao", "<=", lastDayOfMonth),
+        where("statusDaOperacao", "==", "concluido")
+      );
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const operations = querySnapshot.docs.map((doc) => ({
+          ...(doc.data() as ThisMonthOperationsProps),
+        }));
+        setLastMonthOperations(operations);
+      });
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
     });
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
   }, [db, currentUser]);
 
   React.useEffect(() => {

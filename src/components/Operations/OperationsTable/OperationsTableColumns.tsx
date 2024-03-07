@@ -10,7 +10,7 @@ import { OperationSchema } from "@/schemas/OperationSchema";
 import { z } from "zod";
 import { Timestamp, doc, getFirestore, updateDoc } from "firebase/firestore";
 import OperationDropdown from "./OperationDropdown";
-import { getUserData } from "@/services/api";
+import { getUserData } from "@/services/user";
 import {
   Select,
   SelectContent,
@@ -137,7 +137,7 @@ export const OperationsTableColumns: ColumnDef<
       const formattedType = type.toLowerCase().replace(/\s+/g, "-");
 
       getUserData().then((data) => {
-        const tipoOperacao = data?.tiposDeOperacoes.find(
+        const tipoOperacao = data?.tiposDeOperacoes?.find(
           (tipo) => tipo.name === type
         );
         if (tipoOperacao) {

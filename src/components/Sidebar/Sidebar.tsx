@@ -4,19 +4,21 @@ import {
   HandCoins,
   Phone,
   HeartHandshake,
+  Bot,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
-import { getAuth } from "firebase/auth";
-import { firebaseApp } from "@/main";
 import { useLocation, useNavigate } from "react-router-dom";
 import React from "react";
-import { AuthContext } from "@/AuthContext";
+import { AuthContext } from "@/contexts/AuthContext";
+import { SubscriberContext } from "@/contexts/SubscriberContext";
+import { CollaboratorContext } from "@/contexts/CollaboratorContext";
 
 export default function Sidebar() {
-  const auth = getAuth(firebaseApp);
-  const { user, isMidOrHighTierPlan } = React.useContext(AuthContext);
+  const { user } = React.useContext(AuthContext);
+  const { subscriber } = React.useContext(SubscriberContext);
+  const { collaborator } = React.useContext(CollaboratorContext);
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -29,11 +31,26 @@ export default function Sidebar() {
       pathname == "/operacoes" ||
       pathname == "/clientes" ||
       pathname == "/colaboradores" ||
+      pathname == "/automacoes" ||
       pathname == "/conta"
     )
       setShowSidebar(true);
     else setShowSidebar(false);
   }, [pathname]);
+
+  const checkGerenciarColaboradoresPermission =
+    collaborator?.permissions.gerenciarColaboradores === false
+      ? false
+      : subscriber?.plano === "Individual"
+      ? false
+      : true;
+
+  const checkGerenciarAutomacoesPermission =
+    subscriber?.plano !== "Empresarial"
+      ? false
+      : collaborator?.permissions.gerenciarAutomacoes === false
+      ? false
+      : true;
 
   if (!user) return null;
   if (!showSidebar) return null;
@@ -53,19 +70,17 @@ export default function Sidebar() {
           onClick={() => navigate("/conta")}
         >
           <Avatar className="h-9 w-9">
-            <AvatarImage src={auth.currentUser?.photoURL || ""} />
-            <AvatarFallback>
-              {auth.currentUser?.displayName?.charAt(0)}
-            </AvatarFallback>
+            <AvatarImage src={user.photoURL || ""} />
+            <AvatarFallback>{user.displayName?.charAt(0)}</AvatarFallback>
           </Avatar>
 
           {isHovered && (
             <div className="truncate">
               <h2 className="font-medium whitespace-nowrap truncate">
-                {auth.currentUser?.displayName}
+                {user.displayName}
               </h2>
               <span className="text-sm text-ellipsis truncate break-words opacity-85">
-                {auth.currentUser?.email}
+                {user.email}
               </span>
             </div>
           )}
@@ -82,7 +97,7 @@ export default function Sidebar() {
             onClick={() => navigate("/")}
           >
             <BarChart4 className="h-5 w-5" />
-            {isHovered && <span>Dashboard</span>}
+            {isHovered && <span>Visão geral</span>}
           </Button>
           <Button
             className={`space-x-4 justify-start ${
@@ -110,10 +125,21 @@ export default function Sidebar() {
             }`}
             variant={"ghost"}
             onClick={() => navigate("/colaboradores")}
-            disabled={!isMidOrHighTierPlan}
+            disabled={!checkGerenciarColaboradoresPermission}
           >
             <HeartHandshake className="h-5 w-5" />
             {isHovered && <span>Colaboradores</span>}
+          </Button>
+          <Button
+            className={`space-x-4 justify-start ${
+              pathname == "/automacoes" && "bg-slate-50"
+            }`}
+            variant={"ghost"}
+            onClick={() => navigate("/automacoes")}
+            disabled={!checkGerenciarAutomacoesPermission}
+          >
+            <Bot className="h-5 w-5" />
+            {isHovered && <span>Automações</span>}
           </Button>
           <Button asChild className="space-x-4 justify-start" variant={"ghost"}>
             <a href="https://wa.me/5541997590249" target="_blank">

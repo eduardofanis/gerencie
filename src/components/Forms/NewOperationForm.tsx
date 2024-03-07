@@ -54,6 +54,8 @@ import { getFirestore, onSnapshot, doc } from "firebase/firestore";
 import SelectInput, { SelectItems } from "./Input/SelectInput";
 import { CostumerSchema } from "@/schemas/CostumerSchema";
 import DecimalInput from "./Input/DecimalInput";
+import { getUserData } from "@/services/user";
+import { CollaboratorContext } from "@/contexts/CollaboratorContext";
 
 const StatusList: SelectItems[] = [
   {
@@ -77,10 +79,10 @@ const StatusList: SelectItems[] = [
 export default function NewOperationForm() {
   const [data, setData] = React.useState<z.infer<typeof CostumerSchema>[]>();
   const [nomeDoCliente, setNomeDoCliente] = React.useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, setSearchParams] = useSearchParams();
+  const [, setSearchParams] = useSearchParams();
   const [operationTypes, setOperationTypes] =
     React.useState<UserDataProps | null>(null);
+  const { collaborator } = React.useContext(CollaboratorContext);
 
   const form = useForm<z.infer<typeof OperationSchema>>({
     resolver: zodResolver(OperationSchema),
@@ -107,20 +109,30 @@ export default function NewOperationForm() {
   }, []);
 
   React.useEffect(() => {
-    const db = getFirestore(firebaseApp);
-    const { currentUser } = getAuth(firebaseApp);
+    getUserData().then((userData) => {
+      const gerenteUid = userData?.gerenteUid;
 
-    const unsubscribe = onSnapshot(
-      doc(db, currentUser!.uid, "data"),
-      (docSnapshot) => {
-        setOperationTypes(docSnapshot.data() as UserDataProps);
-      }
-    );
+      const db = getFirestore(firebaseApp);
+      const { currentUser } = getAuth(firebaseApp);
 
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
+      const unsubscribe = onSnapshot(
+        doc(db, gerenteUid ? gerenteUid : currentUser!.uid, "data"),
+        (docSnapshot) => {
+          setOperationTypes(docSnapshot.data() as UserDataProps);
+        }
+      );
+
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
+    });
   }, []);
+
+  const manageOperationTypePermission = !collaborator
+    ? true
+    : collaborator && collaborator.permissions.gerenciarTipoDeOperacoes === true
+    ? true
+    : false;
 
   return (
     <>
@@ -218,20 +230,23 @@ export default function NewOperationForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="w-full flex justify-between"
-                          >
-                            Adicionar/remover
-                            <Plus className="w-4 h-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <NewOperationTypeForm />
-                      </Dialog>
-
-                      <Separator className="mb-2" />
+                      {manageOperationTypePermission && (
+                        <>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                className="w-full flex justify-between"
+                              >
+                                Adicionar/remover
+                                <Plus className="w-4 h-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <NewOperationTypeForm />
+                          </Dialog>
+                          <Separator className="mb-2" />
+                        </>
+                      )}
 
                       {operationTypes &&
                       operationTypes.tiposDeOperacoes &&
@@ -324,6 +339,7 @@ export default function NewOperationForm() {
             <Button
               type="button"
               variant={"outline"}
+              className="border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800"
               onClick={() => {
                 setSearchParams({});
               }}

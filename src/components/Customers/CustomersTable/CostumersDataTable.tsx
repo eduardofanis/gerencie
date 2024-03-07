@@ -32,6 +32,7 @@ import {
   PlusCircle,
   ChevronDown,
   Download,
+  Upload,
 } from "lucide-react";
 
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -408,10 +409,17 @@ export function CostumersDataTable<TData, TValue>({
       </div>
       <div>
         <div className="flex items-center justify-between py-2">
-          <Button variant="secondary" onClick={() => handleExport()}>
-            <Download className="size-4 mr-2" />
-            Exportar dados
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" onClick={() => handleExport()}>
+              <Download className="size-4 mr-2" />
+              Exportar dados
+            </Button>
+            <Button variant="secondary" onClick={() => handleExport()}>
+              <Upload className="size-4 mr-2" />
+              Importar dados
+            </Button>
+          </div>
+
           <div className="flex items-center space-x-2">
             <span className="text-sm  ml-2 p-0 text-slate-700">
               Página{" "}

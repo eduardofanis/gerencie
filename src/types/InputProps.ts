@@ -5,7 +5,7 @@ export type InputProps = {
   form: UseFormReturn<any>;
   name: string;
   label?: string;
-  type?: "password" | "text";
+  type?: "password" | "text" | "email";
   placeholder?: string;
   className?: string;
   defaultValue?: string;

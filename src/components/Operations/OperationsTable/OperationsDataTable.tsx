@@ -46,6 +46,7 @@ import {
   Download,
   Plus,
   PlusCircle,
+  Upload,
   X,
 } from "lucide-react";
 
@@ -62,6 +63,7 @@ import { Separator } from "@/components/ui/separator";
 import { OperationProps } from "@/components/Customers/CostumersView";
 
 import * as XLSX from "xlsx";
+import { CollaboratorContext } from "@/contexts/CollaboratorContext";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -85,6 +87,7 @@ export function OperationsDataTable<TData, TValue>({
     });
 
   const [searchParams, setSearchParams] = useSearchParams();
+  const { collaborator } = React.useContext(CollaboratorContext);
 
   const table = useReactTable({
     data,
@@ -128,6 +131,12 @@ export function OperationsDataTable<TData, TValue>({
     XLSX.writeFile(wb, "Tabela de Operações.xlsx");
   }
 
+  const manageOperationTypePermission = !collaborator
+    ? true
+    : collaborator && collaborator.permissions.gerenciarTipoDeOperacoes === true
+    ? true
+    : false;
+
   return (
     <div>
       <div className="flex items-center justify-between py-2">
@@ -163,7 +172,7 @@ export function OperationsDataTable<TData, TValue>({
             >
               <SelectTrigger
                 className={`${
-                  !table.getColumn("tipoDaOperacao")?.getFilterValue() &&
+                  !table.getColumn("statusDaOperacao")?.getFilterValue() &&
                   "text-slate-500"
                 } font-normal`}
               >
@@ -197,20 +206,24 @@ export function OperationsDataTable<TData, TValue>({
                 <SelectValue placeholder="Tipo" />
               </SelectTrigger>
               <SelectContent className="w-[200px]">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="w-full flex gap-2 justify-between"
-                    >
-                      Adicionar/remover
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <NewOperationTypeForm />
-                </Dialog>
+                {manageOperationTypePermission && (
+                  <>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="w-full flex gap-2 justify-between"
+                        >
+                          Adicionar/remover
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <NewOperationTypeForm />
+                    </Dialog>
 
-                <Separator className="mb-2" />
+                    <Separator className="mb-2" />
+                  </>
+                )}
 
                 <SelectGroup>
                   {userData &&
@@ -306,20 +319,24 @@ export function OperationsDataTable<TData, TValue>({
               <SelectValue placeholder="Tipo"></SelectValue>
             </SelectTrigger>
             <SelectContent className="w-[200px]">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="w-full flex gap-2 justify-between"
-                  >
-                    Adicionar/remover
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </DialogTrigger>
-                <NewOperationTypeForm />
-              </Dialog>
+              {manageOperationTypePermission && (
+                <>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="w-full flex gap-2 justify-between"
+                      >
+                        Adicionar/remover
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <NewOperationTypeForm />
+                  </Dialog>
 
-              <Separator className="mb-2" />
+                  <Separator className="mb-2" />
+                </>
+              )}
 
               <SelectGroup>
                 {userData &&
@@ -432,10 +449,16 @@ export function OperationsDataTable<TData, TValue>({
       </div>
       <div>
         <div className="flex items-center justify-between py-2">
-          <Button variant="secondary" onClick={() => handleExport()}>
-            <Download className="size-4 mr-2" />
-            Exportar dados
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" onClick={() => handleExport()}>
+              <Download className="size-4 mr-2" />
+              Exportar dados
+            </Button>
+            <Button variant="secondary" onClick={() => handleExport()}>
+              <Upload className="size-4 mr-2" />
+              Importar dados
+            </Button>
+          </div>
           <div className="flex items-center space-x-2">
             <span className="text-sm  ml-2 p-0 text-slate-700">
               Página{" "}

@@ -60,12 +60,15 @@ export default function SignUp() {
                   Selecione o plano que mais se enquadra nas suas necessidades.
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid grid-cols-3 h-[320px] gap-4 pt-4">
+              <div className="grid grid-cols-3 h-[360px] gap-4 pt-4">
                 <div className="text-center rounded-lg p-4 flex bg-slate-50 flex-col justify-between">
                   <h2>Individual</h2>
                   <span className="text-lg font-medium">R$ 89,90/mês</span>
-                  <ul className="list-disc list-inside text-sm mt-4 mb-8 text-slate-600">
-                    <li>Função de funcionários desativada.</li>
+                  <ul className="space-y-1 list-disc list-inside text-sm mt-4 mb-8 text-slate-600">
+                    <li>Clientes ilimitados;</li>
+                    <li>Operações ilimitadas;</li>
+                    <li>Visão geral de performance;</li>
+                    <li>Suporte;</li>
                   </ul>
                   <DialogClose asChild>
                     <Button
@@ -77,14 +80,18 @@ export default function SignUp() {
                     </Button>
                   </DialogClose>
                 </div>
-                <div className="text-center rounded-lg p-4 flex bg-slate-950 flex-col justify-between">
+                <div className="text-center rounded-lg p-4 flex bg-slate-950 flex-col justify-between relative">
                   <h2 className="text-white">Empresarial</h2>
                   <span className="text-lg font-medium text-white">
                     R$ 349,90/mês
                   </span>
-                  <ul className="list-disc list-inside text-sm mt-4 mb-8 text-slate-300">
-                    <li>Função de funcionários ativada.</li>
-                    <li>Número de funcionários ilimitado.</li>
+                  <ul className="space-y-1 list-disc list-inside text-sm mt-4 mb-8 text-slate-300">
+                    <li>Clientes ilimitados;</li>
+                    <li>Operações ilimitadas;</li>
+                    <li>Visão geral de performance;</li>
+                    <li>Colaboradores ilimitados;</li>
+                    <li>Mensagens automáticas;</li>
+                    <li>Suporte pioritário;</li>
                   </ul>
                   <DialogClose asChild>
                     <Button
@@ -94,13 +101,19 @@ export default function SignUp() {
                       Selecionar plano
                     </Button>
                   </DialogClose>
+                  <div className="absolute -top-3 text-yellow-900 right-8 left-8 bg-yellow-500 p-1 text-xs font-medium rounded">
+                    Melhor custo X benefício!
+                  </div>
                 </div>
                 <div className="text-center rounded-lg p-4 flex flex-col bg-slate-50 justify-between">
                   <h2>Time</h2>
                   <span className="text-lg font-medium">R$ 149,90/mês</span>
-                  <ul className="list-disc list-inside text-sm mt-4 mb-8 text-slate-600">
-                    <li>Função de funcionários ativada.</li>
-                    <li>Limite de 3 funcionários.</li>
+                  <ul className="space-y-1 list-disc list-inside text-sm mt-4 mb-8 text-slate-600">
+                    <li>Clientes ilimitados;</li>
+                    <li>Operações ilimitadas;</li>
+                    <li>Visão geral de performance;</li>
+                    <li>Limite de 3 Colaboradores;</li>
+                    <li>Suporte pioritário;</li>
                   </ul>
                   <DialogClose asChild>
                     <Button

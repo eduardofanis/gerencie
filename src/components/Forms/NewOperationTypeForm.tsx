@@ -32,6 +32,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
+import { getUserData } from "@/services/user";
 
 export type OperationType = {
   name: string;
@@ -59,19 +60,23 @@ export default function NewOperationTypeForm() {
   });
 
   React.useEffect(() => {
-    const db = getFirestore(firebaseApp);
-    const { currentUser } = getAuth(firebaseApp);
+    getUserData().then((userData) => {
+      const gerenteUid = userData?.gerenteUid;
 
-    const unsubscribe = onSnapshot(
-      doc(db, currentUser!.uid, "data"),
-      (docSnapshot) => {
-        setData(docSnapshot.data() as UserDataProps);
-      }
-    );
+      const db = getFirestore(firebaseApp);
+      const { currentUser } = getAuth(firebaseApp);
 
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
+      const unsubscribe = onSnapshot(
+        doc(db, gerenteUid ? gerenteUid : currentUser!.uid, "data"),
+        (docSnapshot) => {
+          setData(docSnapshot.data() as UserDataProps);
+        }
+      );
+
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
+    });
   }, []);
 
   function handleNewOperationType({ name, color }: OperationType) {
