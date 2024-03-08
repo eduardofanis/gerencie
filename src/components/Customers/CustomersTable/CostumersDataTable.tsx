@@ -63,6 +63,18 @@ import {
 
 import * as XLSX from "xlsx";
 import { CostumerProps } from "../CostumersView";
+import { CollaboratorContext } from "@/contexts/CollaboratorContext";
+import { SubscriberContext } from "@/contexts/SubscriberContext";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserDataProps } from "@/types/UserDataProps";
 
 const estados: SelectItems[] = [
   { value: "AC", label: "AC" },
@@ -97,12 +109,25 @@ const estados: SelectItems[] = [
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  collaborators: UserDataProps[];
 }
 
 export function CostumersDataTable<TData, TValue>({
   columns,
   data,
+  collaborators,
 }: DataTableProps<TData, TValue>) {
+  const { collaborator } = React.useContext(CollaboratorContext);
+  const { subscriber } = React.useContext(SubscriberContext);
+
+  const permission =
+    !collaborator && subscriber?.plano !== "Individual"
+      ? true
+      : collaborator &&
+        collaborator.permissions.gerenciarClientesDeOutros === true
+      ? true
+      : false;
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -110,6 +135,7 @@ export function CostumersDataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({
       id: false,
+      criadoPor: permission,
     });
   const [searchParams, setSearchParams] = useSearchParams();
   const [openEstados, setOpenEstados] = React.useState(false);
@@ -167,7 +193,10 @@ export function CostumersDataTable<TData, TValue>({
       <div className="flex items-center justify-between py-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="flex gap-2 lg:hidden" variant="outline">
+            <Button
+              className="flex gap-2 min-[1400px]:hidden"
+              variant="outline"
+            >
               Filtros <ChevronDown className="size-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -185,6 +214,52 @@ export function CostumersDataTable<TData, TValue>({
               }}
               className="col-span-2"
             />
+            {permission && (
+              <Select
+                value={
+                  (table.getColumn("criadoPor")?.getFilterValue() as string) ??
+                  ""
+                }
+                onValueChange={(event) => {
+                  table.getColumn("criadoPor")?.setFilterValue(event);
+                }}
+              >
+                <SelectTrigger
+                  className={`col-span-2 ${
+                    !table.getColumn("criadoPor")?.getFilterValue() &&
+                    "text-slate-500"
+                  } font-normal`}
+                >
+                  <SelectValue placeholder="Criado por"></SelectValue>
+                </SelectTrigger>
+                <SelectContent className="">
+                  <SelectGroup>
+                    {collaborators && collaborators.length > 0 ? (
+                      collaborators.map((collaborator) => (
+                        <SelectItem
+                          value={collaborator.id}
+                          key={collaborator.id}
+                        >
+                          <div className="flex gap-3 items-center">
+                            <Avatar className="size-6">
+                              <AvatarImage src={collaborator.avatar} />
+                              <AvatarFallback className="bg-slate-50">
+                                {collaborator.nome.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            {collaborator.nome}
+                          </div>
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <div className="text-sm text-center my-2">
+                        Nenhum colaborador encontrado
+                      </div>
+                    )}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
             <Input
               placeholder="Telefone"
               value={
@@ -214,7 +289,7 @@ export function CostumersDataTable<TData, TValue>({
                   <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="p-0">
+              <PopoverContent className="p-0 w-[140px]">
                 <Command>
                   <CommandInput placeholder="Pesquisar" className="h-9" />
                   <CommandEmpty>Nenhum estado encontrado.</CommandEmpty>
@@ -247,6 +322,7 @@ export function CostumersDataTable<TData, TValue>({
                 table.getColumn("nome")?.setFilterValue("");
                 table.getColumn("telefone")?.setFilterValue("");
                 table.getColumn("estado")?.setFilterValue("");
+                table.getColumn("criadoPor")?.setFilterValue("");
               }}
             >
               <X className="h-4 w-4 mr-2 " />
@@ -255,7 +331,7 @@ export function CostumersDataTable<TData, TValue>({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="hidden lg:flex gap-2 items-center">
+        <div className="hidden min-[1400px]:flex gap-2 items-center">
           <Input
             placeholder="Nome do cliente"
             value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
@@ -321,6 +397,49 @@ export function CostumersDataTable<TData, TValue>({
             </PopoverContent>
           </Popover>
 
+          {permission && (
+            <Select
+              value={
+                (table.getColumn("criadoPor")?.getFilterValue() as string) ?? ""
+              }
+              onValueChange={(event) =>
+                table.getColumn("criadoPor")?.setFilterValue(event)
+              }
+            >
+              <SelectTrigger
+                className={`w-[240px] ${
+                  !table.getColumn("criadoPor")?.getFilterValue() &&
+                  "text-slate-500"
+                } font-normal`}
+              >
+                <SelectValue placeholder="Criado por"></SelectValue>
+              </SelectTrigger>
+              <SelectContent className="w-[300px]">
+                <SelectGroup>
+                  {collaborators && collaborators.length > 0 ? (
+                    collaborators.map((collaborator) => (
+                      <SelectItem value={collaborator.id} key={collaborator.id}>
+                        <div className="flex gap-3 items-center">
+                          <Avatar className="size-6">
+                            <AvatarImage src={collaborator.avatar} />
+                            <AvatarFallback className="bg-slate-50">
+                              {collaborator.nome.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          {collaborator.nome}
+                        </div>
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="text-sm text-center my-2">
+                      Nenhum colaborador encontrado
+                    </div>
+                  )}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          )}
+
           <Button
             variant="outline"
             className="border-red-200 text-red-600 hover:text-red-800 hover:bg-red-50"
@@ -328,6 +447,7 @@ export function CostumersDataTable<TData, TValue>({
               table.getColumn("nome")?.setFilterValue("");
               table.getColumn("telefone")?.setFilterValue("");
               table.getColumn("estado")?.setFilterValue("");
+              table.getColumn("criadoPor")?.setFilterValue("");
             }}
           >
             <X className="h-4 w-4 mr-2 " />

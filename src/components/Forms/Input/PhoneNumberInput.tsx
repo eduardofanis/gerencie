@@ -8,12 +8,16 @@ export default function PhoneNumberInput(props: InputProps) {
   const initialValue = "";
 
   function formatPhoneNumber(value: string) {
-    // Remove todos os caracteres não numéricos
     const digits = value.replace(/\D/g, "");
-    // Formatação do número de telefone
-    let formattedValue = digits.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-    // Limita o comprimento do número de telefone
-    formattedValue = formattedValue.slice(0, 15);
+
+    let formattedValue =
+      digits.length === 10
+        ? digits.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3")
+        : digits.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+    formattedValue =
+      digits.length === 10
+        ? formattedValue.slice(0, 14)
+        : formattedValue.slice(0, 15);
     return formattedValue;
   }
 

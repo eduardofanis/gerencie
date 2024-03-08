@@ -34,7 +34,11 @@ type ThisMonthOperationsProps = {
   comissao: string;
 };
 
-export default function IncomeMonthCard() {
+export default function IncomeMonthCard({
+  collaboratorUid,
+}: {
+  collaboratorUid: string;
+}) {
   const [thisMonthOperations, setThisMonthOperations] =
     React.useState<ThisMonthOperationsProps[]>();
   const [lastMonthOperations, setLastMonthOperations] =
@@ -65,17 +69,30 @@ export default function IncomeMonthCard() {
         59
       );
 
-      const q = query(
-        collection(
-          db,
-          gerenteUid ? gerenteUid : currentUser!.uid,
-          "data",
-          "operacoes"
-        ),
-        where("dataDaOperacao", ">=", firstDayOfMonth),
-        where("dataDaOperacao", "<=", lastDayOfMonth),
-        where("statusDaOperacao", "==", "concluido")
-      );
+      const q = collaboratorUid
+        ? query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "operacoes"
+            ),
+            where("dataDaOperacao", ">=", firstDayOfMonth),
+            where("dataDaOperacao", "<=", lastDayOfMonth),
+            where("statusDaOperacao", "==", "concluido"),
+            where("criadoPor", "==", collaboratorUid)
+          )
+        : query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "operacoes"
+            ),
+            where("dataDaOperacao", ">=", firstDayOfMonth),
+            where("dataDaOperacao", "<=", lastDayOfMonth),
+            where("statusDaOperacao", "==", "concluido")
+          );
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const operations = querySnapshot.docs.map((doc) => ({
           ...(doc.data() as ThisMonthOperationsProps),
@@ -86,7 +103,7 @@ export default function IncomeMonthCard() {
         if (unsubscribe) unsubscribe();
       };
     });
-  }, [db, currentUser]);
+  }, [db, currentUser, collaboratorUid]);
 
   React.useEffect(() => {
     getUserData().then((userData) => {
@@ -106,17 +123,30 @@ export default function IncomeMonthCard() {
         59
       );
 
-      const q = query(
-        collection(
-          db,
-          gerenteUid ? gerenteUid : currentUser!.uid,
-          "data",
-          "operacoes"
-        ),
-        where("dataDaOperacao", ">=", firstDayOfMonth),
-        where("dataDaOperacao", "<=", lastDayOfMonth),
-        where("statusDaOperacao", "==", "concluido")
-      );
+      const q = collaboratorUid
+        ? query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "operacoes"
+            ),
+            where("dataDaOperacao", ">=", firstDayOfMonth),
+            where("dataDaOperacao", "<=", lastDayOfMonth),
+            where("statusDaOperacao", "==", "concluido"),
+            where("criadoPor", "==", collaboratorUid)
+          )
+        : query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "operacoes"
+            ),
+            where("dataDaOperacao", ">=", firstDayOfMonth),
+            where("dataDaOperacao", "<=", lastDayOfMonth),
+            where("statusDaOperacao", "==", "concluido")
+          );
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const operations = querySnapshot.docs.map((doc) => ({
           ...(doc.data() as ThisMonthOperationsProps),
@@ -127,7 +157,7 @@ export default function IncomeMonthCard() {
         if (unsubscribe) unsubscribe();
       };
     });
-  }, [db, currentUser]);
+  }, [db, currentUser, collaboratorUid]);
 
   React.useEffect(() => {
     function compareMonths() {

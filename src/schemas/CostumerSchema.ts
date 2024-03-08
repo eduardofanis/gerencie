@@ -27,21 +27,7 @@ const CostumerSchema = z.object({
   estado: z.string().min(1),
   cidade: z.string().min(1),
   bairro: z.string().min(1),
-  tipoDoDocumento: z.string(),
-  frenteDoDocumento: z
-    .instanceof(FileList)
-    .transform((file) => file.length > 0 && file.item(0))
-    .refine((file) => !file || (!!file && file.type?.startsWith("image")), {
-      message: "Only images are allowed to be sent.",
-    })
-    .optional(),
-  versoDoDocumento: z
-    .instanceof(FileList)
-    .transform((file) => file.length > 0 && file.item(0))
-    .refine((file) => !file || (!!file && file.type?.startsWith("image")), {
-      message: "Only images are allowed to be sent.",
-    })
-    .optional(),
+  anexos: z.instanceof(FileList).optional(),
 });
 
 export { CostumerSchema };

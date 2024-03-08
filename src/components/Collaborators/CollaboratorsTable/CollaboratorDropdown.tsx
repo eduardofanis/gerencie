@@ -61,10 +61,10 @@ function CollaboratorPermissionsDialog({
 }: CollaboratorPermissionsDialogProps) {
   const [visaoEstatisticasDeTodos, setVisaoEstatisticasDeTodos] =
     React.useState(false);
-  const [
-    gerenciarOperacoesClientesDeOutros,
-    setGerenciarOperacoesClientesDeOutros,
-  ] = React.useState(false);
+  const [gerenciarOperacoesDeOutros, setGerenciarOperacoesDeOutros] =
+    React.useState(false);
+  const [gerenciarClientesDeOutros, setGerenciarClientesDeOutros] =
+    React.useState(false);
   const [gerenciarTipoDeOperacoes, setGerenciarTipoDeOperacoes] =
     React.useState(false);
   const [gerenciarColaboradores, setGerenciarColaboradores] =
@@ -80,8 +80,8 @@ function CollaboratorPermissionsDialog({
       await updateDoc(doc(db, id, "data"), {
         permissoes: {
           visaoEstatisticasDeTodos: visaoEstatisticasDeTodos,
-          gerenciarOperacoesClientesDeOutros:
-            gerenciarOperacoesClientesDeOutros,
+          gerenciarOperacoesDeOutros: gerenciarOperacoesDeOutros,
+          gerenciarClientesDeOutros: gerenciarClientesDeOutros,
           gerenciarTipoDeOperacoes: gerenciarTipoDeOperacoes,
           gerenciarColaboradores: gerenciarColaboradores,
           gerenciarAutomacoes: gerenciarAutomacoes,
@@ -115,8 +115,11 @@ function CollaboratorPermissionsDialog({
 
         if (data && data.permissoes) {
           setVisaoEstatisticasDeTodos(data.permissoes.visaoEstatisticasDeTodos);
-          setGerenciarOperacoesClientesDeOutros(
-            data.permissoes.gerenciarOperacoesClientesDeOutros
+          setGerenciarOperacoesDeOutros(
+            data.permissoes.gerenciarOperacoesDeOutros
+          );
+          setGerenciarClientesDeOutros(
+            data.permissoes.gerenciarClientesDeOutros
           );
           setGerenciarTipoDeOperacoes(data.permissoes.gerenciarTipoDeOperacoes);
           setGerenciarColaboradores(data.permissoes.gerenciarColaboradores);
@@ -153,17 +156,29 @@ function CollaboratorPermissionsDialog({
           </div>
           <div className="flex items-center justify-between pt-2">
             <div className="flex flex-col">
-              <h4 className="text-medium ">
-                Gerenciar operações e clientes de outros
-              </h4>
-              <p className="text-sm opacity-85">Adicionar, remover e editar.</p>
+              <h4 className="text-medium ">Gerenciar operações de outros</h4>
+              <p className="text-sm opacity-85">
+                Visualizar, adicionar, remover e editar.
+              </p>
             </div>
             <Switch
-              checked={gerenciarOperacoesClientesDeOutros}
+              checked={gerenciarOperacoesDeOutros}
               onCheckedChange={() =>
-                setGerenciarOperacoesClientesDeOutros(
-                  !gerenciarOperacoesClientesDeOutros
-                )
+                setGerenciarOperacoesDeOutros(!gerenciarOperacoesDeOutros)
+              }
+            />
+          </div>
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex flex-col">
+              <h4 className="text-medium ">Gerenciar clientes de outros</h4>
+              <p className="text-sm opacity-85">
+                Visualizar, adicionar, remover e editar.
+              </p>
+            </div>
+            <Switch
+              checked={gerenciarClientesDeOutros}
+              onCheckedChange={() =>
+                setGerenciarClientesDeOutros(!gerenciarClientesDeOutros)
               }
             />
           </div>

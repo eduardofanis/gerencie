@@ -46,6 +46,7 @@ import { firebaseConfig } from "@/FirebaseSettings";
 import { FirebaseError, initializeApp } from "firebase/app";
 import { getUserData } from "./user";
 import { UserDataProps } from "@/types/UserDataProps";
+import { Collaborator } from "@/contexts/CollaboratorContext";
 
 export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
   const db = getFirestore(firebaseApp);
@@ -73,8 +74,8 @@ export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
           ...values,
           createdAt: Timestamp.now(),
           dataDeNascimento: dateObject,
-          frenteDoDocumento: "",
-          versoDoDocumento: "",
+          criadoPor: currentUser.uid,
+          anexos: [],
         }
       );
       const clienteRef = doc(
@@ -90,47 +91,35 @@ export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
         variant: "success",
         duration: 5000,
       });
-      if (values.frenteDoDocumento instanceof File) {
-        if (values.frenteDoDocumento.type.startsWith("image/")) {
-          const frenteRef = ref(
-            storage,
-            `documentos/${docRef.id}-frente-documento`
-          );
-          await uploadBytes(frenteRef, values.frenteDoDocumento);
-          const frenteURL = await getDownloadURL(frenteRef);
-          updateDoc(clienteRef, {
-            frenteDoDocumento: frenteURL,
-          });
-        } else {
-          toast({
-            title: "Somente imagens são permitidas!",
-            variant: "destructive",
-            duration: 5000,
-          });
-        }
-      }
+      if (values.anexos) {
+        const fileList = Array.from(values.anexos);
+        console.log(fileList);
 
-      if (values.versoDoDocumento instanceof File) {
-        if (values.versoDoDocumento.type.startsWith("image/")) {
-          const versoRef = ref(
-            storage,
-            `documentos/${docRef.id}-verso-documento`
-          );
-
-          await uploadBytes(versoRef, values.versoDoDocumento);
-
-          // Obtém o URL do arquivo enviado (verso)
-          const versoURL = await getDownloadURL(versoRef);
-          updateDoc(clienteRef, {
-            versoDoDocumento: versoURL,
-          });
-        } else {
-          toast({
-            title: "Somente imagens são permitidas!",
-            variant: "destructive",
-            duration: 5000,
-          });
-        }
+        fileList.forEach(async (file) => {
+          if (
+            file.type.startsWith("image/") ||
+            file.type.startsWith("application/")
+          ) {
+            const fileRef = ref(
+              storage,
+              `documentos/${docRef.id}-${file.name}`
+            );
+            await uploadBytes(fileRef, file);
+            const fileURL = await getDownloadURL(fileRef);
+            updateDoc(clienteRef, {
+              anexos: arrayUnion({
+                name: file.name,
+                url: fileURL,
+              }),
+            });
+          } else {
+            toast({
+              title: "Somente imagens e documentos são permitidos!",
+              variant: "destructive",
+              duration: 5000,
+            });
+          }
+        });
       }
     }
   } catch (error) {
@@ -144,11 +133,7 @@ export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
 }
 
 export async function EditCostumer(
-  {
-    frenteDoDocumento,
-    versoDoDocumento,
-    ...values
-  }: z.infer<typeof CostumerSchema>,
+  { anexos, ...values }: z.infer<typeof CostumerSchema>,
 
   id: string
 ) {
@@ -209,16 +194,15 @@ export async function EditCostumer(
           dataDeNascimento: dateObject,
         }
       );
+
+      if (anexos) {
+        console.log(anexos);
+      }
       toast({
         title: "Cliente editado com sucesso!",
         variant: "success",
         duration: 5000,
       });
-
-      if (frenteDoDocumento)
-        updateCostumerDocuments(frenteDoDocumento, "frente-documento", id);
-      if (versoDoDocumento)
-        updateCostumerDocuments(versoDoDocumento, "verso-documento", id);
     }
   } catch (error) {
     console.log(error);
@@ -252,6 +236,7 @@ export async function NewOperation(
         {
           ...values,
           createdAt: Timestamp.now(),
+          criadoPor: currentUser.uid,
           valorRecebido: (values.valorLiberado * Number(values.comissao)) / 100,
         }
       );
@@ -427,7 +412,7 @@ export async function RemoveOperationType(name: string, color: string) {
   }
 }
 
-export async function GetCostumers() {
+export async function GetCostumers(collaborator?: Collaborator) {
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
 
@@ -436,14 +421,36 @@ export async function GetCostumers() {
 
   try {
     if (currentUser && currentUser.uid) {
-      const querySnapshot = await getDocs(
-        collection(
-          db,
-          gerenteUid ? gerenteUid : currentUser!.uid,
-          "data",
-          "clientes"
-        )
-      );
+      const q = !collaborator
+        ? query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "clientes"
+            )
+          )
+        : collaborator &&
+          collaborator.permissions.gerenciarClientesDeOutros === true
+        ? query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "clientes"
+            )
+          )
+        : query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "clientes"
+            ),
+            where("criadoPor", "==", collaborator.id)
+          );
+
+      const querySnapshot = await getDocs(q);
       const costumers = querySnapshot.docs.map((doc) => ({
         ...(doc.data() as z.infer<typeof CostumerSchema>),
       }));
@@ -797,7 +804,8 @@ export async function NewCollaborator(
               email: user.email,
               permissoes: {
                 visaoEstatisticasDeTodos: false,
-                gerenciarOperacoesClientesDeOutros: false,
+                gerenciarOperacoesDeOutros: false,
+                gerenciarClientesDeOutros: false,
                 gerenciarTipoDeOperacoes: false,
                 gerenciarColaboradores: false,
                 gerenciarAutomacoes: false,
@@ -855,7 +863,7 @@ export async function GetCollaborators() {
         const promises = colaboradores.map(async (colaborador) => {
           const docRef = doc(db, colaborador.uid, "data");
           const docSnap = await getDoc(docRef);
-          return docSnap.data();
+          return docSnap.data() as UserDataProps;
         });
 
         const list = await Promise.all(promises);
@@ -883,6 +891,15 @@ export async function DeleteCollaborator(
 
   try {
     if (currentUser && currentUser.uid) {
+      if (colaboradorId === currentUser.uid) {
+        toast({
+          title: "O colaborador não pode ser excluído!",
+          variant: "destructive",
+          duration: 5000,
+        });
+        return;
+      }
+
       const docRef = doc(db, gerenteUid ? gerenteUid : currentUser.uid, "data");
 
       await signInWithEmailAndPassword(secondaryAuth, email, password);
@@ -892,6 +909,45 @@ export async function DeleteCollaborator(
 
       await updateDoc(docRef, {
         colaboradores: arrayRemove({ uid: colaboradorId }),
+      });
+
+      const operations = await getDocs(
+        query(
+          collection(
+            db,
+            gerenteUid ? gerenteUid : currentUser!.uid,
+            "data",
+            "operacoes"
+          ),
+          where("criadoPor", "==", colaboradorId)
+        )
+      );
+      operations.forEach(async (doc) => {
+        await updateDoc(doc.ref, {
+          criadoPor: gerenteUid ? gerenteUid : currentUser!.uid,
+        });
+      });
+
+      const costumers = await getDocs(
+        query(
+          collection(
+            db,
+            gerenteUid ? gerenteUid : currentUser!.uid,
+            "data",
+            "clientes"
+          ),
+          where("criadoPor", "==", colaboradorId)
+        )
+      );
+      costumers.forEach(async (doc) => {
+        await updateDoc(doc.ref, {
+          criadoPor: gerenteUid ? gerenteUid : currentUser!.uid,
+        });
+      });
+
+      const querySnapshot = await getDocs(collection(db, colaboradorId));
+      querySnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
       });
 
       toast({

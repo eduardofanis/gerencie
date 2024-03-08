@@ -20,20 +20,21 @@ export type CostumerProps = {
   id: string;
   bairro: string;
   estado: string;
-  frenteDoDocumento: string;
   telefone: string;
   complemento: string;
   sexo: string;
-  tipoDoDocumento: string;
   naturalidade: string;
   dataDeNascimento: Timestamp;
   nome: string;
   cidade: string;
-  versoDoDocumento: string;
   numeroDaRua: string;
   cep: string;
   rua: string;
   createdAt: Timestamp;
+  anexos: {
+    url: string;
+    name: string;
+  }[];
 };
 
 export type OperationProps = {
@@ -127,29 +128,39 @@ export default function CostumersView() {
   return (
     <Dialog open={isOpen}>
       <DialogContent className="sm:max-w-[800px]">
-        <div className="grid grid-cols-[200px_1fr] gap-8">
-          <div className="grid gap-3">
-            {costumer.frenteDoDocumento ? (
-              <div className="">
-                <img
-                  src={costumer.frenteDoDocumento}
-                  className="h-[260px] object-cover rounded"
-                />
-              </div>
-            ) : (
-              <Skeleton className="h-[260px]"></Skeleton>
-            )}
-
-            {costumer.versoDoDocumento ? (
-              <div className="">
-                <img
-                  src={costumer.versoDoDocumento}
-                  className="h-[260px] object-cover rounded"
-                />
-              </div>
-            ) : (
-              <Skeleton className="h-[260px]"></Skeleton>
-            )}
+        <div className="grid grid-cols-[auto_1fr] gap-8">
+          <div className="flex flex-col w-[200px] truncate text-ellipsis">
+            <h3 className="font-medium text-lg">Anexos</h3>
+            <ul className="flex list-decimal list-inside text-sm flex-col gap-2 mt-1 text-ellipsis truncate">
+              {costumer.anexos &&
+                costumer.anexos.map((anexo) => (
+                  <TooltipProvider key={anexo.name}>
+                    <Tooltip>
+                      <TooltipTrigger asChild className="text-left w-fit">
+                        <li className="whitespace-nowrap truncate text-ellipsis cursor-pointer hover:underline opacity-90">
+                          <a href={anexo.url} target="_blank">
+                            {anexo.name}
+                          </a>
+                        </li>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {anexo.name.endsWith(".pdf") ? (
+                          <iframe
+                            src={anexo.url}
+                            className="h-[300px] w-auto object-fit"
+                          />
+                        ) : (
+                          <img
+                            src={anexo.url}
+                            alt={anexo.name}
+                            className="h-[300px] w-auto"
+                          />
+                        )}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ))}
+            </ul>
           </div>
           <div className="">
             <h1 className="font-bold text-2xl mb-8">{costumer.nome}</h1>
@@ -170,10 +181,15 @@ export default function CostumersView() {
                     : costumer.cpf}
                 </ClipboardText>
                 <ClipboardText label="Telefone">
-                  {costumer.telefone.replace(
-                    /(\d{2})(\d{5})(\d{4})/,
-                    "($1) $2-$3"
-                  )}
+                  {costumer.telefone.length === 10
+                    ? costumer.telefone.replace(
+                        /(\d{2})(\d{4})(\d{4})/,
+                        "($1) $2-$3"
+                      )
+                    : costumer.telefone.replace(
+                        /(\d{2})(\d{5})(\d{4})/,
+                        "($1) $2-$3"
+                      )}
                 </ClipboardText>
                 <ClipboardText label="Data de nascimento">
                   {new Date(
@@ -233,13 +249,6 @@ export default function CostumersView() {
                   {costumer.bairro ? costumer.bairro : "Não definido"}
                 </ClipboardText>
               </div>
-            </div>
-            <div className="mt-8">
-              <ClipboardText label="Tipo de documento" clipboard={false}>
-                {costumer.tipoDoDocumento
-                  ? costumer.tipoDoDocumento
-                  : "Não definido"}
-              </ClipboardText>
             </div>
           </div>
         </div>

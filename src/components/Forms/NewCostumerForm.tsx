@@ -22,7 +22,13 @@ import CPFInput from "./Input/CPFInput";
 import BirthDateInput from "./Input/BirthDateInput";
 import ComboInput from "./Input/ComboInput";
 import React from "react";
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function NewCostumerForm() {
   const [, setSearchParams] = useSearchParams();
@@ -47,7 +53,6 @@ export default function NewCostumerForm() {
       estado: "",
       cidade: "",
       bairro: "",
-      tipoDoDocumento: "",
     },
   });
 
@@ -90,21 +95,6 @@ export default function NewCostumerForm() {
     },
   ];
 
-  const DocumentoItems: SelectItems[] = [
-    {
-      value: "RG",
-      label: "RG",
-    },
-    {
-      value: "CNH",
-      label: "CNH",
-    },
-    {
-      value: "Outro",
-      label: "Outro",
-    },
-  ];
-
   const estados: SelectItems[] = [
     { value: "AC", label: "AC" },
     { value: "AL", label: "AL" },
@@ -134,6 +124,8 @@ export default function NewCostumerForm() {
     { value: "SE", label: "SE" },
     { value: "TO", label: "TO" },
   ];
+
+  const fileList = form.watch("anexos");
 
   return (
     <>
@@ -282,29 +274,54 @@ export default function NewCostumerForm() {
 
           <div className={stepThree ? "" : "hidden"}>
             <div className="mt-4">
-              <h2 className="mb-2 font-medium">Documentos</h2>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="col-span-2">
-                  <SelectInput
-                    form={form}
-                    name="tipoDoDocumento"
-                    label="Tipo do documento"
-                    placeholder="Selecione"
-                    selectItems={DocumentoItems}
-                  />
+              <h2 className="mb-2 font-medium">Anexos</h2>
+              <div className="grid gap-4">
+                <div className="flex gap-2 w-full">
+                  <div className="w-full">
+                    <FileInput multiple form={form} name="anexos" />
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    className="border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800 p-3"
+                    type="button"
+                    onClick={() => {
+                      form.setValue("anexos", undefined);
+                    }}
+                  >
+                    <X className="size-4" />
+                  </Button>
                 </div>
 
-                <FileInput
-                  form={form}
-                  label="Frente do documento"
-                  name="frenteDoDocumento"
-                />
-
-                <FileInput
-                  form={form}
-                  label="Verso do documento"
-                  name="versoDoDocumento"
-                />
+                {!fileList || fileList.length <= 0 ? (
+                  <span className="text-sm font-medium">
+                    Nenhum arquivo anexado.
+                  </span>
+                ) : (
+                  <ul className="flex list-decimal list-inside text-sm flex-col gap-2">
+                    {fileList &&
+                      Array.from(fileList).map((file) => (
+                        <TooltipProvider key={file.name}>
+                          <Tooltip>
+                            <TooltipTrigger asChild className="text-left w-fit">
+                              <li>{file.name}</li>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {file.type.includes("image") ? (
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={file.name}
+                                  className="max-h-[300px] w-auto"
+                                />
+                              ) : (
+                                <p>{file.name}</p>
+                              )}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ))}
+                  </ul>
+                )}
               </div>
             </div>
 

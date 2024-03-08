@@ -8,20 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OperationSchema } from "@/schemas/OperationSchema";
 import { z } from "zod";
-import { Timestamp, doc, getFirestore, updateDoc } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
 import OperationDropdown from "./OperationDropdown";
 import { getUserData } from "@/services/user";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import { getAuth } from "firebase/auth";
-import { firebaseApp } from "@/main";
+
+import OperationCreatedBy from "./OperationCreatedBy";
+import OperationSelectStatus from "./OperationSelectStatus";
 
 export const OperationsTableColumns: ColumnDef<
   z.infer<typeof OperationSchema>
@@ -38,77 +30,7 @@ export const OperationsTableColumns: ColumnDef<
       const status = row.getValue("statusDaOperacao") as string;
       const id = row.getValue("id") as string;
 
-      function handleChange(value: string) {
-        const db = getFirestore(firebaseApp);
-        const { currentUser } = getAuth(firebaseApp);
-
-        const operationRef = doc(db, currentUser!.uid, "data", "operacoes", id);
-        updateDoc(operationRef, { statusDaOperacao: value });
-      }
-
-      return (
-        <Select value={status ?? ""} onValueChange={handleChange}>
-          <SelectTrigger
-            className={cn(
-              "border-0 ml-1 w-fit justify-normal gap-2 bg-inherit"
-            )}
-          >
-            <div
-              className={`w-2 h-2 rounded-full mr-1 ${
-                status == "concluido"
-                  ? "bg-green-500"
-                  : status == "processando"
-                  ? "bg-yellow-500"
-                  : status == "pendente"
-                  ? "bg-orange-500"
-                  : status == "falha"
-                  ? "bg-red-500"
-                  : "bg-slate-500"
-              }`}
-            ></div>
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="concluido">Concluído</SelectItem>
-              <SelectItem value="processando">Processando</SelectItem>
-              <SelectItem value="pendente">Pendente</SelectItem>
-              <SelectItem value="falha">Falha</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      );
-
-      // switch (status) {
-      //   case "concluido":
-      //     return (
-      //       <div className="text-green-600 font-medium flex items-center ml-4">
-      //         <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-      //         Concluido
-      //       </div>
-      //     );
-      //   case "processando":
-      //     return (
-      //       <div className="text-yellow-600 font-medium flex items-center ml-4">
-      //         <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
-      //         Processando
-      //       </div>
-      //     );
-      //   case "pendente":
-      //     return (
-      //       <div className="text-orange-600 font-medium flex items-center ml-4">
-      //         <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
-      //         Pendente
-      //       </div>
-      //     );
-      //   case "falha":
-      //     return (
-      //       <div className="text-red-600 font-medium flex items-center ml-4">
-      //         <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
-      //         Falha
-      //       </div>
-      //     );
-      // }
+      return <OperationSelectStatus id={id} status={status} />;
     },
   },
   {
@@ -164,6 +86,15 @@ export const OperationsTableColumns: ColumnDef<
           {type.toUpperCase()}
         </Badge>
       );
+    },
+  },
+  {
+    accessorKey: "criadoPor",
+    header: "Criado por",
+    cell: ({ row }) => {
+      const id = row.getValue("criadoPor") as string;
+
+      return <OperationCreatedBy id={id} />;
     },
   },
   {

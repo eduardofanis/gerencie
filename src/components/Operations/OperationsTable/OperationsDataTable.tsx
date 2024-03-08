@@ -55,27 +55,41 @@ import React from "react";
 import NewOperationForm from "@/components/Forms/NewOperationForm";
 
 import { useSearchParams } from "react-router-dom";
-import NewOperationTypeForm, {
-  UserDataProps,
-} from "@/components/Forms/NewOperationTypeForm";
+import NewOperationTypeForm from "@/components/Forms/NewOperationTypeForm";
 import EditOperationForm from "@/components/Forms/EditOperationForm";
 import { Separator } from "@/components/ui/separator";
 import { OperationProps } from "@/components/Customers/CostumersView";
 
 import * as XLSX from "xlsx";
 import { CollaboratorContext } from "@/contexts/CollaboratorContext";
+import { SubscriberContext } from "@/contexts/SubscriberContext";
+import { UserDataProps } from "@/types/UserDataProps";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   userData: UserDataProps;
+  collaborators: UserDataProps[];
 }
 
 export function OperationsDataTable<TData, TValue>({
   columns,
   data,
   userData,
+  collaborators,
 }: DataTableProps<TData, TValue>) {
+  const { collaborator } = React.useContext(CollaboratorContext);
+  const { subscriber } = React.useContext(SubscriberContext);
+
+  const permission =
+    !collaborator && subscriber?.plano !== "Individual"
+      ? true
+      : collaborator &&
+        collaborator.permissions.gerenciarOperacoesDeOutros === true
+      ? true
+      : false;
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -84,10 +98,10 @@ export function OperationsDataTable<TData, TValue>({
     React.useState<VisibilityState>({
       id: false,
       valorRecebido: false,
+      criadoPor: permission,
     });
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const { collaborator } = React.useContext(CollaboratorContext);
 
   const table = useReactTable({
     data,
@@ -142,7 +156,10 @@ export function OperationsDataTable<TData, TValue>({
       <div className="flex items-center justify-between py-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="flex gap-2 lg:hidden" variant="outline">
+            <Button
+              className="flex gap-2 min-[1400px]:hidden"
+              variant="outline"
+            >
               Filtros <ChevronDown className="size-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -160,6 +177,52 @@ export function OperationsDataTable<TData, TValue>({
               }
               className="max-w-sm w-[300px] col-span-2"
             />
+            {permission && (
+              <Select
+                value={
+                  (table.getColumn("criadoPor")?.getFilterValue() as string) ??
+                  ""
+                }
+                onValueChange={(event) => {
+                  table.getColumn("criadoPor")?.setFilterValue(event);
+                }}
+              >
+                <SelectTrigger
+                  className={`w-[300px] col-span-2 ${
+                    !table.getColumn("criadoPor")?.getFilterValue() &&
+                    "text-slate-500"
+                  } font-normal`}
+                >
+                  <SelectValue placeholder="Criado por"></SelectValue>
+                </SelectTrigger>
+                <SelectContent className="w-[300px]">
+                  <SelectGroup>
+                    {collaborators && collaborators.length > 0 ? (
+                      collaborators.map((collaborator) => (
+                        <SelectItem
+                          value={collaborator.id}
+                          key={collaborator.id}
+                        >
+                          <div className="flex gap-3 items-center">
+                            <Avatar className="size-6">
+                              <AvatarImage src={collaborator.avatar} />
+                              <AvatarFallback className="bg-slate-50">
+                                {collaborator.nome.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            {collaborator.nome}
+                          </div>
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <div className="text-sm text-center my-2">
+                        Nenhum colaborador encontrado
+                      </div>
+                    )}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
             <Select
               value={
                 (table
@@ -253,7 +316,7 @@ export function OperationsDataTable<TData, TValue>({
                 table.getColumn("statusDaOperacao")?.setFilterValue("");
                 table.getColumn("tipoDaOperacao")?.setFilterValue("");
                 table.getColumn("cliente")?.setFilterValue("");
-                // setDate(undefined);
+                table.getColumn("criadoPor")?.setFilterValue("");
               }}
             >
               <X className="h-4 w-4 mr-2 " />
@@ -262,7 +325,7 @@ export function OperationsDataTable<TData, TValue>({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="gap-2 items-center hidden lg:flex">
+        <div className="gap-2 items-center hidden min-[1400px]:flex">
           <Select
             value={
               (table
@@ -359,6 +422,49 @@ export function OperationsDataTable<TData, TValue>({
             </SelectContent>
           </Select>
 
+          {permission && (
+            <Select
+              value={
+                (table.getColumn("criadoPor")?.getFilterValue() as string) ?? ""
+              }
+              onValueChange={(event) => {
+                table.getColumn("criadoPor")?.setFilterValue(event);
+              }}
+            >
+              <SelectTrigger
+                className={`w-[240px] ${
+                  !table.getColumn("criadoPor")?.getFilterValue() &&
+                  "text-slate-500"
+                } font-normal`}
+              >
+                <SelectValue placeholder="Criado por"></SelectValue>
+              </SelectTrigger>
+              <SelectContent className="w-[300px]">
+                <SelectGroup>
+                  {collaborators && collaborators.length > 0 ? (
+                    collaborators.map((collaborator) => (
+                      <SelectItem value={collaborator.id} key={collaborator.id}>
+                        <div className="flex gap-3 items-center">
+                          <Avatar className="size-6">
+                            <AvatarImage src={collaborator.avatar} />
+                            <AvatarFallback className="bg-slate-50">
+                              {collaborator.nome.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          {collaborator.nome}
+                        </div>
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="text-sm text-center my-2">
+                      Nenhum colaborador encontrado
+                    </div>
+                  )}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          )}
+
           <Button
             variant="outline"
             className="border-red-200 text-red-600 hover:text-red-800 hover:bg-red-50"
@@ -366,7 +472,7 @@ export function OperationsDataTable<TData, TValue>({
               table.getColumn("statusDaOperacao")?.setFilterValue("");
               table.getColumn("tipoDaOperacao")?.setFilterValue("");
               table.getColumn("cliente")?.setFilterValue("");
-              // setDate(undefined);
+              table.getColumn("criadoPor")?.setFilterValue("");
             }}
           >
             <X className="h-4 w-4 mr-2 " />

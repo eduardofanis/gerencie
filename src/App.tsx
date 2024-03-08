@@ -20,6 +20,7 @@ import {
   SubscriberProtectedRoute,
 } from "./routes/SubscriberProtectedRoute";
 import {
+  CollaboratorProtectedRoute,
   ManageAutomationsProtectedRoute,
   ManageOthersCollaboratorsProtectedRoute,
 } from "./routes/CollaboratorProtectedRoute";
@@ -39,7 +40,9 @@ export default function App() {
                     element={
                       <UserProtectedRoute>
                         <SubscriberProtectedRoute>
-                          <Home />
+                          <CollaboratorProtectedRoute>
+                            <Home />
+                          </CollaboratorProtectedRoute>
                         </SubscriberProtectedRoute>
                       </UserProtectedRoute>
                     }
@@ -52,7 +55,9 @@ export default function App() {
                     element={
                       <UserProtectedRoute>
                         <SubscriberProtectedRoute>
-                          <Operations />
+                          <CollaboratorProtectedRoute>
+                            <Operations />
+                          </CollaboratorProtectedRoute>
                         </SubscriberProtectedRoute>
                       </UserProtectedRoute>
                     }
@@ -62,7 +67,9 @@ export default function App() {
                     element={
                       <UserProtectedRoute>
                         <SubscriberProtectedRoute>
-                          <Customers />
+                          <CollaboratorProtectedRoute>
+                            <Customers />
+                          </CollaboratorProtectedRoute>
                         </SubscriberProtectedRoute>
                       </UserProtectedRoute>
                     }
@@ -81,9 +88,11 @@ export default function App() {
                       <UserProtectedRoute>
                         <SubscriberProtectedRoute>
                           <MidSubscriberProtectedRoute>
-                            <ManageOthersCollaboratorsProtectedRoute>
-                              <Collaborators />
-                            </ManageOthersCollaboratorsProtectedRoute>
+                            <CollaboratorProtectedRoute>
+                              <ManageOthersCollaboratorsProtectedRoute>
+                                <Collaborators />
+                              </ManageOthersCollaboratorsProtectedRoute>
+                            </CollaboratorProtectedRoute>
                           </MidSubscriberProtectedRoute>
                         </SubscriberProtectedRoute>
                       </UserProtectedRoute>
@@ -95,9 +104,11 @@ export default function App() {
                       <UserProtectedRoute>
                         <SubscriberProtectedRoute>
                           <HighSubscriberProtectedRoute>
-                            <ManageAutomationsProtectedRoute>
-                              <Automations />
-                            </ManageAutomationsProtectedRoute>
+                            <CollaboratorProtectedRoute>
+                              <ManageAutomationsProtectedRoute>
+                                <Automations />
+                              </ManageAutomationsProtectedRoute>
+                            </CollaboratorProtectedRoute>
                           </HighSubscriberProtectedRoute>
                         </SubscriberProtectedRoute>
                       </UserProtectedRoute>

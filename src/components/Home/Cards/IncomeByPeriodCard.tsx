@@ -62,7 +62,11 @@ type InitialValues = {
   [key: string]: number;
 };
 
-export default function IncomeByPeriodCard() {
+export default function IncomeByPeriodCard({
+  collaboratorUid,
+}: {
+  collaboratorUid: string;
+}) {
   const [thisMonthOperations, setThisMonthOperations] =
     React.useState<OperationProps[]>();
   const [data, setData] = React.useState<DataProps[] | null>(null);
@@ -150,21 +154,38 @@ export default function IncomeByPeriodCard() {
 
       setData2(allDaysArray);
 
-      const q = query(
-        collection(
-          db,
-          gerenteUid ? gerenteUid : currentUser!.uid,
-          "data",
-          "operacoes"
-        ),
-        where("dataDaOperacao", ">=", date ? date.from : firstDayOfMonth),
-        where(
-          "dataDaOperacao",
-          "<=",
-          date && date.to ? date.to : lastDayOfMonth
-        ),
-        where("statusDaOperacao", "==", "concluido")
-      );
+      const q = collaboratorUid
+        ? query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "operacoes"
+            ),
+            where("dataDaOperacao", ">=", date ? date.from : firstDayOfMonth),
+            where(
+              "dataDaOperacao",
+              "<=",
+              date && date.to ? date.to : lastDayOfMonth
+            ),
+            where("statusDaOperacao", "==", "concluido"),
+            where("criadoPor", "==", collaboratorUid)
+          )
+        : query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "operacoes"
+            ),
+            where("dataDaOperacao", ">=", date ? date.from : firstDayOfMonth),
+            where(
+              "dataDaOperacao",
+              "<=",
+              date && date.to ? date.to : lastDayOfMonth
+            ),
+            where("statusDaOperacao", "==", "concluido")
+          );
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const operations = querySnapshot.docs.map((doc) => ({
           ...(doc.data() as OperationProps),
@@ -176,7 +197,7 @@ export default function IncomeByPeriodCard() {
         if (unsubscribe) unsubscribe();
       };
     });
-  }, [db, currentUser, date, operationTypes]);
+  }, [db, currentUser, date, operationTypes, collaboratorUid]);
 
   React.useEffect(() => {
     let somaThisMonth = 0;

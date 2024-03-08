@@ -4,17 +4,19 @@ import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 import { PermissionsProps, UserDataProps } from "../types/UserDataProps";
 import { AuthContext } from "./AuthContext";
 
-type Collaborator = {
+export type Collaborator = {
+  id: string;
   permissions: PermissionsProps;
 };
 
-type ContextProps = {
+type CollaboratorContextProps = {
   collaborator: Collaborator | null;
 };
 
-export const CollaboratorContext = React.createContext<ContextProps>({
-  collaborator: null,
-});
+export const CollaboratorContext =
+  React.createContext<CollaboratorContextProps>({
+    collaborator: null,
+  });
 
 export default function CollaboratorStorage({
   children,
@@ -46,6 +48,7 @@ export default function CollaboratorStorage({
           collaborator.permissoes
         ) {
           setCollaborator({
+            id: user.uid,
             permissions: collaborator.permissoes,
           });
         } else {

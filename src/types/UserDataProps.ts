@@ -7,7 +7,8 @@ export type CollaboratorProps = {
 
 export type PermissionsProps = {
   visaoEstatisticasDeTodos: boolean;
-  gerenciarOperacoesClientesDeOutros: boolean;
+  gerenciarOperacoesDeOutros: boolean;
+  gerenciarClientesDeOutros: boolean;
   gerenciarTipoDeOperacoes: boolean;
   gerenciarColaboradores: boolean;
   gerenciarAutomacoes: boolean;

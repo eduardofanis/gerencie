@@ -25,7 +25,13 @@ import React from "react";
 import { CostumerProps } from "../Customers/CostumersView";
 import Loading from "../ui/Loading";
 import { Timestamp } from "firebase/firestore";
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function EditCostumerForm() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -51,7 +57,6 @@ export default function EditCostumerForm() {
       estado: "",
       cidade: "",
       bairro: "",
-      tipoDoDocumento: "",
     },
   });
 
@@ -74,7 +79,6 @@ export default function EditCostumerForm() {
       form.setValue("rua", costumer.rua);
       form.setValue("sexo", costumer.sexo);
       form.setValue("telefone", costumer.telefone);
-      form.setValue("tipoDoDocumento", costumer.tipoDoDocumento);
     }
   }, [costumer, form]);
 
@@ -129,21 +133,6 @@ export default function EditCostumerForm() {
     },
   ];
 
-  const DocumentoItems: SelectItems[] = [
-    {
-      value: "RG",
-      label: "RG",
-    },
-    {
-      value: "CNH",
-      label: "CNH",
-    },
-    {
-      value: "Outro",
-      label: "Outro",
-    },
-  ];
-
   const estados: SelectItems[] = [
     { value: "AC", label: "AC" },
     { value: "AL", label: "AL" },
@@ -185,6 +174,8 @@ export default function EditCostumerForm() {
 
     return `${day}${month}${year}`;
   }
+
+  const fileList = form.watch("anexos");
 
   if (!costumer) return <Loading />;
   return (
@@ -371,29 +362,54 @@ export default function EditCostumerForm() {
 
           <div className={stepThree ? "" : "hidden"}>
             <div className="mt-4">
-              <h2 className="mb-2 font-medium">Documentos</h2>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="col-span-2">
-                  <SelectInput
-                    form={form}
-                    name="tipoDoDocumento"
-                    label="Tipo do documento"
-                    placeholder="Selecione"
-                    defaultValue={costumer.tipoDoDocumento}
-                    selectItems={DocumentoItems}
-                  />
-                </div>
-                <FileInput
-                  form={form}
-                  label="Frente do documento"
-                  name="frenteDoDocumento"
-                />
+              <h2 className="mb-2 font-medium">Anexos</h2>
+              <div className="grid gap-4">
+                <div className="flex gap-2 w-full">
+                  <div className="w-full">
+                    <FileInput multiple form={form} name="anexos" />
+                  </div>
 
-                <FileInput
-                  form={form}
-                  label="Verso do documento"
-                  name="versoDoDocumento"
-                />
+                  <Button
+                    variant="outline"
+                    className="border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800 p-3"
+                    type="button"
+                    onClick={() => {
+                      form.setValue("anexos", undefined);
+                    }}
+                  >
+                    <X className="size-4" />
+                  </Button>
+                </div>
+
+                {!fileList || fileList.length <= 0 ? (
+                  <span className="text-sm font-medium">
+                    Nenhum arquivo anexado.
+                  </span>
+                ) : (
+                  <ul className="flex list-decimal list-inside text-sm flex-col gap-2">
+                    {fileList &&
+                      Array.from(fileList).map((file) => (
+                        <TooltipProvider key={file.name}>
+                          <Tooltip>
+                            <TooltipTrigger asChild className="text-left w-fit">
+                              <li>{file.name}</li>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {file.type.includes("image") ? (
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={file.name}
+                                  className="max-h-[300px] w-auto"
+                                />
+                              ) : (
+                                <p>{file.name}</p>
+                              )}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ))}
+                  </ul>
+                )}
               </div>
             </div>
 

@@ -29,7 +29,11 @@ type OperationsProps = {
   comissao: string;
 };
 
-export default function OperationsDayCard() {
+export default function OperationsDayCard({
+  collaboratorUid,
+}: {
+  collaboratorUid: string;
+}) {
   const [todayOperations, setTodayOperations] =
     React.useState<OperationsProps[]>();
   const [yesterdayOperations, setYesterdayOperations] =
@@ -55,17 +59,30 @@ export default function OperationsDayCard() {
         today.getDate() + 1
       );
 
-      const q = query(
-        collection(
-          db,
-          gerenteUid ? gerenteUid : currentUser!.uid,
-          "data",
-          "operacoes"
-        ),
-        where("dataDaOperacao", ">=", startOfToday),
-        where("dataDaOperacao", "<", endOfToday),
-        where("statusDaOperacao", "==", "concluido")
-      );
+      const q = collaboratorUid
+        ? query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "operacoes"
+            ),
+            where("dataDaOperacao", ">=", startOfToday),
+            where("dataDaOperacao", "<", endOfToday),
+            where("statusDaOperacao", "==", "concluido"),
+            where("criadoPor", "==", collaboratorUid)
+          )
+        : query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "operacoes"
+            ),
+            where("dataDaOperacao", ">=", startOfToday),
+            where("dataDaOperacao", "<", endOfToday),
+            where("statusDaOperacao", "==", "concluido")
+          );
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const operations = querySnapshot.docs.map((doc) => ({
           ...(doc.data() as OperationsProps),
@@ -76,7 +93,7 @@ export default function OperationsDayCard() {
         if (unsubscribe) unsubscribe();
       };
     });
-  }, [db, currentUser]);
+  }, [db, currentUser, collaboratorUid]);
 
   React.useEffect(() => {
     getUserData().then((userData) => {
@@ -94,17 +111,30 @@ export default function OperationsDayCard() {
         yesterday.getDate()
       );
 
-      const q = query(
-        collection(
-          db,
-          gerenteUid ? gerenteUid : currentUser!.uid,
-          "data",
-          "operacoes"
-        ),
-        where("dataDaOperacao", ">=", startOfYesterday),
-        where("dataDaOperacao", "<", endOfYesterday),
-        where("statusDaOperacao", "==", "concluido")
-      );
+      const q = collaboratorUid
+        ? query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "operacoes"
+            ),
+            where("dataDaOperacao", ">=", startOfYesterday),
+            where("dataDaOperacao", "<", endOfYesterday),
+            where("statusDaOperacao", "==", "concluido"),
+            where("criadoPor", "==", collaboratorUid)
+          )
+        : query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "operacoes"
+            ),
+            where("dataDaOperacao", ">=", startOfYesterday),
+            where("dataDaOperacao", "<", endOfYesterday),
+            where("statusDaOperacao", "==", "concluido")
+          );
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const operations = querySnapshot.docs.map((doc) => ({
           ...(doc.data() as OperationsProps),
@@ -115,7 +145,7 @@ export default function OperationsDayCard() {
         if (unsubscribe) unsubscribe();
       };
     });
-  }, [db, currentUser]);
+  }, [db, currentUser, collaboratorUid]);
 
   React.useEffect(() => {
     function compareMonths() {

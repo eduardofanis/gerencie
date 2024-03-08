@@ -102,11 +102,11 @@ export default function NewOperationForm() {
 
   React.useEffect(() => {
     async function getCostumers() {
-      const costumers = await GetCostumers();
+      const costumers = await GetCostumers(collaborator!);
       setData(costumers);
     }
     getCostumers();
-  }, []);
+  }, [collaborator]);
 
   React.useEffect(() => {
     getUserData().then((userData) => {

@@ -161,13 +161,15 @@ export async function updateProfilePicture(photo: File) {
   }
 }
 
-export async function getUserData() {
+export async function getUserData(id?: string) {
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
 
   try {
     if (currentUser && currentUser.uid) {
-      const querySnapshot = await getDoc(doc(db, currentUser!.uid, "data"));
+      const querySnapshot = await getDoc(
+        doc(db, id ? id : currentUser.uid, "data")
+      );
       const userData = querySnapshot.data() as UserDataProps;
 
       return userData;

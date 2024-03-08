@@ -7,6 +7,23 @@ type Props = {
   children: React.ReactNode;
 };
 
+export function CollaboratorProtectedRoute({ children }: Props) {
+  const { collaborator } = React.useContext(CollaboratorContext);
+  const { subscriber } = React.useContext(SubscriberContext);
+
+  function checkPermission() {
+    if (collaborator) {
+      if (subscriber?.plano === "Individual") {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  return checkPermission() ? children : <Navigate to="/conta" replace />;
+}
+
 export function ManageOthersCollaboratorsProtectedRoute({ children }: Props) {
   const { collaborator } = React.useContext(CollaboratorContext);
   const { subscriber } = React.useContext(SubscriberContext);

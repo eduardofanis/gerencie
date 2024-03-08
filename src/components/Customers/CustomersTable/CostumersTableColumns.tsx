@@ -9,6 +9,7 @@ import { z } from "zod";
 import { CostumerSchema } from "@/schemas/CostumerSchema";
 import CostumerDropdown from "./CostumerDropdown";
 import { Timestamp } from "firebase/firestore";
+import CostumerCreatedBy from "./CostumerCreatedBy";
 
 export const CostumersTableColumns: ColumnDef<
   z.infer<typeof CostumerSchema>
@@ -38,7 +39,10 @@ export const CostumersTableColumns: ColumnDef<
     header: "Telefone",
     cell: ({ row }) => {
       const value = row.getValue("telefone") as string;
-      const formatted = value.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+      const formatted =
+        value.length === 10
+          ? value.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3")
+          : value.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
 
       return <div className="flex items-center">{formatted}</div>;
     },
@@ -66,6 +70,15 @@ export const CostumersTableColumns: ColumnDef<
       const date = new Date(milliseconds).toLocaleDateString("pt-BR");
 
       return <div className="ml-4">{date}</div>;
+    },
+  },
+  {
+    accessorKey: "criadoPor",
+    header: "Criado por",
+    cell: ({ row }) => {
+      const id = row.getValue("criadoPor") as string;
+
+      return <CostumerCreatedBy id={id} />;
     },
   },
   {

@@ -105,11 +105,11 @@ export default function EditOperationForm() {
 
   React.useEffect(() => {
     async function getCostumers() {
-      const costumers = await GetCostumers();
+      const costumers = await GetCostumers(collaborator!);
       setData(costumers);
     }
     getCostumers();
-  }, []);
+  }, [collaborator]);
 
   React.useEffect(() => {
     const db = getFirestore(firebaseApp);

@@ -7,6 +7,7 @@ import { AuthContext } from "./AuthContext";
 import { getUserData } from "@/services/user";
 
 type Subscriber = {
+  id: string;
   nome: string;
   plano: "Empresarial" | "Time" | "Individual";
   dataDeVencimento: Date;
@@ -48,6 +49,7 @@ export default function SubscriberStorage({
 
           if (subscriberData && subscriberData.dataDeVencimento) {
             setSubscriber({
+              id: subscriberData.id,
               nome: subscriberData.nome,
               plano: subscriberData.plano,
               dataDeVencimento: subscriberData.dataDeVencimento.toDate(),

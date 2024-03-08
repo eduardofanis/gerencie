@@ -59,7 +59,10 @@ export default function CostumerDropdown({ row }: any) {
             Editar cliente
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => setDialog(true)}
+            onClick={() => {
+              setRemove(false);
+              setDialog(true);
+            }}
             className="text-red-700 hover:text-red-700 font-medium "
           >
             <Trash className="w-4 h-4 mr-2 " />

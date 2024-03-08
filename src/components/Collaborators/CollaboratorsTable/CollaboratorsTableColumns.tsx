@@ -33,7 +33,10 @@ export const CollaboratorsTableColumns: ColumnDef<UserDataProps>[] = [
     header: "Telefone",
     cell: ({ row }) => {
       const value = row.getValue("telefone") as string;
-      const formatted = value.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+      const formatted =
+        value.length === 10
+          ? value.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3")
+          : value.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
 
       return <div>{formatted}</div>;
     },

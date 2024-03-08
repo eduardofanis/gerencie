@@ -12,6 +12,7 @@ import {
   Timestamp,
   orderBy,
   limit,
+  where,
 } from "firebase/firestore";
 import { Clock } from "lucide-react";
 import React from "react";
@@ -30,7 +31,11 @@ type OperationProps = {
   comissao: string;
 };
 
-export default function LastOperationsCard() {
+export default function LastOperationsCard({
+  collaboratorUid,
+}: {
+  collaboratorUid: string;
+}) {
   const [data, setData] = React.useState<OperationProps[] | null>(null);
 
   React.useEffect(() => {
@@ -40,16 +45,28 @@ export default function LastOperationsCard() {
       const db = getFirestore(firebaseApp);
       const { currentUser } = getAuth(firebaseApp);
 
-      const q = query(
-        collection(
-          db,
-          gerenteUid ? gerenteUid : currentUser!.uid,
-          "data",
-          "operacoes"
-        ),
-        orderBy("createdAt", "desc"),
-        limit(6)
-      );
+      const q = collaboratorUid
+        ? query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "operacoes"
+            ),
+            where("criadoPor", "==", collaboratorUid),
+            orderBy("createdAt", "desc"),
+            limit(6)
+          )
+        : query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "operacoes"
+            ),
+            orderBy("createdAt", "desc"),
+            limit(6)
+          );
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const operations = querySnapshot.docs.map((doc) => ({
           ...(doc.data() as OperationProps),
@@ -60,7 +77,7 @@ export default function LastOperationsCard() {
         if (unsubscribe) unsubscribe();
       };
     });
-  }, []);
+  }, [collaboratorUid]);
 
   function formatValue(value: string) {
     const amount = parseFloat(value);

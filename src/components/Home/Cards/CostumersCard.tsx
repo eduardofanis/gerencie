@@ -23,7 +23,11 @@ type CostumerProps = {
   nome: string;
 };
 
-export default function CostumersCard() {
+export default function CostumersCard({
+  collaboratorUid,
+}: {
+  collaboratorUid: string;
+}) {
   const [thisMonthCostumers, setThisMonthCostumers] =
     React.useState<CostumerProps[]>();
   const [lastMonthCostumers, setLastMonthCostumers] =
@@ -51,16 +55,28 @@ export default function CostumersCard() {
         59
       );
 
-      const q = query(
-        collection(
-          db,
-          gerenteUid ? gerenteUid : currentUser!.uid,
-          "data",
-          "clientes"
-        ),
-        where("createdAt", ">=", firstDayOfMonth),
-        where("createdAt", "<=", lastDayOfMonth)
-      );
+      const q = collaboratorUid
+        ? query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "clientes"
+            ),
+            where("createdAt", ">=", firstDayOfMonth),
+            where("createdAt", "<=", lastDayOfMonth),
+            where("criadoPor", "==", collaboratorUid)
+          )
+        : query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "clientes"
+            ),
+            where("createdAt", ">=", firstDayOfMonth),
+            where("createdAt", "<=", lastDayOfMonth)
+          );
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const costumers = querySnapshot.docs.map((doc) => ({
           ...(doc.data() as CostumerProps),
@@ -71,7 +87,7 @@ export default function CostumersCard() {
         if (unsubscribe) unsubscribe();
       };
     });
-  }, [db, currentUser]);
+  }, [db, currentUser, collaboratorUid]);
 
   React.useEffect(() => {
     getUserData().then((userData) => {
@@ -91,16 +107,28 @@ export default function CostumersCard() {
         59
       );
 
-      const q = query(
-        collection(
-          db,
-          gerenteUid ? gerenteUid : currentUser!.uid,
-          "data",
-          "clientes"
-        ),
-        where("createdAt", ">=", firstDayOfMonth),
-        where("createdAt", "<=", lastDayOfMonth)
-      );
+      const q = collaboratorUid
+        ? query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "clientes"
+            ),
+            where("createdAt", ">=", firstDayOfMonth),
+            where("createdAt", "<=", lastDayOfMonth),
+            where("criadoPor", "==", collaboratorUid)
+          )
+        : query(
+            collection(
+              db,
+              gerenteUid ? gerenteUid : currentUser!.uid,
+              "data",
+              "clientes"
+            ),
+            where("createdAt", ">=", firstDayOfMonth),
+            where("createdAt", "<=", lastDayOfMonth)
+          );
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const costumers = querySnapshot.docs.map((doc) => ({
           ...(doc.data() as CostumerProps),
