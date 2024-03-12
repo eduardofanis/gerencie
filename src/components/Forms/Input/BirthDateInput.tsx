@@ -25,7 +25,7 @@ export default function BirthDateInput(props: InputProps) {
 
   React.useEffect(() => {
     if (props.defaultValue) {
-      setValue(props.defaultValue.replace("/", ""));
+      setValue(props.defaultValue);
     }
   }, [props.defaultValue]);
 
@@ -47,7 +47,9 @@ export default function BirthDateInput(props: InputProps) {
                 {...field}
                 onChange={(ev) => {
                   setValue(ev.target.value);
-                  field.onChange(ev.target.value);
+                  field.onChange(
+                    ev.target.value.replace(/(\d{2})(\d{2})(\d{4})/, "$1/$2/$3")
+                  );
                 }}
                 value={value}
               />

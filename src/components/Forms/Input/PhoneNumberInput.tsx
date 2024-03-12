@@ -8,28 +8,29 @@ export default function PhoneNumberInput(props: InputProps) {
   const initialValue = "";
 
   function formatPhoneNumber(value: string) {
+    // Remove todos os caracteres não numéricos
     const digits = value.replace(/\D/g, "");
 
-    let formattedValue =
-      digits.length === 10
-        ? digits.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3")
-        : digits.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-    formattedValue =
-      digits.length === 10
-        ? formattedValue.slice(0, 14)
-        : formattedValue.slice(0, 15);
-    return formattedValue;
+    // Formata o número de acordo com a quantidade de dígitos
+    if (digits.length <= 10) {
+      return digits.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+    } else {
+      return digits.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+    }
   }
 
-  const [value, setValue] = useReducer((_: unknown, next: string) => {
-    // Formata o valor enquanto o usuário digita
-    const formattedValue = formatPhoneNumber(next);
-    return formattedValue;
-  }, initialValue);
+  const [formattedValue, setFormattedValue] = useReducer(
+    (_: unknown, next: string) => {
+      if (!next) return initialValue;
+
+      return formatPhoneNumber(next);
+    },
+    initialValue
+  );
 
   React.useEffect(() => {
     if (props.defaultValue) {
-      setValue(props.defaultValue);
+      setFormattedValue(props.defaultValue);
     }
   }, [props.defaultValue]);
 
@@ -38,7 +39,7 @@ export default function PhoneNumberInput(props: InputProps) {
       control={props.form.control}
       name={props.name}
       render={({ field }) => {
-        field.value = value;
+        field.value = formattedValue;
 
         return (
           <FormItem>
@@ -50,10 +51,12 @@ export default function PhoneNumberInput(props: InputProps) {
                 className={props.className}
                 {...field}
                 onChange={(ev) => {
-                  setValue(ev.target.value);
-                  field.onChange(ev.target.value);
+                  if (ev.target.value.length <= 15) {
+                    setFormattedValue(ev.target.value);
+                    field.onChange(ev.target.value.replace(/\D/g, ""));
+                  }
                 }}
-                value={value}
+                value={formattedValue}
               />
             </FormControl>
           </FormItem>

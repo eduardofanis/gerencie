@@ -1,5 +1,6 @@
 import { Button } from "../ui/button";
 import {
+  DialogClose,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -14,7 +15,6 @@ import { CostumerSchema } from "../../schemas/CostumerSchema";
 import SelectInput, { SelectItems } from "./Input/SelectInput";
 import TextInput from "./Input/TextInput";
 import NumberInput from "./Input/NumberInput";
-import FileInput from "./Input/FileInput";
 import { useSearchParams } from "react-router-dom";
 import CepInput from "./Input/CepInput";
 import PhoneNumberInput from "./Input/PhoneNumberInput";
@@ -26,25 +26,18 @@ import { CostumerProps } from "../Customers/CostumersView";
 import Loading from "../ui/Loading";
 import { Timestamp } from "firebase/firestore";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 export default function EditCostumerForm() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [costumer, setCostumer] = React.useState<CostumerProps>();
   const [stepOne, setStepOne] = React.useState(true);
   const [stepTwo, setStepTwo] = React.useState(false);
-  const [stepThree, setStepThree] = React.useState(false);
 
   const form = useForm<z.infer<typeof CostumerSchema>>({
     resolver: zodResolver(CostumerSchema),
     defaultValues: {
       nome: "",
-      cpf: "",
+      cpfRg: "",
       dataDeNascimento: "",
       sexo: "",
       estadoCivil: "",
@@ -67,7 +60,7 @@ export default function EditCostumerForm() {
       form.setValue("cep", costumer.cep);
       form.setValue("cidade", costumer.cidade);
       form.setValue("complemento", costumer.complemento);
-      form.setValue("cpf", costumer.cpf);
+      form.setValue("cpfRg", costumer.cpfRg);
       form.setValue(
         "dataDeNascimento",
         transformTimestampToString(costumer.dataDeNascimento)
@@ -116,20 +109,20 @@ export default function EditCostumerForm() {
 
   const EstadoCivilItems: SelectItems[] = [
     {
-      value: "Casado(a)",
-      label: "Casado(a)",
+      value: "Casado",
+      label: "Casado",
     },
     {
-      value: "Separado(a)",
-      label: "Separado(a)",
+      value: "Separado",
+      label: "Separado",
     },
     {
-      value: "Divorciado(a)",
-      label: "Divorciado(a)",
+      value: "Divorciado",
+      label: "Divorciado",
     },
     {
-      value: "Viúvo(a)",
-      label: "Viúvo(a)",
+      value: "Viúvo",
+      label: "Viúvo",
     },
   ];
 
@@ -172,10 +165,8 @@ export default function EditCostumerForm() {
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const year = date.getFullYear().toString();
 
-    return `${day}${month}${year}`;
+    return `${day}/${month}/${year}`;
   }
-
-  const fileList = form.watch("anexos");
 
   if (!costumer) return <Loading />;
   return (
@@ -203,10 +194,10 @@ export default function EditCostumerForm() {
                 </div>
                 <CPFInput
                   form={form}
-                  name="cpf"
+                  name="cpfRg"
                   label="CPF/RG *"
                   placeholder="000.000.000-00/00.000.000-0"
-                  defaultValue={costumer.cpf}
+                  defaultValue={costumer.cpfRg}
                 />
                 <PhoneNumberInput
                   form={form}
@@ -268,7 +259,6 @@ export default function EditCostumerForm() {
                 onClick={() => {
                   setStepOne(false);
                   setStepTwo(true);
-                  setStepThree(false);
                 }}
               >
                 Próximo
@@ -339,88 +329,6 @@ export default function EditCostumerForm() {
                 onClick={() => {
                   setStepOne(true);
                   setStepTwo(false);
-                  setStepThree(false);
-                }}
-              >
-                <ArrowLeft className="mr-2 size-4" />
-                Voltar
-              </Button>
-
-              <Button
-                type="button"
-                onClick={() => {
-                  setStepOne(false);
-                  setStepTwo(false);
-                  setStepThree(true);
-                }}
-              >
-                Próximo
-                <ArrowRight className="ml-2 size-4" />
-              </Button>
-            </DialogFooter>
-          </div>
-
-          <div className={stepThree ? "" : "hidden"}>
-            <div className="mt-4">
-              <h2 className="mb-2 font-medium">Anexos</h2>
-              <div className="grid gap-4">
-                <div className="flex gap-2 w-full">
-                  <div className="w-full">
-                    <FileInput multiple form={form} name="anexos" />
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    className="border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800 p-3"
-                    type="button"
-                    onClick={() => {
-                      form.setValue("anexos", undefined);
-                    }}
-                  >
-                    <X className="size-4" />
-                  </Button>
-                </div>
-
-                {!fileList || fileList.length <= 0 ? (
-                  <span className="text-sm font-medium">
-                    Nenhum arquivo anexado.
-                  </span>
-                ) : (
-                  <ul className="flex list-decimal list-inside text-sm flex-col gap-2">
-                    {fileList &&
-                      Array.from(fileList).map((file) => (
-                        <TooltipProvider key={file.name}>
-                          <Tooltip>
-                            <TooltipTrigger asChild className="text-left w-fit">
-                              <li>{file.name}</li>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {file.type.includes("image") ? (
-                                <img
-                                  src={URL.createObjectURL(file)}
-                                  alt={file.name}
-                                  className="max-h-[300px] w-auto"
-                                />
-                              ) : (
-                                <p>{file.name}</p>
-                              )}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-
-            <DialogFooter className="mt-8 col-span-2">
-              <Button
-                type="button"
-                variant={"outline"}
-                onClick={() => {
-                  setStepOne(false);
-                  setStepTwo(true);
-                  setStepThree(false);
                 }}
               >
                 <ArrowLeft className="mr-2 size-4" />
@@ -435,6 +343,12 @@ export default function EditCostumerForm() {
           </div>
         </form>
       </Form>
+      <DialogClose
+        className="absolute top-4 right-4"
+        onClick={() => setSearchParams({})}
+      >
+        <X className="h-4 w-4" />
+      </DialogClose>
     </>
   );
 }

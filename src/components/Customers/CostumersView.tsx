@@ -1,11 +1,17 @@
 import { useSearchParams } from "react-router-dom";
 import { Button } from "../ui/button";
-import { Dialog, DialogContent, DialogFooter } from "../ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogFooter } from "../ui/dialog";
 import { Skeleton } from "../ui/skeleton";
-import { GetCostumer } from "@/services/api";
 import React from "react";
-import { Timestamp } from "firebase/firestore";
-import { ClipboardCopy, Edit } from "lucide-react";
+import {
+  Timestamp,
+  arrayRemove,
+  doc,
+  getFirestore,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
+import { ClipboardCopy, Edit, Trash, X } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -13,10 +19,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "../ui/use-toast";
+import { DialogTrigger } from "@radix-ui/react-dialog";
+import NewAnexoForm from "../Forms/NewAnexoForm";
+import { firebaseApp } from "@/main";
+import { SubscriberContext } from "@/contexts/SubscriberContext";
+import { deleteObject, getStorage, ref } from "firebase/storage";
 
 export type CostumerProps = {
   estadoCivil: string;
-  cpf: string;
+  cpfRg: string;
   id: string;
   bairro: string;
   estado: string;
@@ -98,87 +109,83 @@ function ClipboardText({
 export default function CostumersView() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [costumer, setCostumer] = React.useState<CostumerProps>();
+  const { subscriber } = React.useContext(SubscriberContext);
 
   const isOpen = searchParams.get("visualizarCliente") ? true : false;
+  const id: string = searchParams.get("visualizarCliente")!;
 
   React.useEffect(() => {
-    async function getCostumer() {
-      const id: string = searchParams.get("visualizarCliente")!;
-      if (searchParams.get("visualizarCliente")) {
-        const costumerData = await GetCostumer(id);
-        setCostumer(costumerData);
-      }
+    const db = getFirestore(firebaseApp);
+    if (id) {
+      const unsubscribe = onSnapshot(
+        doc(db, subscriber!.id, "data", "clientes", id),
+        (querySnapshot) => {
+          const costumer = querySnapshot.data() as CostumerProps;
+          setCostumer(costumer);
+        }
+      );
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
     }
-    getCostumer();
-  }, [searchParams]);
+  }, [searchParams, subscriber, id]);
+
+  async function handleRemoveAnexo(name: string, url: string) {
+    const db = getFirestore(firebaseApp);
+    const storage = getStorage();
+    try {
+      const fileRef = ref(storage, `documentos/${id}-${name}`);
+      await deleteObject(fileRef);
+
+      await updateDoc(doc(db, subscriber!.id, "data", "clientes", id), {
+        anexos: arrayRemove({
+          name: name,
+          url: url,
+        }),
+      });
+      toast({
+        title: "Anexo removido com sucesso!",
+        variant: "success",
+        duration: 5000,
+      });
+    } catch (error) {
+      toast({
+        title: "Algo deu errado, tente novamente.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    }
+  }
 
   if (!costumer)
     return (
       <Dialog open={isOpen}>
-        <DialogContent className="sm:max-w-[800px]">
-          <div className="grid grid-cols-3">
-            <div className="grid gap-3">
-              <Skeleton className="h-[260px]"></Skeleton>
-              <Skeleton className="h-[260px]"></Skeleton>
-            </div>
-          </div>
+        <DialogContent className="max-w-[600px]">
+          <Skeleton className="w-full h-[400px]" />
         </DialogContent>
       </Dialog>
     );
   return (
     <Dialog open={isOpen}>
-      <DialogContent className="sm:max-w-[800px]">
-        <div className="grid grid-cols-[auto_1fr] gap-8">
-          <div className="flex flex-col w-[200px] truncate text-ellipsis">
-            <h3 className="font-medium text-lg">Anexos</h3>
-            <ul className="flex list-decimal list-inside text-sm flex-col gap-2 mt-1 text-ellipsis truncate">
-              {costumer.anexos &&
-                costumer.anexos.map((anexo) => (
-                  <TooltipProvider key={anexo.name}>
-                    <Tooltip>
-                      <TooltipTrigger asChild className="text-left w-fit">
-                        <li className="whitespace-nowrap truncate text-ellipsis cursor-pointer hover:underline opacity-90">
-                          <a href={anexo.url} target="_blank">
-                            {anexo.name}
-                          </a>
-                        </li>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {anexo.name.endsWith(".pdf") ? (
-                          <iframe
-                            src={anexo.url}
-                            className="h-[300px] w-auto object-fit"
-                          />
-                        ) : (
-                          <img
-                            src={anexo.url}
-                            alt={anexo.name}
-                            className="h-[300px] w-auto"
-                          />
-                        )}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ))}
-            </ul>
-          </div>
+      <DialogContent className="max-w-[600px]">
+        <div className="grid gap-8">
           <div className="">
-            <h1 className="font-bold text-2xl mb-8">{costumer.nome}</h1>
+            <h1 className="font-bold text-2xl mb-4">{costumer.nome}</h1>
             <div>
-              <h2 className="text-lg font-medium mb-4">Dados pessoais</h2>
+              <h2 className="text-lg font-medium mb-2">Dados pessoais</h2>
               <div className="grid grid-cols-3 gap-2">
                 <ClipboardText label="CPF/RG">
-                  {costumer.cpf.length === 11
-                    ? costumer.cpf.replace(
+                  {costumer.cpfRg.length === 11
+                    ? costumer.cpfRg.replace(
                         /(\d{3})(\d{3})(\d{3})(\d{2})/,
                         "$1.$2.$3-$4"
                       )
-                    : costumer.cpf.length === 9
-                    ? costumer.cpf.replace(
+                    : costumer.cpfRg.length === 9
+                    ? costumer.cpfRg.replace(
                         /(\d{2})(\d{3})(\d{3})(\d{1})/,
                         "$1.$2.$3-$4"
                       )
-                    : costumer.cpf}
+                    : costumer.cpfRg}
                 </ClipboardText>
                 <ClipboardText label="Telefone">
                   {costumer.telefone.length === 10
@@ -218,8 +225,8 @@ export default function CostumersView() {
                 </ClipboardText>
               </div>
             </div>
-            <div className="mt-8">
-              <h2 className="text-lg font-medium mb-4">Endereço</h2>
+            <div className="mt-4">
+              <h2 className="text-lg font-medium mb-2">Endereço</h2>
               <div className="grid grid-cols-3 gap-2">
                 <ClipboardText label="CEP">
                   {costumer.cep.replace(/(\d{5})(\d{3})/, "$1-$2")}
@@ -250,6 +257,62 @@ export default function CostumersView() {
                 </ClipboardText>
               </div>
             </div>
+            <div className="flex flex-col truncate text-ellipsis mt-4">
+              <h3 className="font-medium text-lg mb-2">Anexos</h3>
+              <ul className="flex list-decimal list-inside text-sm flex-col gap-1 text-ellipsis truncate">
+                {costumer.anexos &&
+                  costumer.anexos.length > 0 &&
+                  costumer.anexos.map((anexo, index) => (
+                    <li
+                      key={index}
+                      className="flex items-center justify-between"
+                    >
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild className="text-left w-fit">
+                            <a
+                              href={anexo.url}
+                              target="_blank"
+                              className="hover:underline opacity-90"
+                            >
+                              {anexo.name}
+                            </a>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {anexo.name.endsWith(".pdf") ? (
+                              <iframe
+                                src={anexo.url}
+                                className="h-[300px] w-auto object-fit"
+                              />
+                            ) : (
+                              <img
+                                src={anexo.url}
+                                alt={anexo.name}
+                                className="h-[300px] w-auto"
+                              />
+                            )}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <Button
+                        variant="ghost"
+                        className="size-6 p-0"
+                        onClick={() => handleRemoveAnexo(anexo.name, anexo.url)}
+                      >
+                        <Trash className="size-4 text-red-700" />
+                      </Button>
+                    </li>
+                  ))}
+              </ul>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="w-fit p-0 m-0 h-6 mt-1" variant={"link"}>
+                    Clique para anexar um arquivo
+                  </Button>
+                </DialogTrigger>
+                <NewAnexoForm />
+              </Dialog>
+            </div>
           </div>
         </div>
         <DialogFooter>
@@ -266,6 +329,12 @@ export default function CostumersView() {
           </Button>
           <Button onClick={() => setSearchParams({})}>Fechar</Button>
         </DialogFooter>
+        <DialogClose
+          className="absolute top-4 right-4"
+          onClick={() => setSearchParams({})}
+        >
+          <X className="h-4 w-4" />
+        </DialogClose>
       </DialogContent>
     </Dialog>
   );

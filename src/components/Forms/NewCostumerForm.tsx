@@ -1,5 +1,6 @@
 import { Button } from "../ui/button";
 import {
+  DialogClose,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -14,7 +15,6 @@ import { CostumerSchema } from "../../schemas/CostumerSchema";
 import SelectInput, { SelectItems } from "./Input/SelectInput";
 import TextInput from "./Input/TextInput";
 import NumberInput from "./Input/NumberInput";
-import FileInput from "./Input/FileInput";
 import { useSearchParams } from "react-router-dom";
 import CepInput from "./Input/CepInput";
 import PhoneNumberInput from "./Input/PhoneNumberInput";
@@ -23,24 +23,17 @@ import BirthDateInput from "./Input/BirthDateInput";
 import ComboInput from "./Input/ComboInput";
 import React from "react";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 export default function NewCostumerForm() {
   const [, setSearchParams] = useSearchParams();
   const [stepOne, setStepOne] = React.useState(true);
   const [stepTwo, setStepTwo] = React.useState(false);
-  const [stepThree, setStepThree] = React.useState(false);
 
   const form = useForm<z.infer<typeof CostumerSchema>>({
     resolver: zodResolver(CostumerSchema),
     defaultValues: {
       nome: "",
-      cpf: "",
+      cpfRg: "",
       dataDeNascimento: "",
       sexo: "",
       estadoCivil: "",
@@ -78,20 +71,20 @@ export default function NewCostumerForm() {
 
   const EstadoCivilItems: SelectItems[] = [
     {
-      value: "Casado(a)",
-      label: "Casado(a)",
+      value: "Casado",
+      label: "Casado",
     },
     {
-      value: "Separado(a)",
-      label: "Separado(a)",
+      value: "Separado",
+      label: "Separado",
     },
     {
-      value: "Divorciado(a)",
-      label: "Divorciado(a)",
+      value: "Divorciado",
+      label: "Divorciado",
     },
     {
-      value: "Viúvo(a)",
-      label: "Viúvo(a)",
+      value: "Viúvo",
+      label: "Viúvo",
     },
   ];
 
@@ -125,8 +118,6 @@ export default function NewCostumerForm() {
     { value: "TO", label: "TO" },
   ];
 
-  const fileList = form.watch("anexos");
-
   return (
     <>
       <DialogHeader>
@@ -147,7 +138,7 @@ export default function NewCostumerForm() {
                 </div>
                 <CPFInput
                   form={form}
-                  name="cpf"
+                  name="cpfRg"
                   label="CPF/RG *"
                   placeholder="000.000.000-00/00.000.000-0"
                 />
@@ -204,7 +195,6 @@ export default function NewCostumerForm() {
                 onClick={() => {
                   setStepOne(false);
                   setStepTwo(true);
-                  setStepThree(false);
                 }}
               >
                 Próximo
@@ -251,88 +241,6 @@ export default function NewCostumerForm() {
                 onClick={() => {
                   setStepOne(true);
                   setStepTwo(false);
-                  setStepThree(false);
-                }}
-              >
-                <ArrowLeft className="mr-2 size-4" />
-                Voltar
-              </Button>
-
-              <Button
-                type="button"
-                onClick={() => {
-                  setStepOne(false);
-                  setStepTwo(false);
-                  setStepThree(true);
-                }}
-              >
-                Próximo
-                <ArrowRight className="ml-2 size-4" />
-              </Button>
-            </DialogFooter>
-          </div>
-
-          <div className={stepThree ? "" : "hidden"}>
-            <div className="mt-4">
-              <h2 className="mb-2 font-medium">Anexos</h2>
-              <div className="grid gap-4">
-                <div className="flex gap-2 w-full">
-                  <div className="w-full">
-                    <FileInput multiple form={form} name="anexos" />
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    className="border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800 p-3"
-                    type="button"
-                    onClick={() => {
-                      form.setValue("anexos", undefined);
-                    }}
-                  >
-                    <X className="size-4" />
-                  </Button>
-                </div>
-
-                {!fileList || fileList.length <= 0 ? (
-                  <span className="text-sm font-medium">
-                    Nenhum arquivo anexado.
-                  </span>
-                ) : (
-                  <ul className="flex list-decimal list-inside text-sm flex-col gap-2">
-                    {fileList &&
-                      Array.from(fileList).map((file) => (
-                        <TooltipProvider key={file.name}>
-                          <Tooltip>
-                            <TooltipTrigger asChild className="text-left w-fit">
-                              <li>{file.name}</li>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {file.type.includes("image") ? (
-                                <img
-                                  src={URL.createObjectURL(file)}
-                                  alt={file.name}
-                                  className="max-h-[300px] w-auto"
-                                />
-                              ) : (
-                                <p>{file.name}</p>
-                              )}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-
-            <DialogFooter className="mt-8 col-span-2">
-              <Button
-                type="button"
-                variant={"outline"}
-                onClick={() => {
-                  setStepOne(false);
-                  setStepTwo(true);
-                  setStepThree(false);
                 }}
               >
                 <ArrowLeft className="mr-2 size-4" />
@@ -347,6 +255,12 @@ export default function NewCostumerForm() {
           </div>
         </form>
       </Form>
+      <DialogClose
+        className="absolute top-4 right-4"
+        onClick={() => setSearchParams({})}
+      >
+        <X className="h-4 w-4" />
+      </DialogClose>
     </>
   );
 }

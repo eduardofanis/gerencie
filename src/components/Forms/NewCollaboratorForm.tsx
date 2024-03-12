@@ -1,5 +1,10 @@
 import { Button } from "../ui/button";
-import { DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
+import {
+  DialogClose,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 import { Form } from "../ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -9,6 +14,7 @@ import { useSearchParams } from "react-router-dom";
 import PhoneNumberInput from "./Input/PhoneNumberInput";
 import { CollaboratorSchema } from "@/schemas/CollaboratorSchema";
 import { NewCollaborator } from "@/services/api";
+import { X } from "lucide-react";
 
 export default function NewCollaboratorForm() {
   const [, setSearchParams] = useSearchParams();
@@ -82,6 +88,12 @@ export default function NewCollaboratorForm() {
           </div>
         </form>
       </Form>
+      <DialogClose
+        className="absolute top-4 right-4"
+        onClick={() => setSearchParams({})}
+      >
+        <X className="h-4 w-4" />
+      </DialogClose>
     </>
   );
 }

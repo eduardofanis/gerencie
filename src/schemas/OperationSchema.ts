@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const OperationSchema = z.object({
+export const OperationSchema = z.object({
   clienteId: z.string().min(1),
   tipoDaOperacao: z.string().min(1),
   statusDaOperacao: z.string().min(1),
@@ -8,5 +8,3 @@ const OperationSchema = z.object({
   valorLiberado: z.number().min(1),
   comissao: z.number().min(1),
 });
-
-export { OperationSchema };

@@ -29,14 +29,7 @@ import { CostumerSchema } from "../schemas/CostumerSchema";
 import { z } from "zod";
 import { OperationSchema } from "../schemas/OperationSchema";
 import { UseFormReturn } from "react-hook-form";
-import {
-  deleteObject,
-  getDownloadURL,
-  getStorage,
-  listAll,
-  ref,
-  uploadBytes,
-} from "firebase/storage";
+import { deleteObject, getStorage, ref } from "firebase/storage";
 import {
   CostumerProps,
   OperationProps,
@@ -51,7 +44,6 @@ import { Collaborator } from "@/contexts/CollaboratorContext";
 export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
   const db = getFirestore(firebaseApp);
   const { currentUser } = getAuth(firebaseApp);
-  const storage = getStorage();
 
   try {
     if (currentUser && currentUser.uid) {
@@ -75,6 +67,7 @@ export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
           createdAt: Timestamp.now(),
           dataDeNascimento: dateObject,
           criadoPor: currentUser.uid,
+          telefone: values.telefone.replace(/\D/g, ""),
           anexos: [],
         }
       );
@@ -91,36 +84,6 @@ export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
         variant: "success",
         duration: 5000,
       });
-      if (values.anexos) {
-        const fileList = Array.from(values.anexos);
-        console.log(fileList);
-
-        fileList.forEach(async (file) => {
-          if (
-            file.type.startsWith("image/") ||
-            file.type.startsWith("application/")
-          ) {
-            const fileRef = ref(
-              storage,
-              `documentos/${docRef.id}-${file.name}`
-            );
-            await uploadBytes(fileRef, file);
-            const fileURL = await getDownloadURL(fileRef);
-            updateDoc(clienteRef, {
-              anexos: arrayUnion({
-                name: file.name,
-                url: fileURL,
-              }),
-            });
-          } else {
-            toast({
-              title: "Somente imagens e documentos são permitidos!",
-              variant: "destructive",
-              duration: 5000,
-            });
-          }
-        });
-      }
     }
   } catch (error) {
     console.log(error);
@@ -133,7 +96,7 @@ export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
 }
 
 export async function EditCostumer(
-  { anexos, ...values }: z.infer<typeof CostumerSchema>,
+  values: z.infer<typeof CostumerSchema>,
 
   id: string
 ) {
@@ -180,24 +143,19 @@ export async function EditCostumer(
         });
       });
 
-      await updateDoc(
-        doc(
-          db,
-          gerenteUid ? gerenteUid : currentUser.uid,
-          "data",
-          "clientes",
-          id
-        ),
-        {
-          ...values,
-          id: `${values.nome}-${id}`,
-          dataDeNascimento: dateObject,
-        }
+      const clienteRef = doc(
+        db,
+        gerenteUid ? gerenteUid : currentUser.uid,
+        "data",
+        "clientes",
+        id
       );
 
-      if (anexos) {
-        console.log(anexos);
-      }
+      await updateDoc(clienteRef, {
+        ...values,
+        id: `${values.nome}-${id}`,
+        dataDeNascimento: dateObject,
+      });
       toast({
         title: "Cliente editado com sucesso!",
         variant: "success",
@@ -205,7 +163,7 @@ export async function EditCostumer(
       });
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     toast({
       title: "Algo deu errado, tente novamente!",
       variant: "destructive",
@@ -604,6 +562,36 @@ export async function DeleteOperation(operationId: string) {
   }
 }
 
+export async function getOperationTypes() {
+  const db = getFirestore(firebaseApp);
+  const { currentUser } = getAuth(firebaseApp);
+
+  const data = await getUserData();
+  const gerenteUid = data?.gerenteUid;
+
+  try {
+    if (currentUser && currentUser.uid) {
+      const docRef = await getDoc(
+        doc(db, gerenteUid ? gerenteUid : currentUser.uid, "data")
+      );
+      const docData = docRef.data() as UserDataProps;
+
+      const operations: string[] = [];
+
+      if (docData && docData.tiposDeOperacoes) {
+        if (docData.tiposDeOperacoes.length > 0) {
+          return docData.tiposDeOperacoes.forEach((operationType) =>
+            operations.push(operationType.name)
+          );
+        }
+      }
+      return operations;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 export async function DeleteCostumer(
   clienteId: string,
   removerOperacoes: boolean
@@ -612,12 +600,8 @@ export async function DeleteCostumer(
   const { currentUser } = getAuth(firebaseApp);
   const storage = getStorage();
 
-  const partes = clienteId.split("-");
-  const id = partes.slice(1).join("-");
-
-  const storageRef = ref(storage, `documentos`);
-  const frenteName = `${id}-frente-documento`;
-  const versoName = `${id}-verso-documento`;
+  const fullId = clienteId.split("-");
+  const id = fullId.slice(1).join("-");
 
   try {
     if (currentUser && currentUser.uid) {
@@ -631,32 +615,14 @@ export async function DeleteCostumer(
         id
       );
 
-      await deleteDoc(clienteRef);
-
-      try {
-        const fileList = await listAll(storageRef);
-        const frenteExists = fileList.items.some(
-          (item) => item.name === frenteName
-        );
-        const versoExists = fileList.items.some(
-          (item) => item.name === versoName
-        );
-
-        if (frenteExists) {
-          const fileRef = ref(storage, `documentos/${frenteName}`);
-          await deleteObject(fileRef);
-        }
-        if (versoExists) {
-          const fileRef = ref(storage, `documentos/${versoName}`);
-          await deleteObject(fileRef);
-        }
-      } catch (error) {
-        toast({
-          title: "Erro ao remover documentos!",
-          variant: "destructive",
-          duration: 5000,
+      const docData = (await getDoc(clienteRef)).data() as CostumerProps;
+      if (docData.anexos && docData.anexos.length > 0) {
+        docData.anexos.forEach(async (anexo) => {
+          await deleteObject(ref(storage, `documentos/${id}-${anexo.name}`));
         });
       }
+
+      await deleteDoc(clienteRef);
 
       if (removerOperacoes) {
         try {
@@ -702,52 +668,6 @@ export async function DeleteCostumer(
       duration: 5000,
     });
     throw error;
-  }
-}
-
-export async function updateCostumerDocuments(
-  file: File,
-  fileName: string,
-  id: string
-) {
-  const db = getFirestore(firebaseApp);
-  const { currentUser } = getAuth(firebaseApp);
-  const storage = getStorage();
-
-  const data = await getUserData();
-  const gerenteUid = data?.gerenteUid;
-
-  try {
-    const clienteRef = doc(
-      db,
-      gerenteUid ? gerenteUid : currentUser!.uid,
-      "data",
-      "clientes",
-      id
-    );
-    if (file instanceof File) {
-      if (file.type.startsWith("image/")) {
-        const frenteRef = ref(storage, `documentos/${id}-${fileName}`);
-        await uploadBytes(frenteRef, file);
-        const frenteURL = await getDownloadURL(frenteRef);
-        updateDoc(clienteRef, {
-          frenteDoDocumento: frenteURL,
-        });
-      } else {
-        toast({
-          title: "Somente imagens são permitidas!",
-          variant: "destructive",
-          duration: 5000,
-        });
-      }
-    }
-  } catch (error) {
-    console.log(error);
-    toast({
-      title: "Algo deu errado, tente novamente!",
-      variant: "destructive",
-      duration: 5000,
-    });
   }
 }
 

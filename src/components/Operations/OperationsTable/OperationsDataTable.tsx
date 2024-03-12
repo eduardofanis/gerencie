@@ -46,7 +46,6 @@ import {
   Download,
   Plus,
   PlusCircle,
-  Upload,
   X,
 } from "lucide-react";
 
@@ -125,15 +124,15 @@ export function OperationsDataTable<TData, TValue>({
     const data2 = data as OperationProps[];
     const operationData = data2.map((item) => {
       return {
-        Cliente: item.cliente,
-        "Tipo da operação": item.tipoDaOperacao,
-        "Data da operação": item.dataDaOperacao
+        cliente: item.cliente,
+        tipoDeOperacao: item.tipoDaOperacao,
+        dataDaOperacao: item.dataDaOperacao
           .toDate()
           .toLocaleDateString("pt-BR"),
-        "Status da operação": item.statusDaOperacao,
-        "Valor liberado": item.valorLiberado,
-        Comissão: item.comissao,
-        "Valor recebido": item.valorRecebido,
+        statusDaOperacao: item.statusDaOperacao,
+        valorLiberado: item.valorLiberado,
+        comissao: item.comissao,
+        valorRecebido: item.valorRecebido,
       };
     });
 
@@ -559,10 +558,6 @@ export function OperationsDataTable<TData, TValue>({
             <Button variant="secondary" onClick={() => handleExport()}>
               <Download className="size-4 mr-2" />
               Exportar dados
-            </Button>
-            <Button variant="secondary" onClick={() => handleExport()}>
-              <Upload className="size-4 mr-2" />
-              Importar dados
             </Button>
           </div>
           <div className="flex items-center space-x-2">

@@ -75,6 +75,10 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserDataProps } from "@/types/UserDataProps";
+import { toast } from "@/components/ui/use-toast";
+import { NewCostumer } from "@/services/api";
+import { z } from "zod";
+import { CostumerSchema } from "@/schemas/CostumerSchema";
 
 const estados: SelectItems[] = [
   { value: "AC", label: "AC" },
@@ -140,6 +144,8 @@ export function CostumersDataTable<TData, TValue>({
   const [searchParams, setSearchParams] = useSearchParams();
   const [openEstados, setOpenEstados] = React.useState(false);
 
+  const importInputRef = React.useRef<HTMLInputElement>(null);
+
   const table = useReactTable({
     data,
     columns,
@@ -162,21 +168,22 @@ export function CostumersDataTable<TData, TValue>({
     const data2 = data as CostumerProps[];
     const costumerData = data2.map((item) => {
       return {
-        Nome: item.nome,
-        Cpf: item.cpf,
-        "Data de nascimento": item.dataDeNascimento
+        nome: item.nome,
+        cpfRg: item.cpfRg,
+        dataDeNascimento: item.dataDeNascimento
           .toDate()
           .toLocaleDateString("pt-BR"),
-        Sexo: item.sexo,
-        Naturalidade: item.naturalidade,
-        Telefone: item.telefone,
-        Cep: item.cep,
-        Rua: item.rua,
-        "Número da rua": item.numeroDaRua,
-        Complemento: item.complemento,
-        Cidade: item.cidade,
-        Bairro: item.bairro,
-        Estado: item.estado,
+        sexo: item.sexo,
+        estadoCivil: item.estadoCivil,
+        naturalidade: item.naturalidade,
+        telefone: item.telefone,
+        cep: item.cep,
+        rua: item.rua,
+        numeroDaRua: item.numeroDaRua,
+        complemento: item.complemento,
+        cidade: item.cidade,
+        bairro: item.bairro,
+        estado: item.estado,
       };
     });
 
@@ -186,6 +193,65 @@ export function CostumersDataTable<TData, TValue>({
     XLSX.utils.book_append_sheet(wb, ws, "Tabela de Clientes");
 
     XLSX.writeFile(wb, "Tabela de Clientes.xlsx");
+  }
+
+  function handleImportClick() {
+    importInputRef.current?.click();
+  }
+
+  function handleImport(event: React.ChangeEvent<HTMLInputElement>) {
+    if (event.target.files && event.target.files[0]) {
+      const reader = new FileReader();
+      reader.readAsBinaryString(event.target.files[0]);
+
+      reader.onload = function (e) {
+        const data = e.target?.result;
+
+        const wb = XLSX.read(data, { type: "binary" });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const json = XLSX.utils.sheet_to_json(ws) as z.infer<
+          typeof CostumerSchema
+        >[];
+        console.log(json);
+        console.log(verifyProperties(json));
+        if (verifyProperties(json)) {
+          try {
+            json.forEach((item) => {
+              NewCostumer(item);
+            });
+            toast({
+              title: "Clientes importados com sucesso!",
+              variant: "success",
+              duration: 5000,
+            });
+          } catch (error) {
+            toast({
+              title: "Algo deu errado, tente novamente!",
+              variant: "destructive",
+              duration: 5000,
+            });
+          }
+        } else {
+          toast({
+            title: "Formato inválido, verifique e tente novamente!",
+            variant: "destructive",
+            duration: 5000,
+          });
+        }
+      };
+    }
+  }
+
+  function verifyProperties(costumersArray: z.infer<typeof CostumerSchema>[]) {
+    try {
+      costumersArray.forEach((costumer) => {
+        CostumerSchema.parse(costumer);
+      });
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   return (
@@ -534,10 +600,17 @@ export function CostumersDataTable<TData, TValue>({
               <Download className="size-4 mr-2" />
               Exportar dados
             </Button>
-            <Button variant="secondary" onClick={() => handleExport()}>
+            <Button variant="secondary" onClick={() => handleImportClick()}>
               <Upload className="size-4 mr-2" />
               Importar dados
             </Button>
+            <Input
+              type="file"
+              className="hidden"
+              accept=".csv, .xlsx, .xls"
+              onChange={handleImport}
+              ref={importInputRef}
+            />
           </div>
 
           <div className="flex items-center space-x-2">

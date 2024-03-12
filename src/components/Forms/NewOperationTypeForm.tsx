@@ -1,4 +1,4 @@
-import { PlusCircle, Trash } from "lucide-react";
+import { PlusCircle, Trash, X } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   DialogClose,
@@ -189,6 +189,9 @@ export default function NewOperationTypeForm() {
           </Button>
         </DialogClose>
       </DialogFooter>
+      <DialogClose className="absolute top-4 right-4">
+        <X className="h-4 w-4" />
+      </DialogClose>
     </DialogContent>
   );
 }

@@ -29,6 +29,7 @@ import {
   Check,
   ChevronDown,
   Plus,
+  X,
 } from "lucide-react";
 import { GetCostumers, NewOperation } from "@/services/api";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
@@ -352,6 +353,12 @@ export default function NewOperationForm() {
           </DialogFooter>
         </form>
       </Form>
+      <DialogClose
+        className="absolute top-4 right-4"
+        onClick={() => setSearchParams({})}
+      >
+        <X className="h-4 w-4" />
+      </DialogClose>
     </>
   );
 }

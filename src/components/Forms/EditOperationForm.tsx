@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "../ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -28,6 +29,7 @@ import {
   Check,
   ChevronDown,
   Plus,
+  X,
 } from "lucide-react";
 import { EditOperation, GetCostumers, GetOperation } from "@/services/api";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
@@ -381,6 +383,12 @@ export default function EditOperationForm() {
           </DialogFooter>
         </form>
       </Form>
+      <DialogClose
+        className="absolute top-4 right-4"
+        onClick={() => setSearchParams({})}
+      >
+        <X className="h-4 w-4" />
+      </DialogClose>
     </>
   );
 }
