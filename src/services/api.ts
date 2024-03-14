@@ -49,12 +49,24 @@ export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
     if (currentUser && currentUser.uid) {
       const data = await getUserData();
       const gerenteUid = data?.gerenteUid;
-      const date = values.dataDeNascimento.replace(
+      const dataDeNascimento = values.dataDeNascimento.replace(
         /(\d{2})(\d{2})(\d{4})/,
         "$1/$2/$3"
       );
-      const [day, month, year] = date.split("/");
-      const dateObject = new Date(`${month}/${day}/${year}`);
+      const dataDeEmissao = values.dataDeEmissao.replace(
+        /(\d{2})(\d{2})(\d{4})/,
+        "$1/$2/$3"
+      );
+      const [dataDeNascimentoDay, dataDeNascimentoMonth, dataDeNascimentoYear] =
+        dataDeNascimento.split("/");
+      const [dataDeEmissaoDay, dataDeEmissaoMonth, dataDeEmissaoYear] =
+        dataDeEmissao.split("/");
+      const dataDeNascimentoObject = new Date(
+        `${dataDeNascimentoMonth}/${dataDeNascimentoDay}/${dataDeNascimentoYear}`
+      );
+      const dataDeEmissaoObject = new Date(
+        `${dataDeEmissaoMonth}/${dataDeEmissaoDay}/${dataDeEmissaoYear}`
+      );
       const docRef = await addDoc(
         collection(
           db,
@@ -65,7 +77,8 @@ export async function NewCostumer(values: z.infer<typeof CostumerSchema>) {
         {
           ...values,
           createdAt: Timestamp.now(),
-          dataDeNascimento: dateObject,
+          dataDeNascimento: dataDeNascimentoObject,
+          dataDeEmissao: dataDeEmissaoObject,
           criadoPor: currentUser.uid,
           telefone: values.telefone.replace(/\D/g, ""),
           anexos: [],
@@ -107,12 +120,24 @@ export async function EditCostumer(
     if (currentUser && currentUser.uid) {
       const data = await getUserData();
       const gerenteUid = data?.gerenteUid;
-      const date = values.dataDeNascimento.replace(
+      const dataDeNascimento = values.dataDeNascimento.replace(
         /(\d{2})(\d{2})(\d{4})/,
         "$1/$2/$3"
       );
-      const [day, month, year] = date.split("/");
-      const dateObject = new Date(`${month}/${day}/${year}`);
+      const dataDeEmissao = values.dataDeEmissao.replace(
+        /(\d{2})(\d{2})(\d{4})/,
+        "$1/$2/$3"
+      );
+      const [dataDeNascimentoDay, dataDeNascimentoMonth, dataDeNascimentoYear] =
+        dataDeNascimento.split("/");
+      const [dataDeEmissaoDay, dataDeEmissaoMonth, dataDeEmissaoYear] =
+        dataDeEmissao.split("/");
+      const dataDeNascimentoObject = new Date(
+        `${dataDeNascimentoMonth}/${dataDeNascimentoDay}/${dataDeNascimentoYear}`
+      );
+      const dataDeEmissaoObject = new Date(
+        `${dataDeEmissaoMonth}/${dataDeEmissaoDay}/${dataDeEmissaoYear}`
+      );
       const docRef = getDoc(
         doc(
           db,
@@ -154,7 +179,8 @@ export async function EditCostumer(
       await updateDoc(clienteRef, {
         ...values,
         id: `${values.nome}-${id}`,
-        dataDeNascimento: dateObject,
+        dataDeNascimento: dataDeNascimentoObject,
+        dataDeEmissao: dataDeEmissaoObject,
       });
       toast({
         title: "Cliente editado com sucesso!",

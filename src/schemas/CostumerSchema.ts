@@ -44,9 +44,7 @@ const CostumerSchema = z.object({
         })
         .join(" ");
     }),
-  cpfRg: z
-    .string()
-    .refine((value) => value.length === 11 || value.length === 9),
+  email: z.string().email(),
   dataDeNascimento: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/),
   sexo: z
     .string()
@@ -71,6 +69,33 @@ const CostumerSchema = z.object({
   telefone: z
     .string()
     .refine((value) => value.length === 10 || value.length === 11),
+  nomeDaMae: z
+    .string()
+    .min(1)
+    .transform((nome) => {
+      return nome
+        .trim()
+        .split(" ")
+        .map((word) => {
+          return word[0].toLocaleUpperCase().concat(word.substring(1));
+        })
+        .join(" ");
+    }),
+  cpf: z.string().min(11).max(11),
+  rg: z.string().min(9).max(9),
+  dataDeEmissao: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/),
+  localDeEmissao: z.string().min(1),
+  banco: z.string().min(1),
+  agencia: z.number().min(1),
+  numeroDaConta: z.number().min(1),
+  digitoDaConta: z.number().min(1),
+  chavePix: z
+    .string()
+    .refine((value) =>
+      value?.length > 0
+        ? value === "Telefone" || value === "E-mail" || value === "Banco"
+        : true
+    ),
   cep: z.string().min(8).max(8),
   rua: z.string().min(1),
   numeroDaRua: z.number().min(1),

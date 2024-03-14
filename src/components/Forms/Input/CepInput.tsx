@@ -10,14 +10,12 @@ export default function CepInput(props: InputProps) {
 
   function formatCEP(value: string) {
     const digits = value.replace(/\D/g, "");
-    let formattedValue = digits.replace(/(\d{5})(\d{3})/, "$1-$2");
-    formattedValue = formattedValue.slice(0, 9);
-    return formattedValue;
+    return digits.replace(/(\d{5})(\d{3})/, "$1-$2");
   }
 
   const [value, setValue] = useReducer((_: unknown, next: string) => {
-    const formattedValue = formatCEP(next);
-    return formattedValue;
+    if (!next) return initialValue;
+    return formatCEP(next);
   }, initialValue);
 
   React.useEffect(() => {
@@ -43,10 +41,12 @@ export default function CepInput(props: InputProps) {
                 className=""
                 {...field}
                 onChange={(ev) => {
-                  setValue(ev.target.value);
-                  field.onChange(ev.target.value);
-                  if (ev.target.value.length == 8) {
-                    fetchCep(ev.target.value.replace("-", ""), props.form);
+                  if (ev.target.value.length <= 9) {
+                    setValue(ev.target.value);
+                    field.onChange(ev.target.value);
+                    if (ev.target.value.length == 8) {
+                      fetchCep(ev.target.value.replace("-", ""), props.form);
+                    }
                   }
                 }}
                 value={value}

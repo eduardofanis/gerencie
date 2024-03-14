@@ -4,12 +4,12 @@ import { Input } from "../../ui/input"; // Shandcn UI Input
 import { InputProps } from "@/types/InputProps";
 import React from "react";
 
-export default function CPFInput(props: InputProps) {
+export default function RGInput(props: InputProps) {
   const initialValue = "";
 
   function formatCPF(value: string) {
     const digits = value.replace(/\D/g, "");
-    return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, "$1.$2.$3-$4");
   }
 
   const [value, setValue] = useReducer((_: unknown, next: string) => {
@@ -40,7 +40,7 @@ export default function CPFInput(props: InputProps) {
                 className={props.className}
                 {...field}
                 onChange={(ev) => {
-                  if (ev.target.value.length <= 14) {
+                  if (ev.target.value.length <= 12) {
                     setValue(ev.target.value);
                     field.onChange(ev.target.value);
                   }

@@ -4,7 +4,7 @@ import {
   HandCoins,
   Phone,
   HeartHandshake,
-  Bot,
+  // Bot,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
@@ -45,12 +45,12 @@ export default function Sidebar() {
       ? false
       : true;
 
-  const checkGerenciarAutomacoesPermission =
-    subscriber?.plano !== "Empresarial"
-      ? false
-      : collaborator?.permissions.gerenciarAutomacoes === false
-      ? false
-      : true;
+  // const checkGerenciarAutomacoesPermission =
+  //   subscriber?.plano !== "Empresarial"
+  //     ? false
+  //     : collaborator?.permissions.gerenciarAutomacoes === false
+  //     ? false
+  //     : true;
 
   if (!user) return null;
   if (!showSidebar) return null;
@@ -130,7 +130,7 @@ export default function Sidebar() {
             <HeartHandshake className="h-5 w-5" />
             {isHovered && <span>Colaboradores</span>}
           </Button>
-          <Button
+          {/* <Button
             className={`space-x-4 justify-start ${
               pathname == "/automacoes" && "bg-slate-50"
             }`}
@@ -140,7 +140,7 @@ export default function Sidebar() {
           >
             <Bot className="h-5 w-5" />
             {isHovered && <span>Automações</span>}
-          </Button>
+          </Button> */}
           <Button asChild className="space-x-4 justify-start" variant={"ghost"}>
             <a href="https://wa.me/5541997590249" target="_blank">
               <Phone className="h-5 w-5" />

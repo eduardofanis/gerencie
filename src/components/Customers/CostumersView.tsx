@@ -24,10 +24,21 @@ import NewAnexoForm from "../Forms/NewAnexoForm";
 import { firebaseApp } from "@/main";
 import { SubscriberContext } from "@/contexts/SubscriberContext";
 import { deleteObject, getStorage, ref } from "firebase/storage";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export type CostumerProps = {
+  email: string;
   estadoCivil: string;
-  cpfRg: string;
+  cpf: string;
+  rg: string;
+  dataDeEmissao: Timestamp;
+  localDeEmissao: string;
+  nomeDaMae: string;
+  banco: string;
+  agencia: string;
+  numeroDaConta: string;
+  digitoDaConta: string;
+  chavePix: string;
   id: string;
   bairro: string;
   estado: string;
@@ -63,19 +74,14 @@ export type OperationProps = {
 };
 
 type ClipboardTextProps = {
-  children: string;
-  label: string;
-  clipboard?: boolean;
+  children?: string;
+  label?: string;
   className?: string;
 };
 
-function ClipboardText({
-  children,
-  label,
-  clipboard = true,
-  className,
-}: ClipboardTextProps) {
+function ClipboardText({ children, label, className }: ClipboardTextProps) {
   function copyToClipboard() {
+    if (!children) return;
     navigator.clipboard.writeText(children);
     toast({
       title: `${label} copiado com sucesso!`,
@@ -86,20 +92,24 @@ function ClipboardText({
 
   return (
     <div className={className}>
-      <h3 className="font-medium">{label}</h3>
+      {label && <h3 className="font-medium">{label}</h3>}
       <div className="flex items-center gap-1">
-        <p>{children}</p>
-        {clipboard && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger onClick={copyToClipboard}>
-                <ClipboardCopy className="h-4 w-4 " />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Clique para copiar</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+        {children ? (
+          <>
+            <p>{children}</p>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger onClick={copyToClipboard}>
+                  <ClipboardCopy className="h-4 w-4 " />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Clique para copiar</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </>
+        ) : (
+          <p>Não definido</p>
         )}
       </div>
     </div>
@@ -157,6 +167,22 @@ export default function CostumersView() {
     }
   }
 
+  function getChavePix() {
+    if (!costumer) return;
+    const { chavePix } = costumer;
+    switch (chavePix) {
+      case "Telefone":
+        return costumer.telefone.length === 10
+          ? costumer.telefone.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3")
+          : costumer.telefone.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+      case "E-mail":
+        return costumer.email;
+
+      case "Banco":
+        return "Dados bancários";
+    }
+  }
+
   if (!costumer)
     return (
       <Dialog open={isOpen}>
@@ -170,92 +196,131 @@ export default function CostumersView() {
       <DialogContent className="max-w-[600px]">
         <div className="grid gap-8">
           <div className="">
-            <h1 className="font-bold text-2xl mb-4">{costumer.nome}</h1>
-            <div>
-              <h2 className="text-lg font-medium mb-2">Dados pessoais</h2>
-              <div className="grid grid-cols-3 gap-2">
-                <ClipboardText label="CPF/RG">
-                  {costumer.cpfRg.length === 11
-                    ? costumer.cpfRg.replace(
-                        /(\d{3})(\d{3})(\d{3})(\d{2})/,
-                        "$1.$2.$3-$4"
-                      )
-                    : costumer.cpfRg.length === 9
-                    ? costumer.cpfRg.replace(
-                        /(\d{2})(\d{3})(\d{3})(\d{1})/,
-                        "$1.$2.$3-$4"
-                      )
-                    : costumer.cpfRg}
-                </ClipboardText>
-                <ClipboardText label="Telefone">
-                  {costumer.telefone.length === 10
-                    ? costumer.telefone.replace(
-                        /(\d{2})(\d{4})(\d{4})/,
-                        "($1) $2-$3"
-                      )
-                    : costumer.telefone.replace(
-                        /(\d{2})(\d{5})(\d{4})/,
-                        "($1) $2-$3"
-                      )}
-                </ClipboardText>
-                <ClipboardText label="Data de nascimento">
-                  {new Date(
-                    costumer.dataDeNascimento.seconds * 1000
-                  ).toLocaleDateString("pt-BR")}
-                </ClipboardText>
-                <ClipboardText
-                  clipboard={costumer.sexo ? true : false}
-                  label="Sexo"
-                >
-                  {costumer.sexo ? costumer.sexo : "Não definido"}
-                </ClipboardText>
-                <ClipboardText
-                  clipboard={!!costumer.estadoCivil}
-                  label="Estado civil"
-                >
-                  {costumer.estadoCivil ? costumer.estadoCivil : "Não definido"}
-                </ClipboardText>
-                <ClipboardText
-                  clipboard={!!costumer.naturalidade}
-                  label="Naturalidade"
-                >
-                  {costumer.naturalidade
-                    ? costumer.naturalidade
-                    : "Não definido"}
-                </ClipboardText>
-              </div>
-            </div>
-            <div className="mt-4">
-              <h2 className="text-lg font-medium mb-2">Endereço</h2>
-              <div className="grid grid-cols-3 gap-2">
-                <ClipboardText label="CEP">
-                  {costumer.cep.replace(/(\d{5})(\d{3})/, "$1-$2")}
-                </ClipboardText>
-                <ClipboardText className="col-span-2" label="Rua">
-                  {costumer.rua}
-                </ClipboardText>
-                <ClipboardText
-                  clipboard={!!costumer.numeroDaRua}
-                  label="Número"
-                >
-                  {costumer.numeroDaRua ? costumer.numeroDaRua : "Não definido"}
-                </ClipboardText>
-                <ClipboardText
-                  clipboard={!!costumer.complemento}
-                  label="Complemento"
-                >
-                  {costumer.complemento ? costumer.complemento : "Não definido"}
-                </ClipboardText>
-                <ClipboardText clipboard={!!costumer.estado} label="Estado">
-                  {costumer.estado ? costumer.estado : "Não definido"}
-                </ClipboardText>
-                <ClipboardText clipboard={!!costumer.cidade} label="Cidade">
-                  {costumer.cidade ? costumer.cidade : "Não definido"}
-                </ClipboardText>
-                <ClipboardText clipboard={!!costumer.bairro} label="Bairro">
-                  {costumer.bairro ? costumer.bairro : "Não definido"}
-                </ClipboardText>
-              </div>
+            <h1 className="font-bold text-2xl">{costumer.nome}</h1>
+            <ClipboardText>{costumer.email}</ClipboardText>
+            <div className="mt-4 grid">
+              <Tabs defaultValue="dadosPessoais" className="w-full">
+                <TabsList className="w-full bg-slate-50">
+                  <TabsTrigger value="dadosPessoais" className="w-full">
+                    Dados pessoais
+                  </TabsTrigger>
+                  <TabsTrigger value="documentacao" className="w-full">
+                    Documentação
+                  </TabsTrigger>
+                  <TabsTrigger value="dadosBancarios" className="w-full">
+                    Dados bancários
+                  </TabsTrigger>
+                  <TabsTrigger value="endereco" className="w-full">
+                    Endereço
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="dadosPessoais">
+                  <h2 className="text-lg font-medium mb-2">Dados pessoais</h2>
+                  <div className="grid grid-cols-3 gap-2">
+                    <ClipboardText label="Telefone">
+                      {costumer.telefone.length === 10
+                        ? costumer.telefone.replace(
+                            /(\d{2})(\d{4})(\d{4})/,
+                            "($1) $2-$3"
+                          )
+                        : costumer.telefone.replace(
+                            /(\d{2})(\d{5})(\d{4})/,
+                            "($1) $2-$3"
+                          )}
+                    </ClipboardText>
+                    <ClipboardText label="Data de nascimento">
+                      {costumer.dataDeNascimento &&
+                        new Date(
+                          costumer.dataDeNascimento.seconds * 1000
+                        ).toLocaleDateString("pt-BR")}
+                    </ClipboardText>
+                    <ClipboardText label="Sexo">{costumer.sexo}</ClipboardText>
+                    <ClipboardText label="Estado civil">
+                      {costumer.estadoCivil}
+                    </ClipboardText>
+                    <ClipboardText label="Naturalidade">
+                      {costumer.naturalidade}
+                    </ClipboardText>
+                  </div>
+                </TabsContent>
+                <TabsContent value="documentacao">
+                  <h2 className="text-lg font-medium mb-2">Documentação</h2>
+                  <div className="grid grid-cols-3 gap-2">
+                    <ClipboardText className="col-span-2" label="Nome da Mãe">
+                      {costumer.nomeDaMae}
+                    </ClipboardText>
+                    <ClipboardText label="RG">
+                      {costumer.rg &&
+                        costumer.rg.replace(
+                          /(\d{2})(\d{3})(\d{3})(\d{1})/,
+                          "$1.$2.$3-$4"
+                        )}
+                    </ClipboardText>
+                    <ClipboardText label="CPF">
+                      {costumer.cpf &&
+                        costumer.cpf.replace(
+                          /(\d{3})(\d{3})(\d{3})(\d{2})/,
+                          "$1.$2.$3-$4"
+                        )}
+                    </ClipboardText>
+                    <ClipboardText label="Data de emissão">
+                      {costumer.dataDeEmissao &&
+                        new Date(
+                          costumer.dataDeEmissao.seconds * 1000
+                        ).toLocaleDateString("pt-BR")}
+                    </ClipboardText>
+                    <ClipboardText label="Local de emissão">
+                      {costumer.localDeEmissao}
+                    </ClipboardText>
+                  </div>
+                </TabsContent>
+                <TabsContent value="dadosBancarios">
+                  <h2 className="text-lg font-medium mb-2">Dados bancários</h2>
+                  <div className="grid grid-cols-4 gap-2">
+                    <ClipboardText label="Banco">
+                      {costumer.banco}
+                    </ClipboardText>
+                    <ClipboardText label="Agência">
+                      {costumer.agencia}
+                    </ClipboardText>
+                    <ClipboardText label="Conta">
+                      {costumer.numeroDaConta}
+                    </ClipboardText>
+                    <ClipboardText label="Dígito">
+                      {costumer.digitoDaConta}
+                    </ClipboardText>
+                    <ClipboardText label="Chave PIX" className="col-span-3">
+                      {getChavePix()}
+                    </ClipboardText>
+                  </div>
+                </TabsContent>
+                <TabsContent value="endereco">
+                  <h2 className="text-lg font-medium mb-2">Endereço</h2>
+                  <div className="grid grid-cols-3 gap-2">
+                    <ClipboardText label="CEP">
+                      {costumer.cep.replace(/(\d{5})(\d{3})/, "$1-$2")}
+                    </ClipboardText>
+                    <ClipboardText className="col-span-2" label="Rua">
+                      {costumer.rua}
+                    </ClipboardText>
+                    <ClipboardText label="Número">
+                      {costumer.numeroDaRua}
+                    </ClipboardText>
+                    <ClipboardText label="Complemento">
+                      {costumer.complemento}
+                    </ClipboardText>
+                    <ClipboardText label="Estado">
+                      {costumer.estado}
+                    </ClipboardText>
+                    <ClipboardText label="Cidade">
+                      {costumer.cidade}
+                    </ClipboardText>
+                    <ClipboardText label="Bairro">
+                      {costumer.bairro}
+                    </ClipboardText>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
             <div className="flex flex-col truncate text-ellipsis mt-4">
               <h3 className="font-medium text-lg mb-2">Anexos</h3>

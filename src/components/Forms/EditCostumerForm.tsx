@@ -26,18 +26,31 @@ import { CostumerProps } from "../Customers/CostumersView";
 import Loading from "../ui/Loading";
 import { Timestamp } from "firebase/firestore";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
+import RGInput from "./Input/RGInput";
 
 export default function EditCostumerForm() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [costumer, setCostumer] = React.useState<CostumerProps>();
   const [stepOne, setStepOne] = React.useState(true);
   const [stepTwo, setStepTwo] = React.useState(false);
+  const [stepThree, setStepThree] = React.useState(false);
+  const [stepFour, setStepFour] = React.useState(false);
 
   const form = useForm<z.infer<typeof CostumerSchema>>({
     resolver: zodResolver(CostumerSchema),
     defaultValues: {
       nome: "",
-      cpfRg: "",
+      cpf: "",
+      agencia: 0,
+      banco: "",
+      rg: "",
+      email: "",
+      nomeDaMae: "",
+      numeroDaConta: 0,
+      digitoDaConta: 0,
+      chavePix: "",
+      dataDeEmissao: "",
+      localDeEmissao: "",
       dataDeNascimento: "",
       sexo: "",
       estadoCivil: "",
@@ -56,22 +69,36 @@ export default function EditCostumerForm() {
   React.useEffect(() => {
     if (costumer) {
       form.setValue("nome", costumer.nome);
+      form.setValue("email", costumer.email);
+      form.setValue("sexo", costumer.sexo);
+      form.setValue("telefone", costumer.telefone);
+      form.setValue("estado", costumer.estado);
+      form.setValue("estadoCivil", costumer.estadoCivil);
+      form.setValue("naturalidade", costumer.naturalidade);
+      form.setValue("nomeDaMae", costumer.nomeDaMae);
+      form.setValue("cpf", costumer.cpf);
+      form.setValue("rg", costumer.rg);
+      form.setValue(
+        "dataDeEmissao",
+        transformTimestampToString(costumer.dataDeEmissao)
+      );
+      form.setValue("localDeEmissao", costumer.localDeEmissao);
+      form.setValue("banco", costumer.banco);
+      form.setValue("agencia", parseFloat(costumer.agencia));
+      form.setValue("numeroDaConta", parseFloat(costumer.numeroDaConta));
+      form.setValue("digitoDaConta", parseFloat(costumer.digitoDaConta));
+      form.setValue("chavePix", costumer.chavePix);
       form.setValue("bairro", costumer.bairro);
       form.setValue("cep", costumer.cep);
       form.setValue("cidade", costumer.cidade);
       form.setValue("complemento", costumer.complemento);
-      form.setValue("cpfRg", costumer.cpfRg);
       form.setValue(
         "dataDeNascimento",
         transformTimestampToString(costumer.dataDeNascimento)
       );
-      form.setValue("estado", costumer.estado);
-      form.setValue("estadoCivil", costumer.estadoCivil);
-      form.setValue("naturalidade", costumer.naturalidade);
+
       form.setValue("numeroDaRua", parseFloat(costumer.numeroDaRua));
       form.setValue("rua", costumer.rua);
-      form.setValue("sexo", costumer.sexo);
-      form.setValue("telefone", costumer.telefone);
     }
   }, [costumer, form]);
 
@@ -109,6 +136,10 @@ export default function EditCostumerForm() {
 
   const EstadoCivilItems: SelectItems[] = [
     {
+      value: "Solteiro",
+      label: "Solteiro",
+    },
+    {
       value: "Casado",
       label: "Casado",
     },
@@ -123,6 +154,21 @@ export default function EditCostumerForm() {
     {
       value: "Viúvo",
       label: "Viúvo",
+    },
+  ];
+
+  const ChavePixItems: SelectItems[] = [
+    {
+      value: "Telefone",
+      label: "Telefone",
+    },
+    {
+      value: "E-mail",
+      label: "E-mail",
+    },
+    {
+      value: "Banco",
+      label: "Dados bancários",
     },
   ];
 
@@ -157,6 +203,7 @@ export default function EditCostumerForm() {
   ];
 
   function transformTimestampToString(timestamp: Timestamp) {
+    if (!timestamp) return "";
     const date = new Date(
       timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000
     );
@@ -192,20 +239,27 @@ export default function EditCostumerForm() {
                     defaultValue={costumer.nome}
                   />
                 </div>
-                <CPFInput
-                  form={form}
-                  name="cpfRg"
-                  label="CPF/RG *"
-                  placeholder="000.000.000-00/00.000.000-0"
-                  defaultValue={costumer.cpfRg}
-                />
-                <PhoneNumberInput
-                  form={form}
-                  name="telefone"
-                  label="Telefone *"
-                  placeholder="(00) 00000-0000"
-                  defaultValue={costumer.telefone}
-                />
+
+                <div className="space-y-1 col-span-2">
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="space-y-1 col-span-2">
+                      <TextInput
+                        form={form}
+                        label="E-mail *"
+                        name="email"
+                        defaultValue={costumer.email}
+                      />
+                    </div>
+
+                    <PhoneNumberInput
+                      form={form}
+                      name="telefone"
+                      label="Telefone *"
+                      placeholder="(00) 00000-000"
+                      defaultValue={costumer.telefone}
+                    />
+                  </div>
+                </div>
 
                 <BirthDateInput
                   form={form}
@@ -220,9 +274,9 @@ export default function EditCostumerForm() {
                   form={form}
                   name="sexo"
                   label="Sexo"
-                  defaultValue={costumer.sexo}
                   placeholder="Selecione"
                   selectItems={SexoItems}
+                  defaultValue={costumer.sexo}
                 />
 
                 <SelectInput
@@ -230,8 +284,8 @@ export default function EditCostumerForm() {
                   name="estadoCivil"
                   label="Estado civil"
                   placeholder="Selecione"
-                  defaultValue={costumer.estadoCivil}
                   selectItems={EstadoCivilItems}
+                  defaultValue={costumer.estadoCivil}
                 />
 
                 <TextInput
@@ -259,6 +313,8 @@ export default function EditCostumerForm() {
                 onClick={() => {
                   setStepOne(false);
                   setStepTwo(true);
+                  setStepThree(false);
+                  setStepFour(false);
                 }}
               >
                 Próximo
@@ -269,9 +325,149 @@ export default function EditCostumerForm() {
 
           <div className={stepTwo ? "" : "hidden"}>
             <div className="mt-4">
+              <h2 className="mb-2 font-medium">Documentação</h2>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1 col-span-2">
+                  <TextInput
+                    form={form}
+                    label="Nome da Mãe *"
+                    name="nomeDaMae"
+                    defaultValue={costumer.nomeDaMae}
+                  />
+                </div>
+                <CPFInput
+                  form={form}
+                  name="cpf"
+                  label="CPF *"
+                  placeholder="000.000.000-00"
+                  defaultValue={costumer.cpf}
+                />
+                <RGInput
+                  form={form}
+                  name="rg"
+                  label="RG *"
+                  placeholder="00.000.000-0"
+                  defaultValue={costumer.rg}
+                />
+                <BirthDateInput
+                  form={form}
+                  label="Data de emissão *"
+                  name="dataDeEmissao"
+                  defaultValue={transformTimestampToString(
+                    costumer.dataDeEmissao
+                  )}
+                />
+                <TextInput
+                  form={form}
+                  label="Local de emissão *"
+                  name="localDeEmissao"
+                  defaultValue={costumer.localDeEmissao}
+                />
+              </div>
+            </div>
+            <DialogFooter className="mt-8 col-span-2">
+              <Button
+                type="button"
+                variant={"outline"}
+                onClick={() => {
+                  setStepOne(true);
+                  setStepTwo(false);
+                  setStepThree(false);
+                  setStepFour(false);
+                }}
+              >
+                <ArrowLeft className="mr-2 size-4" />
+                Voltar
+              </Button>
+
+              <Button
+                type="button"
+                onClick={() => {
+                  setStepOne(false);
+                  setStepTwo(false);
+                  setStepThree(true);
+                  setStepFour(false);
+                }}
+              >
+                Próximo
+                <ArrowRight className="ml-2 size-4" />
+              </Button>
+            </DialogFooter>
+          </div>
+
+          <div className={stepThree ? "" : "hidden"}>
+            <div className="mt-4">
+              <h2 className="mb-2 font-medium">Dados bancários</h2>
+              <div className="grid grid-cols-2 gap-2">
+                <TextInput
+                  form={form}
+                  label="Banco *"
+                  name="banco"
+                  defaultValue={costumer.banco}
+                />
+                <NumberInput
+                  form={form}
+                  label="Agência *"
+                  name="agencia"
+                  defaultValue={costumer.agencia}
+                />
+                <NumberInput
+                  form={form}
+                  label="Número da conta *"
+                  name="numeroDaConta"
+                  defaultValue={costumer.numeroDaConta}
+                />
+                <NumberInput
+                  form={form}
+                  label="Dígito da conta *"
+                  name="digitoDaConta"
+                  defaultValue={costumer.digitoDaConta}
+                />
+                <SelectInput
+                  form={form}
+                  name="chavePix"
+                  label="Chave PIX"
+                  placeholder="Selecione"
+                  defaultValue={costumer.chavePix}
+                  selectItems={ChavePixItems}
+                />
+              </div>
+            </div>
+            <DialogFooter className="mt-8 col-span-2">
+              <Button
+                type="button"
+                variant={"outline"}
+                onClick={() => {
+                  setStepOne(false);
+                  setStepTwo(true);
+                  setStepThree(false);
+                  setStepFour(false);
+                }}
+              >
+                <ArrowLeft className="mr-2 size-4" />
+                Voltar
+              </Button>
+
+              <Button
+                type="button"
+                onClick={() => {
+                  setStepOne(false);
+                  setStepTwo(false);
+                  setStepThree(false);
+                  setStepFour(true);
+                }}
+              >
+                Próximo
+                <ArrowRight className="ml-2 size-4" />
+              </Button>
+            </DialogFooter>
+          </div>
+
+          <div className={stepFour ? "" : "hidden"}>
+            <div className="mt-4">
               <h2 className="mb-2 font-medium">Endereço</h2>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="col-span-3 w-[160px]">
+              <div className="grid grid-cols-4 gap-2">
+                <div className="col-span-4 w-[160px]">
                   <CepInput
                     form={form}
                     name="cep"
@@ -280,7 +476,8 @@ export default function EditCostumerForm() {
                     defaultValue={costumer.cep}
                   />
                 </div>
-                <div className="space-y-1 col-span-2">
+
+                <div className="space-y-1 col-span-3">
                   <TextInput
                     form={form}
                     label="Rua *"
@@ -288,12 +485,14 @@ export default function EditCostumerForm() {
                     defaultValue={costumer.rua}
                   />
                 </div>
+
                 <NumberInput
                   form={form}
                   label="Número *"
                   name="numeroDaRua"
                   defaultValue={costumer.numeroDaRua}
                 />
+
                 <TextInput
                   form={form}
                   label="Complemento"
@@ -302,9 +501,9 @@ export default function EditCostumerForm() {
                 />
                 <ComboInput
                   form={form}
-                  label="Estado *"
+                  label="Estado"
                   name="estado"
-                  placeholder="Estado"
+                  placeholder="Estado *"
                   selectItems={estados}
                   defaultValue={costumer.estado}
                 />
@@ -327,8 +526,10 @@ export default function EditCostumerForm() {
                 type="button"
                 variant={"outline"}
                 onClick={() => {
-                  setStepOne(true);
+                  setStepOne(false);
                   setStepTwo(false);
+                  setStepThree(true);
+                  setStepFour(false);
                 }}
               >
                 <ArrowLeft className="mr-2 size-4" />
