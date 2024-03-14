@@ -169,7 +169,15 @@ export function CostumersDataTable<TData, TValue>({
     const costumerData = data2.map((item) => {
       return {
         nome: item.nome,
-        cpfRg: item.cpfRg,
+        nomeDaMae: item.nomeDaMae,
+        cpf: item.cpf,
+        rg: item.rg,
+        dataDeEmissao: item.dataDeEmissao.toDate().toLocaleDateString("pt-BR"),
+        localDeEmissao: item.localDeEmissao,
+        banco: item.banco,
+        agencia: item.agencia,
+        numeroDaConta: item.numeroDaConta,
+        digitoDaConta: item.digitoDaConta,
         dataDeNascimento: item.dataDeNascimento
           .toDate()
           .toLocaleDateString("pt-BR"),
