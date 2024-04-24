@@ -93,7 +93,10 @@ const CostumerSchema = z.object({
     .string()
     .refine((value) =>
       value?.length > 0
-        ? value === "Telefone" || value === "E-mail" || value === "Banco"
+        ? value === "Telefone" ||
+          value === "E-mail" ||
+          value === "Banco" ||
+          value === "CPF"
         : true
     ),
   cep: z.string().min(8).max(8),
