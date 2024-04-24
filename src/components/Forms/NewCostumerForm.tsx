@@ -21,7 +21,6 @@ import CepInput from "./Input/CepInput";
 import ComboInput from "./Input/ComboInput";
 import NumberInput from "./Input/NumberInput";
 import PhoneNumberInput from "./Input/PhoneNumberInput";
-import RGInput from "./Input/RGInput";
 import SelectInput, { SelectItems } from "./Input/SelectInput";
 import TextInput from "./Input/TextInput";
 
@@ -261,7 +260,7 @@ export default function NewCostumerForm() {
                   label="CPF *"
                   placeholder="000.000.000-00"
                 />
-                <RGInput
+                <NumberInput
                   form={form}
                   name="rg"
                   label="RG *"
