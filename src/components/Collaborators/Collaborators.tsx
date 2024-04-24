@@ -1,12 +1,12 @@
+import { firebaseApp } from "@/main";
+import { GetCollaborators } from "@/services/api";
+import { UserDataProps } from "@/types/UserDataProps";
+import { getAuth } from "firebase/auth";
+import { doc, getFirestore, onSnapshot } from "firebase/firestore";
+import React from "react";
+import Loading from "../ui/Loading";
 import { CollaboratorsDataTable } from "./CollaboratorsTable/CollaboratorsDataTable";
 import { CollaboratorsTableColumns } from "./CollaboratorsTable/CollaboratorsTableColumns";
-import React from "react";
-import { getFirestore, onSnapshot, doc } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-import { firebaseApp } from "@/main";
-import Loading from "../ui/Loading";
-import { UserDataProps } from "@/types/UserDataProps";
-import { GetCollaborators } from "@/services/api";
 
 export default function Customers() {
   const [data, setData] = React.useState<UserDataProps[]>();

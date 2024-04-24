@@ -115,6 +115,10 @@ export default function NewCostumerForm() {
       label: "E-mail",
     },
     {
+      value: "CPF",
+      label: "CPF",
+    },
+    {
       value: "Banco",
       label: "Dados bancários",
     },

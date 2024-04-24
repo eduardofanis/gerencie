@@ -167,6 +167,10 @@ export default function EditCostumerForm() {
       label: "E-mail",
     },
     {
+      value: "CPF",
+      label: "CPF",
+    },
+    {
       value: "Banco",
       label: "Dados bancários",
     },

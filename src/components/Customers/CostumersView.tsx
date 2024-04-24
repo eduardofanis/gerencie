@@ -181,6 +181,9 @@ export default function CostumersView() {
 
       case "Banco":
         return "Dados bancários";
+
+      case "CPF":
+        return costumer.cpf;
     }
   }
 
