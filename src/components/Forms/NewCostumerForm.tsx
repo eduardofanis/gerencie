@@ -175,13 +175,13 @@ export default function NewCostumerForm() {
                 <div className="space-y-1 col-span-2">
                   <div className="grid grid-cols-3 gap-2">
                     <div className="space-y-1 col-span-2">
-                      <TextInput form={form} label="E-mail *" name="email" />
+                      <TextInput form={form} label="E-mail" name="email" />
                     </div>
 
                     <PhoneNumberInput
                       form={form}
                       name="telefone"
-                      label="Telefone *"
+                      label="Telefone"
                       placeholder="(00) 00000-0000"
                     />
                   </div>
@@ -190,7 +190,7 @@ export default function NewCostumerForm() {
                 <BirthDateInput
                   form={form}
                   name="dataDeNascimento"
-                  label="Data de nascimento *"
+                  label="Data de nascimento"
                 />
 
                 <SelectInput
@@ -247,13 +247,6 @@ export default function NewCostumerForm() {
             <div className="mt-4">
               <h2 className="mb-2 font-medium">Documentação</h2>
               <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1 col-span-2">
-                  <TextInput
-                    form={form}
-                    label="Nome da Mãe *"
-                    name="nomeDaMae"
-                  />
-                </div>
                 <CPFInput
                   form={form}
                   name="cpf"
@@ -263,19 +256,26 @@ export default function NewCostumerForm() {
                 <NumberInput
                   form={form}
                   name="rg"
-                  label="RG *"
+                  label="RG"
                   placeholder="00.000.000-0"
                 />
                 <BirthDateInput
                   form={form}
-                  label="Data de emissão *"
+                  label="Data de emissão"
                   name="dataDeEmissao"
                 />
                 <TextInput
                   form={form}
-                  label="Local de emissão *"
+                  label="Local de emissão"
                   name="localDeEmissao"
                 />
+                <div className="space-y-1 col-span-2">
+                  <TextInput
+                    form={form}
+                    label="Nome da Mãe *"
+                    name="nomeDaMae"
+                  />
+                </div>
               </div>
             </div>
             <DialogFooter className="mt-8 col-span-2">
@@ -312,7 +312,7 @@ export default function NewCostumerForm() {
             <div className="mt-4">
               <h2 className="mb-2 font-medium">Dados bancários</h2>
               <div className="grid grid-cols-2 gap-2 mb-2">
-                <TextInput form={form} label="Banco *" name="banco" />
+                <TextInput form={form} label="Banco" name="banco" />
                 <SelectInput
                   form={form}
                   name="chavePix"
@@ -323,22 +323,14 @@ export default function NewCostumerForm() {
               </div>
               <div className="grid grid-cols-5 gap-2">
                 <div className="col-span-2">
-                  <NumberInput form={form} label="Agência *" name="agencia" />
+                  <NumberInput form={form} label="Agência" name="agencia" />
                 </div>
 
                 <div className="col-span-2">
-                  <NumberInput
-                    form={form}
-                    label="Conta *"
-                    name="numeroDaConta"
-                  />
+                  <NumberInput form={form} label="Conta" name="numeroDaConta" />
                 </div>
 
-                <NumberInput
-                  form={form}
-                  label="Dígito *"
-                  name="digitoDaConta"
-                />
+                <NumberInput form={form} label="Dígito" name="digitoDaConta" />
               </div>
             </div>
             <DialogFooter className="mt-8 col-span-2">
@@ -379,16 +371,16 @@ export default function NewCostumerForm() {
                   <CepInput
                     form={form}
                     name="cep"
-                    label="CEP *"
+                    label="CEP"
                     placeholder="00000-000"
                   />
                 </div>
 
                 <div className="space-y-1 col-span-3">
-                  <TextInput form={form} label="Rua *" name="rua" />
+                  <TextInput form={form} label="Rua" name="rua" />
                 </div>
 
-                <NumberInput form={form} label="Número *" name="numeroDaRua" />
+                <NumberInput form={form} label="Número" name="numeroDaRua" />
 
                 <TextInput form={form} label="Complemento" name="complemento" />
                 <ComboInput
@@ -398,8 +390,8 @@ export default function NewCostumerForm() {
                   placeholder="Estado *"
                   selectItems={estados}
                 />
-                <TextInput form={form} label="Cidade *" name="cidade" />
-                <TextInput form={form} label="Bairro *" name="bairro" />
+                <TextInput form={form} label="Cidade" name="cidade" />
+                <TextInput form={form} label="Bairro" name="bairro" />
               </div>
             </div>
             <DialogFooter className="mt-8 col-span-2">

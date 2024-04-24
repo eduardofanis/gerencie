@@ -1,8 +1,7 @@
-import { useReducer } from "react";
+import { InputProps } from "@/types/InputProps";
+import React, { useReducer } from "react";
 import { FormControl, FormField, FormItem, FormLabel } from "../../ui/form"; // Shadcn UI import
 import { Input } from "../../ui/input"; // Shandcn UI Input
-import { InputProps } from "@/types/InputProps";
-import React from "react";
 
 export default function BirthDateInput(props: InputProps) {
   const initialValue = "";
@@ -42,10 +41,15 @@ export default function BirthDateInput(props: InputProps) {
                 className={props.className}
                 {...field}
                 onChange={(ev) => {
-                  setValue(ev.target.value);
-                  field.onChange(
-                    ev.target.value.replace(/(\d{2})(\d{2})(\d{4})/, "$1/$2/$3")
-                  );
+                  if (ev.target.value.length <= 10) {
+                    setValue(ev.target.value);
+                    field.onChange(
+                      ev.target.value.replace(
+                        /(\d{2})(\d{2})(\d{4})/,
+                        "$1/$2/$3"
+                      )
+                    );
+                  }
                 }}
                 value={value}
               />

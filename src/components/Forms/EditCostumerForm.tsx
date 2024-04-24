@@ -248,7 +248,7 @@ export default function EditCostumerForm() {
                     <div className="space-y-1 col-span-2">
                       <TextInput
                         form={form}
-                        label="E-mail *"
+                        label="E-mail"
                         name="email"
                         defaultValue={costumer.email}
                       />
@@ -257,7 +257,7 @@ export default function EditCostumerForm() {
                     <PhoneNumberInput
                       form={form}
                       name="telefone"
-                      label="Telefone *"
+                      label="Telefone"
                       placeholder="(00) 00000-000"
                       defaultValue={costumer.telefone}
                     />
@@ -267,7 +267,7 @@ export default function EditCostumerForm() {
                 <BirthDateInput
                   form={form}
                   name="dataDeNascimento"
-                  label="Data de nascimento *"
+                  label="Data de nascimento"
                   defaultValue={transformTimestampToString(
                     costumer.dataDeNascimento
                   )}
@@ -330,14 +330,6 @@ export default function EditCostumerForm() {
             <div className="mt-4">
               <h2 className="mb-2 font-medium">Documentação</h2>
               <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1 col-span-2">
-                  <TextInput
-                    form={form}
-                    label="Nome da Mãe *"
-                    name="nomeDaMae"
-                    defaultValue={costumer.nomeDaMae}
-                  />
-                </div>
                 <CPFInput
                   form={form}
                   name="cpf"
@@ -348,13 +340,13 @@ export default function EditCostumerForm() {
                 <NumberInput
                   form={form}
                   name="rg"
-                  label="RG *"
+                  label="RG"
                   placeholder="00.000.000-0"
                   defaultValue={costumer.rg}
                 />
                 <BirthDateInput
                   form={form}
-                  label="Data de emissão *"
+                  label="Data de emissão"
                   name="dataDeEmissao"
                   defaultValue={transformTimestampToString(
                     costumer.dataDeEmissao
@@ -362,10 +354,18 @@ export default function EditCostumerForm() {
                 />
                 <TextInput
                   form={form}
-                  label="Local de emissão *"
+                  label="Local de emissão"
                   name="localDeEmissao"
                   defaultValue={costumer.localDeEmissao}
                 />
+                <div className="space-y-1 col-span-2">
+                  <TextInput
+                    form={form}
+                    label="Nome da Mãe *"
+                    name="nomeDaMae"
+                    defaultValue={costumer.nomeDaMae}
+                  />
+                </div>
               </div>
             </div>
             <DialogFooter className="mt-8 col-span-2">
@@ -402,7 +402,7 @@ export default function EditCostumerForm() {
             <div className="mt-4">
               <h2 className="mb-2 font-medium">Dados bancários</h2>
               <div className="grid grid-cols-2 gap-2 mb-2">
-                <TextInput form={form} label="Banco *" name="banco" />
+                <TextInput form={form} label="Banco" name="banco" />
                 <SelectInput
                   form={form}
                   name="chavePix"
@@ -416,7 +416,7 @@ export default function EditCostumerForm() {
                 <div className="col-span-2">
                   <NumberInput
                     form={form}
-                    label="Agência *"
+                    label="Agência"
                     name="agencia"
                     defaultValue={costumer.agencia}
                   />
@@ -425,7 +425,7 @@ export default function EditCostumerForm() {
                 <div className="col-span-2">
                   <NumberInput
                     form={form}
-                    label="Conta *"
+                    label="Conta"
                     name="numeroDaConta"
                     defaultValue={costumer.numeroDaConta}
                   />
@@ -433,7 +433,7 @@ export default function EditCostumerForm() {
 
                 <NumberInput
                   form={form}
-                  label="Dígito *"
+                  label="Dígito"
                   name="digitoDaConta"
                   defaultValue={costumer.digitoDaConta}
                 />
@@ -477,7 +477,7 @@ export default function EditCostumerForm() {
                   <CepInput
                     form={form}
                     name="cep"
-                    label="CEP *"
+                    label="CEP"
                     placeholder="00000-000"
                     defaultValue={costumer.cep}
                   />
@@ -486,7 +486,7 @@ export default function EditCostumerForm() {
                 <div className="space-y-1 col-span-3">
                   <TextInput
                     form={form}
-                    label="Rua *"
+                    label="Rua"
                     name="rua"
                     defaultValue={costumer.rua}
                   />
@@ -494,7 +494,7 @@ export default function EditCostumerForm() {
 
                 <NumberInput
                   form={form}
-                  label="Número *"
+                  label="Número"
                   name="numeroDaRua"
                   defaultValue={costumer.numeroDaRua}
                 />
@@ -509,19 +509,19 @@ export default function EditCostumerForm() {
                   form={form}
                   label="Estado"
                   name="estado"
-                  placeholder="Estado *"
+                  placeholder="Estado"
                   selectItems={estados}
                   defaultValue={costumer.estado}
                 />
                 <TextInput
                   form={form}
-                  label="Cidade *"
+                  label="Cidade"
                   name="cidade"
                   defaultValue={costumer.cidade}
                 />
                 <TextInput
                   form={form}
-                  label="Bairro *"
+                  label="Bairro"
                   name="bairro"
                   defaultValue={costumer.bairro}
                 />
