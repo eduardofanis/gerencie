@@ -82,7 +82,7 @@ const CostumerSchema = z.object({
         .join(" ");
     }),
   cpf: z.string().min(11).max(11),
-  rg: z.string().min(9).max(9),
+  rg: z.string().min(1),
   dataDeEmissao: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/),
   localDeEmissao: z.string().min(1),
   banco: z.string().min(1),
