@@ -86,9 +86,9 @@ const CostumerSchema = z.object({
   dataDeEmissao: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/),
   localDeEmissao: z.string().min(1),
   banco: z.string().min(1),
-  agencia: z.number().min(1),
-  numeroDaConta: z.number().min(1),
-  digitoDaConta: z.number().min(1),
+  agencia: z.string().min(1),
+  numeroDaConta: z.string().min(1),
+  digitoDaConta: z.string().min(1),
   chavePix: z
     .string()
     .refine((value) =>
@@ -98,7 +98,7 @@ const CostumerSchema = z.object({
     ),
   cep: z.string().min(8).max(8),
   rua: z.string().min(1),
-  numeroDaRua: z.number().min(1),
+  numeroDaRua: z.string().min(1),
   complemento: z.string().optional(),
   estado: z
     .string()

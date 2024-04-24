@@ -41,13 +41,13 @@ export default function EditCostumerForm() {
     defaultValues: {
       nome: "",
       cpf: "",
-      agencia: 0,
+      agencia: "",
       banco: "",
       rg: "",
       email: "",
       nomeDaMae: "",
-      numeroDaConta: 0,
-      digitoDaConta: 0,
+      numeroDaConta: "",
+      digitoDaConta: "",
       chavePix: "",
       dataDeEmissao: "",
       localDeEmissao: "",
@@ -58,7 +58,7 @@ export default function EditCostumerForm() {
       telefone: "",
       cep: "",
       rua: "",
-      numeroDaRua: 0,
+      numeroDaRua: "",
       complemento: "",
       estado: "",
       cidade: "",
@@ -84,9 +84,9 @@ export default function EditCostumerForm() {
       );
       form.setValue("localDeEmissao", costumer.localDeEmissao);
       form.setValue("banco", costumer.banco);
-      form.setValue("agencia", parseFloat(costumer.agencia));
-      form.setValue("numeroDaConta", parseFloat(costumer.numeroDaConta));
-      form.setValue("digitoDaConta", parseFloat(costumer.digitoDaConta));
+      form.setValue("agencia", costumer.agencia);
+      form.setValue("numeroDaConta", costumer.numeroDaConta);
+      form.setValue("digitoDaConta", costumer.digitoDaConta);
       form.setValue("chavePix", costumer.chavePix);
       form.setValue("bairro", costumer.bairro);
       form.setValue("cep", costumer.cep);
@@ -97,7 +97,7 @@ export default function EditCostumerForm() {
         transformTimestampToString(costumer.dataDeNascimento)
       );
 
-      form.setValue("numeroDaRua", parseFloat(costumer.numeroDaRua));
+      form.setValue("numeroDaRua", costumer.numeroDaRua);
       form.setValue("rua", costumer.rua);
     }
   }, [costumer, form]);
@@ -410,11 +410,17 @@ export default function EditCostumerForm() {
                   label="Chave PIX"
                   placeholder="Selecione"
                   selectItems={ChavePixItems}
+                  defaultValue={costumer.chavePix}
                 />
               </div>
               <div className="grid grid-cols-5 gap-2">
                 <div className="col-span-2">
-                  <NumberInput form={form} label="Agência *" name="agencia" />
+                  <NumberInput
+                    form={form}
+                    label="Agência *"
+                    name="agencia"
+                    defaultValue={costumer.agencia}
+                  />
                 </div>
 
                 <div className="col-span-2">
@@ -422,6 +428,7 @@ export default function EditCostumerForm() {
                     form={form}
                     label="Conta *"
                     name="numeroDaConta"
+                    defaultValue={costumer.numeroDaConta}
                   />
                 </div>
 
@@ -429,6 +436,7 @@ export default function EditCostumerForm() {
                   form={form}
                   label="Dígito *"
                   name="digitoDaConta"
+                  defaultValue={costumer.digitoDaConta}
                 />
               </div>
             </div>
