@@ -1,10 +1,9 @@
 import { CollaboratorContext } from "@/contexts/CollaboratorContext";
-import IncomeMonthCard from "./Cards/IncomeMonthCard";
-import CostumersCard from "./Cards/CostumersCard";
-import IncomeByPeriodCard from "./Cards/IncomeByPeriodCard";
-import OperationsDayCard from "./Cards/OperationsDayCard";
-import OperationsMonthCard from "./Cards/OperationsMonthCard";
-import LastOperationsCard from "./Cards/LastOperationsCard";
+import { SubscriberContext } from "@/contexts/SubscriberContext";
+import { GetCollaborators } from "@/services/api";
+import { getUserData } from "@/services/user";
+import { UserDataProps } from "@/types/UserDataProps";
+import React from "react";
 import {
   Select,
   SelectContent,
@@ -13,11 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import React from "react";
-import { SubscriberContext } from "@/contexts/SubscriberContext";
-import { GetCollaborators } from "@/services/api";
-import { getUserData } from "@/services/user";
-import { UserDataProps } from "@/types/UserDataProps";
+import CostumersCard from "./Cards/CostumersCard";
+import IncomeByPeriodCard from "./Cards/IncomeByPeriodCard";
+import IncomeMonthCard from "./Cards/IncomeMonthCard";
+import OperationsDayCard from "./Cards/OperationsDayCard";
+import OperationsMonthCard from "./Cards/OperationsMonthCard";
 
 export default function Home() {
   const { collaborator } = React.useContext(CollaboratorContext);
@@ -53,7 +52,7 @@ export default function Home() {
   }, [collaborator]);
 
   return (
-    <div className="p-8 w-full">
+    <div className="p-8 w-full h-screen flex flex-col">
       <div className="flex items-center  gap-4 mb-8">
         <h1 className="text-3xl font-bold">Visão geral</h1>
         <Select
@@ -100,11 +99,10 @@ export default function Home() {
         <OperationsDayCard collaboratorUid={value} />
         <CostumersCard collaboratorUid={value} />
       </div>
-      <div className="grid grid-cols-2 2xl:grid-cols-3 mt-4 gap-4">
+      <div className="mt-4 flex flex-col min-h-[340px] flex-grow">
         <IncomeByPeriodCard collaboratorUid={value} />
-        <LastOperationsCard collaboratorUid={value} />
-        <div></div>
       </div>
+      {/* <LastOperationsCard collaboratorUid={value} /> */}
     </div>
   );
 }

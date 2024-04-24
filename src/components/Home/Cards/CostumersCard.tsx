@@ -139,7 +139,7 @@ export default function CostumersCard({
         if (unsubscribe) unsubscribe();
       };
     });
-  }, [db, currentUser]);
+  }, [db, currentUser, collaboratorUid]);
 
   React.useEffect(() => {
     function compareMonths() {

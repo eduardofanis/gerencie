@@ -351,13 +351,13 @@ export default function IncomeByPeriodCard({
 
   if (!data || !somaValues) return <Skeleton className="col-span-2" />;
   return (
-    <Card className="col-span-2 relative">
+    <Card className="relative flex flex-grow flex-col">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-medium">
           Receita por período
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-grow flex-col">
         <div className="text-2xl font-bold">{somaValues}</div>
 
         <p className="text-xs text-muted-foreground">
@@ -416,7 +416,7 @@ export default function IncomeByPeriodCard({
             </PopoverContent>
           </Popover>
         </div>
-        <div className="h-[360px] mt-8">
+        <div className="mt-8 flex-grow">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={data}
