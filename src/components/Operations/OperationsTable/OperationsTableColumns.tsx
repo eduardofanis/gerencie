@@ -7,12 +7,18 @@ import { Button } from "@/components/ui/button";
 
 import { Badge } from "@/components/ui/badge";
 import { OperationSchema } from "@/schemas/OperationSchema";
-import { z } from "zod";
-import { Timestamp } from "firebase/firestore";
-import OperationDropdown from "./OperationDropdown";
 import { getUserData } from "@/services/user";
+import { Timestamp } from "firebase/firestore";
+import { z } from "zod";
+import OperationDropdown from "./OperationDropdown";
 
-import OperationCreatedBy from "./OperationCreatedBy";
+import CreatedBy from "@/components/ui/CreatedBy";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import OperationSelectStatus from "./OperationSelectStatus";
 
 export const OperationsTableColumns: ColumnDef<
@@ -47,7 +53,20 @@ export const OperationsTableColumns: ColumnDef<
       );
     },
     cell: ({ row }) => {
-      return <div className="ml-4">{row.getValue("cliente")}</div>;
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="ml-4 text-ellipsis max-w-28 truncate">
+                {row.getValue("cliente")}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent align="start">
+              {row.getValue("cliente")}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
     },
   },
   {
@@ -89,12 +108,16 @@ export const OperationsTableColumns: ColumnDef<
     },
   },
   {
+    accessorKey: "banco",
+    header: "Banco",
+  },
+  {
     accessorKey: "criadoPor",
     header: "Criado por",
     cell: ({ row }) => {
       const id = row.getValue("criadoPor") as string;
 
-      return <OperationCreatedBy id={id} />;
+      return <CreatedBy id={id} />;
     },
   },
   {

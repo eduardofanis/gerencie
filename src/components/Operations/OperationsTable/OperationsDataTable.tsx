@@ -14,13 +14,10 @@ import {
 } from "@tanstack/react-table";
 
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -30,10 +27,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,21 +49,21 @@ import {
   X,
 } from "lucide-react";
 
+import NewOperationForm from "@/components/Forms/NewOperationForm";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import React from "react";
-import NewOperationForm from "@/components/Forms/NewOperationForm";
 
-import { useSearchParams } from "react-router-dom";
-import NewOperationTypeForm from "@/components/Forms/NewOperationTypeForm";
-import EditOperationForm from "@/components/Forms/EditOperationForm";
-import { Separator } from "@/components/ui/separator";
 import { OperationProps } from "@/components/Customers/CostumersView";
+import EditOperationForm from "@/components/Forms/EditOperationForm";
+import NewOperationTypeForm from "@/components/Forms/NewOperationTypeForm";
+import { Separator } from "@/components/ui/separator";
+import { useSearchParams } from "react-router-dom";
 
-import * as XLSX from "xlsx";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CollaboratorContext } from "@/contexts/CollaboratorContext";
 import { SubscriberContext } from "@/contexts/SubscriberContext";
 import { UserDataProps } from "@/types/UserDataProps";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import * as XLSX from "xlsx";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -530,7 +530,7 @@ export function OperationsDataTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell className="py-1" key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -543,7 +543,7 @@ export function OperationsDataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-16 text-center"
+                  className="h-10 text-center"
                 >
                   Nenhum resultado.
                 </TableCell>

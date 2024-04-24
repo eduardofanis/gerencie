@@ -1,8 +1,8 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
-import { UserDataProps } from "@/types/UserDataProps";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserDataProps } from "@/types/UserDataProps";
+import { ColumnDef } from "@tanstack/react-table";
 import CollaboratorDropdown from "./CollaboratorDropdown";
 
 export const CollaboratorsTableColumns: ColumnDef<UserDataProps>[] = [

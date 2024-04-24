@@ -1,8 +1,13 @@
-import { useSearchParams } from "react-router-dom";
-import { Button } from "../ui/button";
-import { Dialog, DialogClose, DialogContent, DialogFooter } from "../ui/dialog";
-import { Skeleton } from "../ui/skeleton";
-import React from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { SubscriberContext } from "@/contexts/SubscriberContext";
+import { firebaseApp } from "@/main";
+import { DialogTrigger } from "@radix-ui/react-dialog";
 import {
   Timestamp,
   arrayRemove,
@@ -11,20 +16,15 @@ import {
   onSnapshot,
   updateDoc,
 } from "firebase/firestore";
-import { ClipboardCopy, Edit, Trash, X } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { toast } from "../ui/use-toast";
-import { DialogTrigger } from "@radix-ui/react-dialog";
-import NewAnexoForm from "../Forms/NewAnexoForm";
-import { firebaseApp } from "@/main";
-import { SubscriberContext } from "@/contexts/SubscriberContext";
 import { deleteObject, getStorage, ref } from "firebase/storage";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ClipboardCopy, Edit, Trash, X } from "lucide-react";
+import React from "react";
+import { useSearchParams } from "react-router-dom";
+import NewAnexoForm from "../Forms/NewAnexoForm";
+import { Button } from "../ui/button";
+import { Dialog, DialogClose, DialogContent, DialogFooter } from "../ui/dialog";
+import { Skeleton } from "../ui/skeleton";
+import { toast } from "../ui/use-toast";
 
 export type CostumerProps = {
   email: string;
@@ -64,6 +64,7 @@ export type OperationProps = {
   comissao: string;
   valorRecebido: string;
   tipoDaOperacao: string;
+  banco: string;
   id: string;
   parcelas: string;
   createdAt: Timestamp;

@@ -1,3 +1,11 @@
+import { NewCostumer } from "@/services/api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { useSearchParams } from "react-router-dom";
+import { z } from "zod";
+import { CostumerSchema } from "../../schemas/CostumerSchema";
 import { Button } from "../ui/button";
 import {
   DialogClose,
@@ -6,24 +14,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { NewCostumer } from "@/services/api";
 import { Form } from "../ui/form";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CostumerSchema } from "../../schemas/CostumerSchema";
+import BirthDateInput from "./Input/BirthDateInput";
+import CPFInput from "./Input/CPFInput";
+import CepInput from "./Input/CepInput";
+import ComboInput from "./Input/ComboInput";
+import NumberInput from "./Input/NumberInput";
+import PhoneNumberInput from "./Input/PhoneNumberInput";
+import RGInput from "./Input/RGInput";
 import SelectInput, { SelectItems } from "./Input/SelectInput";
 import TextInput from "./Input/TextInput";
-import NumberInput from "./Input/NumberInput";
-import { useSearchParams } from "react-router-dom";
-import CepInput from "./Input/CepInput";
-import PhoneNumberInput from "./Input/PhoneNumberInput";
-import CPFInput from "./Input/CPFInput";
-import BirthDateInput from "./Input/BirthDateInput";
-import ComboInput from "./Input/ComboInput";
-import React from "react";
-import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
-import RGInput from "./Input/RGInput";
 
 export default function NewCostumerForm() {
   const [, setSearchParams] = useSearchParams();
@@ -308,26 +308,33 @@ export default function NewCostumerForm() {
           <div className={stepThree ? "" : "hidden"}>
             <div className="mt-4">
               <h2 className="mb-2 font-medium">Dados bancários</h2>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 mb-2">
                 <TextInput form={form} label="Banco *" name="banco" />
-                <NumberInput form={form} label="Agência *" name="agencia" />
-                <NumberInput
-                  form={form}
-                  label="Número da conta *"
-                  name="numeroDaConta"
-                />
-                <NumberInput
-                  form={form}
-                  label="Dígito da conta *"
-                  name="digitoDaConta"
-                />
-
                 <SelectInput
                   form={form}
                   name="chavePix"
                   label="Chave PIX"
                   placeholder="Selecione"
                   selectItems={ChavePixItems}
+                />
+              </div>
+              <div className="grid grid-cols-5 gap-2">
+                <div className="col-span-2">
+                  <NumberInput form={form} label="Agência *" name="agencia" />
+                </div>
+
+                <div className="col-span-2">
+                  <NumberInput
+                    form={form}
+                    label="Conta *"
+                    name="numeroDaConta"
+                  />
+                </div>
+
+                <NumberInput
+                  form={form}
+                  label="Dígito *"
+                  name="digitoDaConta"
                 />
               </div>
             </div>

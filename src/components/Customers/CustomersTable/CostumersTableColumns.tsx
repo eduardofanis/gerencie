@@ -5,11 +5,17 @@ import { ArrowUpDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-import { z } from "zod";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { CostumerSchema } from "@/schemas/CostumerSchema";
-import CostumerDropdown from "./CostumerDropdown";
 import { Timestamp } from "firebase/firestore";
-import CostumerCreatedBy from "./CostumerCreatedBy";
+import { z } from "zod";
+import CreatedBy from "../../ui/CreatedBy";
+import CostumerDropdown from "./CostumerDropdown";
 
 export const CostumersTableColumns: ColumnDef<
   z.infer<typeof CostumerSchema>
@@ -31,7 +37,33 @@ export const CostumersTableColumns: ColumnDef<
       );
     },
     cell: ({ row }) => {
-      return <div className="ml-4">{row.getValue("nome")}</div>;
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="ml-4 text-ellipsis max-w-28 truncate">
+                {row.getValue("nome")}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent align="start">
+              {row.getValue("nome")}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    },
+  },
+  {
+    accessorKey: "cpf",
+    header: "CPF",
+    cell: ({ row }) => {
+      const value = row.getValue("cpf") as string;
+      const formatted = value?.replace(
+        /(\d{3})(\d{3})(\d{3})(\d{2})/,
+        "$1.$2.$3-$4"
+      );
+
+      return <div>{formatted}</div>;
     },
   },
   {
@@ -40,9 +72,9 @@ export const CostumersTableColumns: ColumnDef<
     cell: ({ row }) => {
       const value = row.getValue("telefone") as string;
       const formatted =
-        value.length === 10
-          ? value.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3")
-          : value.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+        value?.length === 10
+          ? value?.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3")
+          : value?.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
 
       return <div className="flex items-center">{formatted}</div>;
     },
@@ -78,38 +110,10 @@ export const CostumersTableColumns: ColumnDef<
     cell: ({ row }) => {
       const id = row.getValue("criadoPor") as string;
 
-      return <CostumerCreatedBy id={id} />;
+      return <CreatedBy id={id} />;
     },
   },
-  {
-    accessorKey: "valorTotalLiberado",
-    header: ({ column }) => {
-      return (
-        <div className="text-right">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Total liberado
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-      );
-    },
-    cell: ({ row }) => {
-      const amount = parseFloat(
-        row.getValue("valorTotalLiberado")
-          ? row.getValue("valorTotalLiberado")
-          : "0"
-      );
-      const formatted = new Intl.NumberFormat("pt-BR", {
-        style: "currency",
-        currency: "BRL",
-      }).format(amount);
 
-      return <div className="text-right font-medium mr-4">{formatted}</div>;
-    },
-  },
   {
     id: "actions",
     cell: ({ row }) => {

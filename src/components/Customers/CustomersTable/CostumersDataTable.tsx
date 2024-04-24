@@ -13,6 +13,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -21,25 +23,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  X,
-  PlusCircle,
-  ChevronDown,
   Download,
+  PlusCircle,
   Upload,
+  X,
 } from "lucide-react";
 
+import EditCostumerForm from "@/components/Forms/EditCostumerForm";
+import NewCostumerForm from "@/components/Forms/NewCostumerForm";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import React from "react";
-import NewCostumerForm from "@/components/Forms/NewCostumerForm";
 import { useSearchParams } from "react-router-dom";
-import EditCostumerForm from "@/components/Forms/EditCostumerForm";
 
 import { SelectItems } from "@/components/Forms/Input/SelectInput";
 import {
@@ -50,21 +50,18 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
-import * as XLSX from "xlsx";
-import { CostumerProps } from "../CostumersView";
-import { CollaboratorContext } from "@/contexts/CollaboratorContext";
-import { SubscriberContext } from "@/contexts/SubscriberContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
@@ -73,12 +70,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserDataProps } from "@/types/UserDataProps";
 import { toast } from "@/components/ui/use-toast";
-import { NewCostumer } from "@/services/api";
-import { z } from "zod";
+import { CollaboratorContext } from "@/contexts/CollaboratorContext";
+import { SubscriberContext } from "@/contexts/SubscriberContext";
 import { CostumerSchema } from "@/schemas/CostumerSchema";
+import { NewCostumer } from "@/services/api";
+import { UserDataProps } from "@/types/UserDataProps";
+import * as XLSX from "xlsx";
+import { z } from "zod";
+import { CostumerProps } from "../CostumersView";
 
 const estados: SelectItems[] = [
   { value: "AC", label: "AC" },
@@ -268,7 +268,7 @@ export function CostumersDataTable<TData, TValue>({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              className="flex gap-2 min-[1400px]:hidden"
+              className="flex gap-2 min-[1540px]:hidden"
               variant="outline"
             >
               Filtros <ChevronDown className="size-4" />
@@ -285,6 +285,14 @@ export function CostumersDataTable<TData, TValue>({
               }
               onChange={(event) => {
                 table.getColumn("nome")?.setFilterValue(event.target.value);
+              }}
+              className="col-span-2"
+            />
+            <Input
+              placeholder="CPF"
+              value={(table.getColumn("cpf")?.getFilterValue() as string) ?? ""}
+              onChange={(event) => {
+                table.getColumn("cpf")?.setFilterValue(event.target.value);
               }}
               className="col-span-2"
             />
@@ -405,7 +413,7 @@ export function CostumersDataTable<TData, TValue>({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="hidden min-[1400px]:flex gap-2 items-center">
+        <div className="hidden min-[1540px]:flex gap-2 items-center">
           <Input
             placeholder="Nome do cliente"
             value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
@@ -413,6 +421,14 @@ export function CostumersDataTable<TData, TValue>({
               table.getColumn("nome")?.setFilterValue(event.target.value)
             }
             className="max-w-sm w-[300px]"
+          />
+          <Input
+            placeholder="CPF"
+            value={(table.getColumn("cpf")?.getFilterValue() as string) ?? ""}
+            onChange={(event) => {
+              table.getColumn("cpf")?.setFilterValue(event.target.value);
+            }}
+            className="max-w-sm w-[160px]"
           />
           <Input
             placeholder="Telefone"
@@ -579,7 +595,7 @@ export function CostumersDataTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell className="py-2" key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -592,7 +608,7 @@ export function CostumersDataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-16 text-center"
+                  className="h-10 text-center"
                 >
                   Nenhum resultado.
                 </TableCell>

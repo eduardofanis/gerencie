@@ -9,6 +9,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -17,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import {
   ChevronLeft,
   ChevronRight,
@@ -26,11 +26,11 @@ import {
   PlusCircle,
 } from "lucide-react";
 
+import NewCollaboratorForm from "@/components/Forms/NewCollaboratorForm";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { SubscriberContext } from "@/contexts/SubscriberContext";
 import React from "react";
 import { useSearchParams } from "react-router-dom";
-import NewCollaboratorForm from "@/components/Forms/NewCollaboratorForm";
-import { SubscriberContext } from "@/contexts/SubscriberContext";
 
 import {
   Tooltip,
@@ -152,7 +152,7 @@ export function CollaboratorsDataTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell className="py-2" key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -165,7 +165,7 @@ export function CollaboratorsDataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-16 text-center"
+                  className="h-10 text-center"
                 >
                   Nenhum colaborador.
                 </TableCell>

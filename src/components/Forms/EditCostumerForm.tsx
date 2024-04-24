@@ -1,3 +1,14 @@
+import { EditCostumer, GetCostumer } from "@/services/api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Timestamp } from "firebase/firestore";
+import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { useSearchParams } from "react-router-dom";
+import { z } from "zod";
+import { CostumerSchema } from "../../schemas/CostumerSchema";
+import { CostumerProps } from "../Customers/CostumersView";
+import Loading from "../ui/Loading";
 import { Button } from "../ui/button";
 import {
   DialogClose,
@@ -6,27 +17,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { EditCostumer, GetCostumer } from "@/services/api";
 import { Form } from "../ui/form";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CostumerSchema } from "../../schemas/CostumerSchema";
+import BirthDateInput from "./Input/BirthDateInput";
+import CPFInput from "./Input/CPFInput";
+import CepInput from "./Input/CepInput";
+import ComboInput from "./Input/ComboInput";
+import NumberInput from "./Input/NumberInput";
+import PhoneNumberInput from "./Input/PhoneNumberInput";
+import RGInput from "./Input/RGInput";
 import SelectInput, { SelectItems } from "./Input/SelectInput";
 import TextInput from "./Input/TextInput";
-import NumberInput from "./Input/NumberInput";
-import { useSearchParams } from "react-router-dom";
-import CepInput from "./Input/CepInput";
-import PhoneNumberInput from "./Input/PhoneNumberInput";
-import CPFInput from "./Input/CPFInput";
-import BirthDateInput from "./Input/BirthDateInput";
-import ComboInput from "./Input/ComboInput";
-import React from "react";
-import { CostumerProps } from "../Customers/CostumersView";
-import Loading from "../ui/Loading";
-import { Timestamp } from "firebase/firestore";
-import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
-import RGInput from "./Input/RGInput";
 
 export default function EditCostumerForm() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -398,38 +398,33 @@ export default function EditCostumerForm() {
           <div className={stepThree ? "" : "hidden"}>
             <div className="mt-4">
               <h2 className="mb-2 font-medium">Dados bancários</h2>
-              <div className="grid grid-cols-2 gap-2">
-                <TextInput
-                  form={form}
-                  label="Banco *"
-                  name="banco"
-                  defaultValue={costumer.banco}
-                />
-                <NumberInput
-                  form={form}
-                  label="Agência *"
-                  name="agencia"
-                  defaultValue={costumer.agencia}
-                />
-                <NumberInput
-                  form={form}
-                  label="Número da conta *"
-                  name="numeroDaConta"
-                  defaultValue={costumer.numeroDaConta}
-                />
-                <NumberInput
-                  form={form}
-                  label="Dígito da conta *"
-                  name="digitoDaConta"
-                  defaultValue={costumer.digitoDaConta}
-                />
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <TextInput form={form} label="Banco *" name="banco" />
                 <SelectInput
                   form={form}
                   name="chavePix"
                   label="Chave PIX"
                   placeholder="Selecione"
-                  defaultValue={costumer.chavePix}
                   selectItems={ChavePixItems}
+                />
+              </div>
+              <div className="grid grid-cols-5 gap-2">
+                <div className="col-span-2">
+                  <NumberInput form={form} label="Agência *" name="agencia" />
+                </div>
+
+                <div className="col-span-2">
+                  <NumberInput
+                    form={form}
+                    label="Conta *"
+                    name="numeroDaConta"
+                  />
+                </div>
+
+                <NumberInput
+                  form={form}
+                  label="Dígito *"
+                  name="digitoDaConta"
                 />
               </div>
             </div>

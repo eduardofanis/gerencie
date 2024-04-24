@@ -1,5 +1,47 @@
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CollaboratorContext } from "@/contexts/CollaboratorContext";
+import { cn } from "@/lib/utils";
+import { firebaseApp } from "@/main";
+import { CostumerSchema } from "@/schemas/CostumerSchema";
+import { OperationSchema } from "@/schemas/OperationSchema";
+import { EditOperation, GetCostumers, GetOperation } from "@/services/api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { getAuth } from "firebase/auth";
+import { doc, getFirestore, onSnapshot } from "firebase/firestore";
+import {
+  Calendar as CalendarIcon,
+  Check,
+  ChevronDown,
+  Plus,
+  X,
+} from "lucide-react";
 import React from "react";
+import { useForm } from "react-hook-form";
+import { useSearchParams } from "react-router-dom";
+import { z } from "zod";
+import { OperationProps } from "../Customers/CostumersView";
+import Loading from "../ui/Loading";
 import { Button } from "../ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "../ui/command";
 import {
   Dialog,
   DialogClose,
@@ -9,55 +51,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Calendar as CalendarIcon,
-  Check,
-  ChevronDown,
-  Plus,
-  X,
-} from "lucide-react";
-import { EditOperation, GetCostumers, GetOperation } from "@/services/api";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import MoneyInput from "./Input/MoneyInput";
-import { OperationSchema } from "@/schemas/OperationSchema";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "../ui/command";
 import { ScrollArea } from "../ui/scroll-area";
-import { useSearchParams } from "react-router-dom";
 import { Separator } from "../ui/separator";
-import NewOperationTypeForm, { UserDataProps } from "./NewOperationTypeForm";
-import { firebaseApp } from "@/main";
-import { getAuth } from "firebase/auth";
-import { getFirestore, onSnapshot, doc } from "firebase/firestore";
-import SelectInput, { SelectItems } from "./Input/SelectInput";
-import { CostumerSchema } from "@/schemas/CostumerSchema";
-import { OperationProps } from "../Customers/CostumersView";
-import Loading from "../ui/Loading";
 import DecimalInput from "./Input/DecimalInput";
-import { CollaboratorContext } from "@/contexts/CollaboratorContext";
+import MoneyInput from "./Input/MoneyInput";
+import SelectInput, { SelectItems } from "./Input/SelectInput";
+import TextInput from "./Input/TextInput";
+import NewOperationTypeForm, { UserDataProps } from "./NewOperationTypeForm";
 
 const StatusList: SelectItems[] = [
   {
@@ -94,6 +95,7 @@ export default function EditOperationForm() {
       clienteId: "",
       tipoDaOperacao: "",
       statusDaOperacao: "",
+      banco: "",
       valorLiberado: 0,
       comissao: 0,
       dataDaOperacao: new Date(),
@@ -140,6 +142,7 @@ export default function EditOperationForm() {
       form.setValue("comissao", parseFloat(operation.comissao));
       form.setValue("statusDaOperacao", operation.statusDaOperacao);
       form.setValue("tipoDaOperacao", operation.tipoDaOperacao);
+      form.setValue("banco", operation.banco);
       form.setValue("valorLiberado", parseFloat(operation.valorLiberado));
       form.setValue("clienteId", operation.clienteId);
       form.setValue("dataDaOperacao", operation.dataDaOperacao.toDate());
@@ -204,7 +207,7 @@ export default function EditOperationForm() {
                             Nenhum cliente encontrado.
                           </CommandEmpty>
                           <CommandGroup>
-                            <ScrollArea className="max-h-[400px]">
+                            <ScrollArea className="max-h-[400px] overflow-y-scroll">
                               {data !== undefined &&
                                 data.map(
                                   (cliente: z.infer<typeof CostumerSchema>) => (
@@ -348,6 +351,13 @@ export default function EditOperationForm() {
                   </Popover>
                 </FormItem>
               )}
+            />
+
+            <TextInput
+              form={form}
+              name="banco"
+              label="Banco"
+              defaultValue={operation.valorLiberado}
             />
 
             <MoneyInput
