@@ -1,30 +1,79 @@
-# React + TypeScript + Vite
+<h1 align="left">Gerencie</h1>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+###
 
-Currently, two official plugins are available:
+<p align="left">Web app to manage costumers & money operations.</p>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+###
 
-## Expanding the ESLint configuration
+<h3 align="left">I developed a system for the company where my mother works.</h3>
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+###
 
-- Configure the top-level `parserOptions` property like this:
+<p align="left">My mother works with mediation of payroll loans, credit release, and related services. She used to write down her clients’ information and operations one by one using pen and paper.</p>
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+###
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+<p align="left">Seeing this, I developed this system called Gerencie to make her work easier, allowing her to manage her clients and operations more clearly and to track the amounts she released and the amounts she received.</p>
+
+###
+
+<p align="left">It includes a dashboard with charts, an advanced table system with filters, advanced forms, a collaborator system to manage teams, and more.</p>
+
+###
+
+<h3 align="left">Some of the technologies I used:</h3>
+
+###
+
+<p align="left">- ReactJS<br>- TailwindCSS<br>- Zod<br>- Recharts<br>- TanStack Table<br>- React Hook Form</p>
+
+###
+
+<div align="center">
+  <img height="400" src="https://imgur.com/CpRDqW7.png"  />
+</div>
+
+###
+
+<div align="center">
+  <img height="400" src="https://imgur.com/t3WmmFQ.png"  />
+</div>
+
+###
+
+<div align="center">
+  <img height="400" src="https://imgur.com/TZvEwPn.png"  />
+</div>
+
+###
+
+<div align="center">
+  <img height="400" src="https://imgur.com/puqSc8Y.png"  />
+</div>
+
+###
+
+<div align="center">
+  <img height="400" src="https://imgur.com/cscRzcB.png"  />
+</div>
+
+###
+
+<div align="center">
+  <img height="400" src="https://imgur.com/NGBrpU4.png"  />
+</div>
+
+###
+
+<div align="center">
+  <img height="400" src="https://imgur.com/7lhcDjl.png"  />
+</div>
+
+###
+
+<div align="center">
+  <img height="400" src="https://imgur.com/yXxrMfn.png"  />
+</div>
+
+###
